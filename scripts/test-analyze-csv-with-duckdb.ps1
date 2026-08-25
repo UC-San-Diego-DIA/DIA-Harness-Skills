@@ -216,3 +216,5 @@ finally {
         Remove-Item -LiteralPath $resolvedTestRoot -Recurse -Force
     }
 }
+
+exit 0
