@@ -6,6 +6,7 @@ This repository is the reviewed source for DIA skills used in TritonAI Harness o
 
 | Skill | Use it for | Invocation |
 | --- | --- | --- |
+| [`analyze-csv-with-duckdb`](skills/analyze-csv-with-duckdb/SKILL.md) | Creating a local DuckDB workspace for ad hoc analysis of one CSV | `$analyze-csv-with-duckdb` |
 | [`connect-clickup`](skills/connect-clickup/SKILL.md) | Connecting TritonAI Harness to ClickUp through the official OAuth MCP server | `$connect-clickup` |
 
 ## Install a skill
@@ -13,15 +14,17 @@ This repository is the reviewed source for DIA skills used in TritonAI Harness o
 Clone the repository, open PowerShell in its root, and run:
 
 ```powershell
-pwsh -File .\scripts\install-skill.ps1 -Skill connect-clickup
+pwsh -File .\scripts\install-skill.ps1 -Skill analyze-csv-with-duckdb
 ```
+
+Replace the skill name with another catalog entry when installing a different skill.
 
 The installer copies the source skill into `%USERPROFILE%\.tritonai-harness\codex\skills`. It asks before replacing an installed copy and keeps the previous copy in a timestamped backup directory.
 
 After installation, restart TritonAI Harness so it reloads the skill catalog. Invoke the skill explicitly:
 
 ```text
-$connect-clickup
+$analyze-csv-with-duckdb
 ```
 
 ## Repository layout
@@ -47,8 +50,8 @@ pwsh -File .\scripts\validate-repository.ps1
 pwsh -File .\scripts\test-install-skill.ps1
 ```
 
-The validator checks skill packages, local Markdown links, invocation policy, and likely secrets. The installer test uses a temporary directory and never touches the active TritonAI Harness installation.
+The validator checks skill packages, local Markdown links, invocation policy, and likely secrets. The installer test uses a temporary directory and never touches the active TritonAI Harness installation. The GitHub workflow also runs the DuckDB helper against temporary CSV files.
 
 ## Security
 
-Do not commit ClickUp tokens, OAuth credentials, copied user configuration, task exports, or personal task IDs. Shared workspace and space IDs are allowed when they identify an approved team destination.
+Do not commit source CSVs, DuckDB databases, analysis outputs, ClickUp tokens, OAuth credentials, copied user configuration, task exports, or personal task IDs. Shared workspace and space IDs are allowed when they identify an approved team destination.

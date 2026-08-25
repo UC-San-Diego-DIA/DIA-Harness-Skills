@@ -115,11 +115,16 @@ else {
     }
 }
 
-$clickupMetadata = Join-Path $skillsRoot 'connect-clickup\agents\openai.yaml'
-if (Test-Path -LiteralPath $clickupMetadata -PathType Leaf) {
-    $metadataText = Get-Content -Raw -LiteralPath $clickupMetadata
+$explicitOnlySkills = @('analyze-csv-with-duckdb', 'connect-clickup')
+foreach ($explicitOnlySkill in $explicitOnlySkills) {
+    $explicitMetadata = Join-Path $skillsRoot "$explicitOnlySkill\agents\openai.yaml"
+    if (-not (Test-Path -LiteralPath $explicitMetadata -PathType Leaf)) {
+        Add-ValidationError "skills\$explicitOnlySkill\agents\openai.yaml: explicit-only skill metadata is missing"
+        continue
+    }
+    $metadataText = Get-Content -Raw -LiteralPath $explicitMetadata
     if (-not $metadataText.Contains('allow_implicit_invocation: false')) {
-        Add-ValidationError 'skills\connect-clickup\agents\openai.yaml: skill must remain explicit-only'
+        Add-ValidationError "skills\$explicitOnlySkill\agents\openai.yaml: skill must remain explicit-only"
     }
 }
 
@@ -151,7 +156,7 @@ foreach ($markdownFile in $markdownFiles) {
     }
 }
 
-$checkedExtensions = @('.md', '.yaml', '.yml', '.toml', '.json', '.ps1')
+$checkedExtensions = @('.md', '.yaml', '.yml', '.toml', '.json', '.ps1', '.py')
 $secretPattern = [regex]'(?i)(?:pk_[a-z0-9]{16,}|clickup_api_token\s*=\s*[''"][^''"]+|sk-[a-z0-9]{20,})'
 $checkedFiles = @(
     Get-ChildItem -LiteralPath $repositoryRoot -Recurse -File |

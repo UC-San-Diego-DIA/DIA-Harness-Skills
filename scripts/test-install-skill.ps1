@@ -28,11 +28,19 @@ $destination = Join-Path $resolvedTestRoot 'installed-skills'
 $whatIfDestination = Join-Path $resolvedTestRoot 'what-if-skills'
 
 try {
-    & $installer -Skill connect-clickup -Destination $destination -Force
+    $skillsToInstall = @('analyze-csv-with-duckdb', 'connect-clickup')
+    foreach ($skillName in $skillsToInstall) {
+        & $installer -Skill $skillName -Destination $destination -Force
+
+        $installedSkillPath = Join-Path $destination $skillName
+        $installedSkillEntry = Join-Path $installedSkillPath 'SKILL.md'
+        Assert-True (Test-Path -LiteralPath $installedSkillEntry -PathType Leaf) "$skillName fresh install did not copy SKILL.md."
+    }
 
     $installedSkill = Join-Path $destination 'connect-clickup'
     $installedEntry = Join-Path $installedSkill 'SKILL.md'
-    Assert-True (Test-Path -LiteralPath $installedEntry -PathType Leaf) 'Fresh install did not copy SKILL.md.'
+    $duckdbHelper = Join-Path $destination 'analyze-csv-with-duckdb\scripts\duckdb_analysis.py'
+    Assert-True (Test-Path -LiteralPath $duckdbHelper -PathType Leaf) 'DuckDB helper script was not installed.'
 
     $marker = 'installer-backup-test-marker'
     Set-Content -LiteralPath $installedEntry -Value $marker
@@ -48,7 +56,7 @@ try {
     $backupText = Get-Content -Raw -LiteralPath (Join-Path $backups[0].FullName 'SKILL.md')
     Assert-True ($backupText.Contains($marker)) 'Backup does not contain the replaced copy.'
 
-    & $installer -Skill connect-clickup -Destination $whatIfDestination -Force -WhatIf
+    & $installer -Skill analyze-csv-with-duckdb -Destination $whatIfDestination -Force -WhatIf
     Assert-True (-not (Test-Path -LiteralPath $whatIfDestination)) 'WhatIf created a destination directory.'
 
     Write-Host 'Installer tests passed.'
