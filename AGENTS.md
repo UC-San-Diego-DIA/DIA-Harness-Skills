@@ -31,9 +31,11 @@ skills/
 
 Only add optional directories when the skill uses them. Do not add a README or changelog inside a skill package.
 
-## Current skill boundary
+## Current skill boundaries
 
 `connect-clickup` owns configuration, OAuth login, restart guidance, and read-only connection verification. It does not own ClickUp task management, workflow rules, legacy server migration, or fallback authentication.
+
+`start-my-day` owns read-only daily prioritization from ClickUp, Outlook calendar, and Outlook mail, plus user-approved follow-through in those systems. It does not own connection setup, other evidence sources, or unapproved external changes.
 
 ## Working rules
 

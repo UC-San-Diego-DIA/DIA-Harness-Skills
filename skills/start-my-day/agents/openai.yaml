@@ -1,0 +1,6 @@
+interface:
+  display_name: "Start My Day"
+  short_description: "Choose today's focus from ClickUp and Outlook"
+  default_prompt: "Use $start-my-day to create today's focused brief and matching HTML file."
+policy:
+  allow_implicit_invocation: false
