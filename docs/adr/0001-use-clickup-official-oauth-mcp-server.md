@@ -1,0 +1,3 @@
+# Use ClickUp's official OAuth MCP server
+
+The ClickUp connection skill will configure [ClickUp's official remote MCP server](https://developer.clickup.com/docs/connect-an-ai-assistant-to-clickups-mcp-server) directly over Streamable HTTP and authenticate each staff member through OAuth. [Codex supports this transport and OAuth directly](https://learn.chatgpt.com/docs/extend/mcp?surface=cli), so the connection needs no plaintext personal API token, Node.js, or third-party transport wrapper. The team accepts ClickUp's public-beta status. The skill will not migrate or fall back to a community server; if another server already owns the `clickup` configuration name, the skill stops and reports the conflict.

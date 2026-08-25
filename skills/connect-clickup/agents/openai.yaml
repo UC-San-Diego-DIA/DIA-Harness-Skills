@@ -1,0 +1,6 @@
+interface:
+  display_name: "Connect ClickUp"
+  short_description: "Connect TritonAI Harness to ClickUp OAuth"
+  default_prompt: "Use $connect-clickup to connect this TritonAI Harness to ClickUp and verify the team destinations."
+policy:
+  allow_implicit_invocation: false
