@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>{{TITLE}}</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --canvas: #f5f6f4;
+      --paper: #ffffff;
+      --ink: #101820;
+      --muted: #626b73;
+      --line: #e8ebed;
+      --teal: #13a89e;
+      --teal-dark: #0f766e;
+      --teal-soft: #eefaf8;
+      --warm: #f5a500;
+      --warm-soft: #fff9e8;
+      --warm-line: #f3df99;
+      --shadow: 0 14px 42px rgb(16 24 32 / 8%);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      font-family: Inter, Aptos, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    main {
+      width: min(900px, calc(100% - 32px));
+      margin: 28px auto;
+      padding: 46px 54px 30px;
+      background: var(--paper);
+      border: 1px solid #edf0f1;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    header {
+      padding-bottom: 28px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    section {
+      padding-top: 30px;
+    }
+
+    .eyebrow,
+    h2,
+    .priority-number {
+      text-transform: uppercase;
+      letter-spacing: 0.11em;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--teal-dark);
+      font-size: 0.76rem;
+      font-weight: 750;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 16px;
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      font-weight: 780;
+      line-height: 1.08;
+      letter-spacing: -0.035em;
+    }
+
+    h2 {
+      margin-bottom: 14px;
+      color: #454f57;
+      font-size: 0.78rem;
+      font-weight: 780;
+    }
+
+    h3 {
+      margin-bottom: 8px;
+      font-size: 1.02rem;
+      font-weight: 720;
+      line-height: 1.4;
+    }
+
+    .orientation {
+      max-width: 72ch;
+      margin: 0;
+      padding: 16px 18px;
+      background: #fafcfc;
+      border-left: 3px solid var(--teal);
+      color: #303a42;
+    }
+
+    .priority-grid {
+      border-top: 1px solid var(--line);
+    }
+
+    .priority {
+      display: grid;
+      grid-template-columns: 22px minmax(0, 1fr);
+      gap: 14px;
+      padding: 18px 2px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .check-marker {
+      width: 18px;
+      height: 18px;
+      margin-top: 3px;
+      background: var(--paper);
+      border: 1.5px solid #aeb7bd;
+      border-radius: 5px;
+      box-shadow: inset 0 0 0 3px var(--paper);
+    }
+
+    .priority-content {
+      min-width: 0;
+    }
+
+    .priority-number {
+      margin-bottom: 4px;
+      color: var(--teal-dark);
+      font-size: 0.68rem;
+      font-weight: 780;
+    }
+
+    .next-action {
+      margin-bottom: 8px;
+      color: #28333b;
+    }
+
+    .label {
+      font-weight: 720;
+    }
+
+    .evidence {
+      display: inline-block;
+      margin: 0;
+      padding: 4px 8px;
+      background: var(--teal-soft);
+      border-radius: 999px;
+      color: var(--teal-dark);
+      font-size: 0.78rem;
+      font-weight: 650;
+    }
+
+    ul,
+    ol {
+      margin: 0;
+      padding-left: 1.15rem;
+    }
+
+    li {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    li:last-child {
+      border-bottom: 0;
+    }
+
+    li::marker {
+      color: var(--teal);
+    }
+
+    .attention,
+    .actions {
+      margin-top: 30px;
+      padding: 20px 22px;
+      border: 1px solid;
+      border-radius: 10px;
+    }
+
+    .attention {
+      background: var(--warm-soft);
+      border-color: var(--warm-line);
+    }
+
+    .attention h2 {
+      color: #8a5800;
+    }
+
+    .attention li::marker {
+      color: var(--warm);
+    }
+
+    .actions {
+      background: var(--teal-soft);
+      border-color: #bfe8e3;
+    }
+
+    .actions h2 {
+      color: var(--teal-dark);
+    }
+
+    a {
+      color: var(--teal-dark);
+      font-weight: 650;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.16em;
+    }
+
+    footer {
+      padding-top: 26px;
+      color: var(--muted);
+      font-size: 0.76rem;
+      text-align: right;
+    }
+
+    @media (max-width: 620px) {
+      main {
+        width: min(100% - 18px, 900px);
+        margin: 9px auto;
+        padding: 30px 24px 22px;
+        border-radius: 12px;
+      }
+
+      header {
+        padding-bottom: 24px;
+      }
+
+      section {
+        padding-top: 26px;
+      }
+
+      .orientation {
+        padding: 14px;
+      }
+
+      .attention,
+      .actions {
+        margin-top: 26px;
+        padding: 18px;
+      }
+    }
+
+    @media print {
+      :root {
+        --canvas: #ffffff;
+        --shadow: none;
+      }
+
+      body {
+        background: #ffffff;
+      }
+
+      main {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        box-shadow: none;
+      }
+
+      section,
+      .priority,
+      .attention,
+      .actions {
+        break-inside: avoid;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">Daily focus</p>
+      <h1>{{DATE}}</h1>
+      <p class="orientation">{{ORIENTATION}}</p>
+    </header>
+
+    <section aria-labelledby="focus-heading">
+      <h2 id="focus-heading">Today's focus</h2>
+      <div class="priority-grid">
+        {{PRIORITY_CARDS}}
+      </div>
+    </section>
+
+    {{SCHEDULE_SECTION}}
+    {{WATCHLIST_SECTION}}
+    {{SOURCE_GAPS_SECTION}}
+    {{PROPOSED_ACTIONS_SECTION}}
+
+    <footer>
+      Generated <time datetime="{{GENERATED_ISO}}">{{GENERATED_DISPLAY}}</time>
+    </footer>
+  </main>
+</body>
+</html>
