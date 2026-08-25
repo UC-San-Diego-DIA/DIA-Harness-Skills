@@ -1,0 +1,6 @@
+interface:
+  display_name: "Analyze CSV with DuckDB"
+  short_description: "Create a local DuckDB CSV analysis workspace"
+  default_prompt: "Use $analyze-csv-with-duckdb to create a local analysis workspace for my CSV and answer questions with DuckDB."
+policy:
+  allow_implicit_invocation: false
