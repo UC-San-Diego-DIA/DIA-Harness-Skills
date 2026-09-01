@@ -37,6 +37,8 @@ Only add optional directories when the skill uses them. Do not add a README or c
 
 `start-my-day` owns read-only daily prioritization from ClickUp, Outlook calendar, and Outlook mail, plus user-approved follow-through in those systems. It does not own connection setup, other evidence sources, or unapproved external changes.
 
+`setup-project-folder` owns local creation and validation of the schema-1 business-insights project folder for existing ClickUp resources. It does not create or change ClickUp content, migrate conflicting folders, process project files, analyze data, or create deliverables.
+
 ## Working rules
 
 - Read `README.md`, `CONTEXT.md`, and the relevant skill before changing behavior.

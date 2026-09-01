@@ -24,6 +24,7 @@ $requiredFiles = @(
     'CONTRIBUTING.md',
     'scripts\install-skill.ps1',
     'scripts\test-install-skill.ps1',
+    'scripts\test-setup-project-folder.ps1',
     'scripts\validate-repository.ps1',
     '.github\workflows\validate.yml'
 )
@@ -115,7 +116,7 @@ else {
     }
 }
 
-$explicitOnlySkills = @('analyze-csv-with-duckdb', 'connect-clickup', 'start-my-day')
+$explicitOnlySkills = @('analyze-csv-with-duckdb', 'connect-clickup', 'setup-project-folder', 'start-my-day')
 foreach ($explicitOnlySkill in $explicitOnlySkills) {
     $explicitMetadata = Join-Path $skillsRoot "$explicitOnlySkill\agents\openai.yaml"
     if (-not (Test-Path -LiteralPath $explicitMetadata -PathType Leaf)) {
