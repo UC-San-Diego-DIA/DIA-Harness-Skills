@@ -1,0 +1,6 @@
+interface:
+  display_name: "Transcript to Meeting Notes"
+  short_description: "Turn a project transcript into notes and tasks"
+  default_prompt: "Use $process-meeting-transcript to draft meeting notes and DIA-owned ClickUp tasks from a project transcript."
+policy:
+  allow_implicit_invocation: false

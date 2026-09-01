@@ -35,6 +35,8 @@ Only add optional directories when the skill uses them. Do not add a README or c
 
 `connect-clickup` owns configuration, OAuth login, restart guidance, and read-only connection verification. It does not own ClickUp task management, workflow rules, legacy server migration, or fallback authentication.
 
+`process-meeting-transcript` owns one transcript's meeting-note synthesis, Project Hub publication, DIA-owned action-item extraction, and approved task creation. It does not own transcript capture, project-folder setup, connection setup, general ClickUp task management, or follow-through in other systems.
+
 `start-my-day` owns read-only daily prioritization from ClickUp, Outlook calendar, and Outlook mail, plus user-approved follow-through in those systems. It does not own connection setup, other evidence sources, or unapproved external changes.
 
 `setup-project-folder` owns local creation and validation of the schema-1 business-insights project folder for existing ClickUp resources. It does not create or change ClickUp content, migrate conflicting folders, process project files, analyze data, or create deliverables.
