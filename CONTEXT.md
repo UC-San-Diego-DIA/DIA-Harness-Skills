@@ -16,6 +16,26 @@ _Avoid_: Canonical skill, master skill
 A runtime copy of a source skill inside a staff member's TritonAI Harness environment. Changes to an installed skill do not change the source skill.
 _Avoid_: Source skill
 
+**Local project folder**:
+A staff member's top-level local directory for one DIA project, named after its connected ClickUp Folder and organized according to a versioned layout.
+_Avoid_: Project workspace, Local workspace
+
+**Project manifest**:
+A local project's machine-readable identity, including its supported type and connected ClickUp resources by stable ID.
+_Avoid_: Workspace configuration, Project settings file
+
+**Business insights project**:
+A DIA project that produces stakeholder insight through analysis and may result in data products, presentations, or both.
+_Avoid_: Reporting project, Dashboard project
+
+**Deliverable**:
+A stakeholder-facing outcome produced by a DIA project.
+_Avoid_: Output, Artifact
+
+**Data product**:
+A reusable analytical deliverable through which stakeholders access or use data, such as a Tableau dashboard.
+_Avoid_: Dashboard file, Report
+
 **Analysis workspace**:
 A local working area for one source CSV and the ad hoc analysis derived from it.
 _Avoid_: Business-analysis space, Analysis area

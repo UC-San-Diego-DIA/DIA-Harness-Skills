@@ -28,7 +28,7 @@ $destination = Join-Path $resolvedTestRoot 'installed-skills'
 $whatIfDestination = Join-Path $resolvedTestRoot 'what-if-skills'
 
 try {
-    $skillsToInstall = @('analyze-csv-with-duckdb', 'connect-clickup', 'start-my-day')
+    $skillsToInstall = @('analyze-csv-with-duckdb', 'connect-clickup', 'setup-project-folder', 'start-my-day')
     foreach ($skillName in $skillsToInstall) {
         & $installer -Skill $skillName -Destination $destination -Force
 
@@ -40,8 +40,12 @@ try {
     $installedSkill = Join-Path $destination 'connect-clickup'
     $installedEntry = Join-Path $installedSkill 'SKILL.md'
     $duckdbHelper = Join-Path $destination 'analyze-csv-with-duckdb\scripts\duckdb_analysis.py'
+    $projectFolderHelper = Join-Path $destination 'setup-project-folder\scripts\setup_project_folder.ps1'
+    $projectAgentsTemplate = Join-Path $destination 'setup-project-folder\assets\project-AGENTS.md'
     $dailyBriefTemplate = Join-Path $destination 'start-my-day\assets\brief-template.html'
     Assert-True (Test-Path -LiteralPath $duckdbHelper -PathType Leaf) 'DuckDB helper script was not installed.'
+    Assert-True (Test-Path -LiteralPath $projectFolderHelper -PathType Leaf) 'Project-folder helper script was not installed.'
+    Assert-True (Test-Path -LiteralPath $projectAgentsTemplate -PathType Leaf) 'Project AGENTS template was not installed.'
     Assert-True (Test-Path -LiteralPath $dailyBriefTemplate -PathType Leaf) 'Start My Day HTML template was not installed.'
 
     $marker = 'installer-backup-test-marker'

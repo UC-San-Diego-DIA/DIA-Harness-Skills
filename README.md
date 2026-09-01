@@ -8,6 +8,7 @@ This repository is the reviewed source for DIA skills used in TritonAI Harness o
 | --- | --- | --- |
 | [`analyze-csv-with-duckdb`](skills/analyze-csv-with-duckdb/SKILL.md) | Creating a local DuckDB workspace for ad hoc analysis of one CSV | `$analyze-csv-with-duckdb` |
 | [`connect-clickup`](skills/connect-clickup/SKILL.md) | Connecting TritonAI Harness to ClickUp through the official OAuth MCP server | `$connect-clickup` |
+| [`setup-project-folder`](skills/setup-project-folder/SKILL.md) | Creating or validating a business-insights project folder connected to ClickUp | `$setup-project-folder` |
 | [`start-my-day`](skills/start-my-day/SKILL.md) | Choosing today's focus from ClickUp, Outlook calendar, and Outlook mail | `$start-my-day` |
 
 ## Install a skill
@@ -51,7 +52,7 @@ pwsh -File .\scripts\validate-repository.ps1
 pwsh -File .\scripts\test-install-skill.ps1
 ```
 
-The validator checks skill packages, local Markdown links, invocation policy, and likely secrets. The installer test uses a temporary directory and never touches the active TritonAI Harness installation. The GitHub workflow also runs the DuckDB helper against temporary CSV files.
+The validator checks skill packages, local Markdown links, invocation policy, and likely secrets. The installer test uses a temporary directory and never touches the active TritonAI Harness installation. The GitHub workflow also tests the DuckDB and project-folder helpers in temporary directories.
 
 ## Security
 
