@@ -8,6 +8,7 @@ This repository is the reviewed source for DIA skills used in TritonAI Harness o
 | --- | --- | --- |
 | [`analyze-csv-with-duckdb`](skills/analyze-csv-with-duckdb/SKILL.md) | Creating a local DuckDB workspace for ad hoc analysis of one CSV | `$analyze-csv-with-duckdb` |
 | [`connect-clickup`](skills/connect-clickup/SKILL.md) | Connecting TritonAI Harness to ClickUp through the official OAuth MCP server | `$connect-clickup` |
+| [`process-meeting-transcript`](skills/process-meeting-transcript/SKILL.md) | Turning a project transcript into meeting notes and DIA-owned ClickUp tasks | `$process-meeting-transcript` |
 | [`setup-project-folder`](skills/setup-project-folder/SKILL.md) | Creating or validating a business-insights project folder connected to ClickUp | `$setup-project-folder` |
 | [`start-my-day`](skills/start-my-day/SKILL.md) | Choosing today's focus from ClickUp, Outlook calendar, and Outlook mail | `$start-my-day` |
 
