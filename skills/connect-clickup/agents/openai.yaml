@@ -1,6 +1,15 @@
 interface:
-  display_name: "Connect ClickUp"
-  short_description: "Connect TritonAI Harness to ClickUp OAuth"
-  default_prompt: "Use $connect-clickup to connect this TritonAI Harness to ClickUp and verify the team destinations."
+  display_name: "Connect Harness to ClickUp"
+  short_description: "Connect TritonAI Harness to ClickUp"
+  default_prompt: "Use $connect-clickup to connect this TritonAI Harness to ClickUp. I may also include company ClickUp Space URLs to verify."
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "clickup"
+      description: "Official ClickUp MCP server"
+      transport: "streamable_http"
+      url: "https://mcp.clickup.com/mcp"
+
 policy:
   allow_implicit_invocation: false
