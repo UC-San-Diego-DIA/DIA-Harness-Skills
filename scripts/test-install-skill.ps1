@@ -28,7 +28,7 @@ $destination = Join-Path $resolvedTestRoot 'installed-skills'
 $whatIfDestination = Join-Path $resolvedTestRoot 'what-if-skills'
 
 try {
-    $skillsToInstall = @('analyze-csv-with-duckdb', 'connect-clickup', 'process-meeting-transcript', 'setup-project-folder', 'start-my-day')
+    $skillsToInstall = @('dia-analyze-local-data', 'dia-clickup-mcp-setup', 'dia-new-data-analysis-workspace', 'dia-process-meeting-transcript', 'dia-setup-project-folder', 'dia-start-my-day', 'dia-transcript-to-process-map')
     foreach ($skillName in $skillsToInstall) {
         & $installer -Skill $skillName -Destination $destination -Force
 
@@ -37,34 +37,38 @@ try {
         Assert-True (Test-Path -LiteralPath $installedSkillEntry -PathType Leaf) "$skillName fresh install did not copy SKILL.md."
     }
 
-    $installedSkill = Join-Path $destination 'connect-clickup'
+    $installedSkill = Join-Path $destination 'dia-clickup-mcp-setup'
     $installedEntry = Join-Path $installedSkill 'SKILL.md'
-    $duckdbHelper = Join-Path $destination 'analyze-csv-with-duckdb\scripts\duckdb_analysis.py'
-    $projectFolderHelper = Join-Path $destination 'setup-project-folder\scripts\setup_project_folder.ps1'
-    $projectAgentsTemplate = Join-Path $destination 'setup-project-folder\assets\project-AGENTS.md'
-    $meetingNoteFormat = Join-Path $destination 'process-meeting-transcript\references\meeting-note-format.md'
-    $dailyBriefTemplate = Join-Path $destination 'start-my-day\assets\brief-template.html'
+    $duckdbHelper = Join-Path $destination 'dia-analyze-local-data\scripts\duckdb_analysis.py'
+    $projectFolderHelper = Join-Path $destination 'dia-setup-project-folder\scripts\setup_project_folder.ps1'
+    $projectAgentsTemplate = Join-Path $destination 'dia-setup-project-folder\assets\project-AGENTS.md'
+    $workspaceHelper = Join-Path $destination 'dia-new-data-analysis-workspace\scripts\create_workspace.ps1'
+    $workspaceAgentsTemplate = Join-Path $destination 'dia-new-data-analysis-workspace\assets\workspace-AGENTS.md'
+    $meetingNoteFormat = Join-Path $destination 'dia-process-meeting-transcript\references\meeting-note-format.md'
+    $dailyBriefTemplate = Join-Path $destination 'dia-start-my-day\assets\brief-template.html'
     Assert-True (Test-Path -LiteralPath $duckdbHelper -PathType Leaf) 'DuckDB helper script was not installed.'
     Assert-True (Test-Path -LiteralPath $projectFolderHelper -PathType Leaf) 'Project-folder helper script was not installed.'
     Assert-True (Test-Path -LiteralPath $projectAgentsTemplate -PathType Leaf) 'Project AGENTS template was not installed.'
+    Assert-True (Test-Path -LiteralPath $workspaceHelper -PathType Leaf) 'Workspace helper script was not installed.'
+    Assert-True (Test-Path -LiteralPath $workspaceAgentsTemplate -PathType Leaf) 'Workspace AGENTS template was not installed.'
     Assert-True (Test-Path -LiteralPath $meetingNoteFormat -PathType Leaf) 'Meeting-note format reference was not installed.'
     Assert-True (Test-Path -LiteralPath $dailyBriefTemplate -PathType Leaf) 'Start My Day HTML template was not installed.'
 
     $marker = 'installer-backup-test-marker'
     Set-Content -LiteralPath $installedEntry -Value $marker
 
-    & $installer -Skill connect-clickup -Destination $destination -Force
+    & $installer -Skill dia-clickup-mcp-setup -Destination $destination -Force
 
     $currentText = Get-Content -Raw -LiteralPath $installedEntry
     Assert-True (-not $currentText.Contains($marker)) 'Replacement did not install the source copy.'
 
-    $backups = @(Get-ChildItem -LiteralPath $destination -Directory -Filter 'connect-clickup.backup-*')
+    $backups = @(Get-ChildItem -LiteralPath $destination -Directory -Filter 'dia-clickup-mcp-setup.backup-*')
     Assert-True ($backups.Count -eq 1) 'Replacement did not create exactly one backup.'
 
     $backupText = Get-Content -Raw -LiteralPath (Join-Path $backups[0].FullName 'SKILL.md')
     Assert-True ($backupText.Contains($marker)) 'Backup does not contain the replaced copy.'
 
-    & $installer -Skill analyze-csv-with-duckdb -Destination $whatIfDestination -Force -WhatIf
+    & $installer -Skill dia-analyze-local-data -Destination $whatIfDestination -Force -WhatIf
     Assert-True (-not (Test-Path -LiteralPath $whatIfDestination)) 'WhatIf created a destination directory.'
 
     Write-Host 'Installer tests passed.'

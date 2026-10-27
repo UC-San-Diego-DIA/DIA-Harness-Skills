@@ -31,7 +31,7 @@ function Invoke-ProjectFolderHelper {
 }
 
 $repositoryRoot = Split-Path -Parent $PSScriptRoot
-$helper = Join-Path $repositoryRoot 'skills\setup-project-folder\scripts\setup_project_folder.ps1'
+$helper = Join-Path $repositoryRoot 'skills\dia-setup-project-folder\scripts\setup_project_folder.ps1'
 $pwsh = Join-Path $PSHOME 'pwsh.exe'
 $temporaryBase = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
 $testRoot = Join-Path $temporaryBase "dia-project-folder-$([System.Guid]::NewGuid().ToString('N'))"

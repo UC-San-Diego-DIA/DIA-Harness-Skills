@@ -1,0 +1,6 @@
+interface:
+  display_name: "Analyze Local Data"
+  short_description: "Create a local DuckDB CSV analysis workspace"
+  default_prompt: "Use $dia-analyze-local-data to create a local analysis workspace for my CSV and answer questions with DuckDB."
+policy:
+  allow_implicit_invocation: false

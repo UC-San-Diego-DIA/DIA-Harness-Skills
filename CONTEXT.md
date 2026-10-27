@@ -32,6 +32,10 @@ _Avoid_: Reporting project, Dashboard project
 A stakeholder-facing outcome produced by a DIA project.
 _Avoid_: Output, Artifact
 
+**Requirements document**:
+A structured document produced from a business-owner requirements conversation, capturing actors and roles, the current-state process, problems with the current state, requested capabilities, inputs and outputs, success criteria, constraints, out-of-scope items, and open questions.
+_Avoid_: Requirements spec, Business requirements document
+
 **Data product**:
 A reusable analytical deliverable through which stakeholders access or use data, such as a Tableau dashboard.
 _Avoid_: Dashboard file, Report
@@ -39,6 +43,10 @@ _Avoid_: Dashboard file, Report
 **Analysis workspace**:
 A local working area for one source CSV and the ad hoc analysis derived from it.
 _Avoid_: Business-analysis space, Analysis area
+
+**Data analysis workspace**:
+A fresh local working area for one analysis project, holding immutable raw inputs, numbered pipeline scripts, and dashboard-ready output. It is not connected to ClickUp or GitHub.
+_Avoid_: Analytics workspace, Data project scaffold
 
 **Source CSV**:
 The user-selected CSV that supplies the data for an analysis workspace.

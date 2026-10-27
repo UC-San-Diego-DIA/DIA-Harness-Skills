@@ -1,0 +1,4 @@
+interface:
+  display_name: "DIA Transcript to Meeting Notes"
+  short_description: "Turn Zoom transcripts into project meeting notes"
+  default_prompt: "Use $dia-transcript-to-meeting-notes to turn a Zoom transcript into project meeting notes."
