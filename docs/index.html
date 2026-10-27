@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>DIA Skills &amp; Playbooks - UC San Diego</title>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+:root{
+  --navy:#182B49;
+  --blue:#00629B;
+  --blue-dark:#004E7C;
+  --yellow:#FFCD00;
+  --gold:#C69214;
+  --turquoise:#00C6D7;
+  --magenta:#D462AD;
+  --sand:#F5F0E6;
+  --green:#6E963B;
+  --muted:#747678;
+  --line:rgba(24,43,73,.14);
+  --term-bg:#101B31;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  color:var(--navy);
+  background:#fff;
+  -webkit-font-smoothing:antialiased;
+}
+code,pre,.mono{font-family:"JetBrains Mono","Cascadia Code",Consolas,"SF Mono",ui-monospace,monospace}
+::selection{background:var(--yellow);color:var(--navy)}
+svg.lucide{width:16px;height:16px;flex-shrink:0}
+.shell{max-width:1160px;margin:0 auto;padding:0 24px}
+section[id]{scroll-margin-top:84px}
+
+.nav{
+  position:sticky;top:0;z-index:50;
+  background:#fff;
+  border-bottom:1px solid var(--line);
+}
+.nav-inner{display:flex;align-items:center;gap:20px;height:64px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+.monogram{
+  width:40px;height:40px;border-radius:8px;
+  background:var(--navy);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12.5px;font-weight:800;letter-spacing:.06em;
+}
+.brand-campus{display:block;font-size:11px;color:var(--muted);letter-spacing:.04em}
+.brand-name{display:block;font-size:15px;font-weight:750;color:var(--navy);line-height:1.2}
+.nav-links{display:flex;gap:2px;margin-left:8px}
+.nav-links a{
+  color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;
+  padding:8px 12px;border-radius:6px;transition:color .15s,background .15s;
+}
+.nav-links a:hover{color:var(--navy);background:rgba(24,43,73,.06)}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.ver-chip{
+  font-family:"JetBrains Mono","Cascadia Code",Consolas,monospace;
+  font-size:12px;font-weight:700;
+  background:var(--sand);color:var(--navy);
+  border:1px solid var(--line);
+  padding:4px 9px;border-radius:5px;
+}
+
+.hero{background:var(--navy);color:#fff;border-top:4px solid var(--yellow);padding:72px 0 64px}
+.hero-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:52px;align-items:center}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  color:var(--turquoise);font-size:13px;font-weight:700;letter-spacing:.05em;
+  text-transform:uppercase;margin:0 0 16px;
+}
+.eyebrow svg.lucide{width:15px;height:15px}
+.hero h1{
+  font-size:44px;line-height:1.12;letter-spacing:-.01em;
+  margin:0 0 16px;font-weight:800;
+}
+.lede{color:rgba(255,255,255,.82);font-size:17px;line-height:1.6;max-width:560px;margin:0 0 28px}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:40px}
+.btn{
+  display:inline-flex;align-items:center;gap:9px;
+  padding:12px 20px;border-radius:8px;
+  font-size:15px;font-weight:650;text-decoration:none;cursor:pointer;
+  transition:background .15s,border-color .15s,color .15s;
+}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:var(--blue-dark)}
+.btn-ghost{color:#fff;border:1px solid rgba(255,255,255,.4)}
+.btn-ghost:hover{background:rgba(255,255,255,.08);border-color:#fff}
+.btn-yellow{background:var(--yellow);color:var(--navy)}
+.btn-yellow:hover{background:#F3E500}
+.stats{display:flex;flex-wrap:wrap}
+.stats div{padding:2px 28px;border-left:1px solid rgba(255,255,255,.22)}
+.stats div:first-child{padding-left:0;border-left:none}
+.stats strong{display:block;font-size:30px;font-weight:800}
+.stats span{display:block;font-size:12.5px;color:rgba(255,255,255,.62);margin-top:2px}
+
+.term{background:var(--term-bg);border:1px solid rgba(255,255,255,.14);border-radius:8px;overflow:hidden}
+.term-head{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.1);
+  color:rgba(255,255,255,.55);font-size:12.5px;
+  font-family:"JetBrains Mono","Cascadia Code",Consolas,monospace;
+}
+.term-dot{width:10px;height:10px;border-radius:50%;background:var(--turquoise)}
+.term pre{margin:0;padding:18px 16px;color:#E8ECF3;font-size:13.5px;line-height:1.75;white-space:pre-wrap}
+.t-prompt{color:var(--turquoise);font-weight:700}
+.t-ok{color:var(--turquoise)}
+.t-dim{color:rgba(255,255,255,.55)}
+
+.explain{border-bottom:1px solid var(--line);padding:44px 0}
+.explain-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:36px}
+.explain-item svg.lucide{width:22px;height:22px;color:var(--blue)}
+.explain-item h3{font-size:16.5px;margin:12px 0 6px}
+.explain-item p{margin:0;color:var(--muted);font-size:14.5px;line-height:1.6}
+
+.section-head h2{font-size:30px;letter-spacing:-.01em;margin:0 0 6px}
+.section-head p{color:var(--muted);font-size:15.5px;margin:0 0 40px}
+
+.skills{padding:56px 0 24px}
+.group{margin-bottom:48px}
+.group-head{display:flex;align-items:flex-start;gap:18px;margin-bottom:16px;flex-wrap:wrap}
+.group-num{
+  font-family:"JetBrains Mono","Cascadia Code",Consolas,monospace;
+  font-size:15px;font-weight:800;color:rgba(24,43,73,.38);padding-top:3px;
+}
+.group-title h3{margin:0;font-size:19px;display:flex;align-items:center;gap:9px}
+.group-title p{margin:5px 0 0;color:var(--muted);font-size:14.5px}
+.dot{width:9px;height:9px;border-radius:3px;background:var(--c,var(--blue));display:inline-block}
+.group-start{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.start-label{font-size:13px;color:rgba(24,43,73,.55)}
+.cmd-chip{
+  display:inline-flex;align-items:center;gap:7px;
+  background:var(--yellow);color:var(--navy);
+  font-family:"JetBrains Mono","Cascadia Code",Consolas,monospace;
+  font-size:13px;font-weight:700;
+  padding:7px 12px;border-radius:6px;
+}
+.cmd-chip svg.lucide{width:14px;height:14px}
+.skill-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.skill{
+  background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px;
+  transition:border-color .15s,transform .15s,box-shadow .15s;
+}
+.skill:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:0 6px 16px rgba(24,43,73,.08)}
+.skill-cmd{
+  margin:0 0 7px;font-size:14px;font-weight:700;color:var(--blue);
+  overflow-wrap:anywhere;
+}
+.skill p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.55}
+
+.playbooks{background:var(--sand);padding:64px 0}
+.pb-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.pb{
+  background:#fff;border:1px solid var(--line);border-radius:8px;
+  padding:22px;display:flex;flex-direction:column;
+}
+.pb-tag{
+  align-self:flex-start;display:inline-flex;align-items:center;gap:8px;
+  font-size:12.5px;font-weight:700;color:var(--navy);
+  background:rgba(24,43,73,.07);padding:5px 10px;border-radius:5px;
+}
+.pb h3{margin:14px 0 6px;font-size:19px}
+.pb-desc{margin:0 0 20px;color:var(--muted);font-size:14px;line-height:1.55}
+.steps{position:relative;list-style:none;margin:0 0 20px;padding:0}
+.steps::before{content:"";position:absolute;left:11px;top:16px;bottom:16px;width:2px;background:rgba(24,43,73,.16)}
+.steps li{position:relative;display:flex;align-items:center;gap:12px;padding:5px 0}
+.step-num{
+  width:24px;height:24px;border-radius:6px;flex-shrink:0;position:relative;z-index:1;
+  background:var(--navy);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-family:"JetBrains Mono","Cascadia Code",Consolas,monospace;
+  font-size:11.5px;font-weight:800;
+}
+.steps code{
+  font-size:12.5px;color:var(--navy);
+  background:rgba(0,98,155,.07);padding:3px 8px;border-radius:4px;
+  overflow-wrap:anywhere;
+}
+.pb-foot{
+  margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  border-top:1px solid var(--line);padding-top:14px;
+}
+.pb-meta{display:inline-flex;align-items:center;gap:7px;color:var(--muted);font-size:13px}
+.pb-meta svg.lucide{width:14px;height:14px}
+.btn-link{
+  display:inline-flex;align-items:center;gap:6px;
+  color:var(--blue);font-weight:650;font-size:14px;text-decoration:none;
+}
+.btn-link:hover{text-decoration:underline}
+
+.roadmap{padding:56px 0}
+.rm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.rm{
+  border:1px dashed var(--line);border-radius:8px;padding:16px;
+  color:var(--muted);
+}
+.rm h4{margin:0 0 6px;font-size:15px;color:var(--navy);display:flex;align-items:center;gap:8px}
+.rm p{margin:0;font-size:13.5px;line-height:1.55}
+.rm-tag{
+  font-size:11px;font-weight:700;color:var(--gold);
+  background:rgba(198,146,20,.12);padding:2px 7px;border-radius:4px;
+}
+
+.news{padding:56px 0 64px;border-top:1px solid var(--line)}
+.news-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.news-list li{
+  display:grid;grid-template-columns:88px 92px 1fr;gap:18px;
+  padding:20px 0;border-bottom:1px solid var(--line);
+}
+.ver{
+  justify-self:start;align-self:start;
+  font-family:"JetBrains Mono","Cascadia Code",Consolas,monospace;
+  font-size:12.5px;font-weight:800;color:var(--navy);
+  background:var(--yellow);padding:4px 9px;border-radius:5px;
+}
+.news-list time{color:rgba(24,43,73,.55);font-size:13.5px;padding-top:5px}
+.news-list h3{margin:0 0 4px;font-size:16px}
+.news-list p{margin:0;color:var(--muted);font-size:14px;line-height:1.55}
+
+.cta{background:var(--navy);color:#fff;border-top:4px solid var(--yellow);padding:64px 0}
+.cta-inner{max-width:660px;margin:0 auto;text-align:center}
+.cta h2{font-size:30px;letter-spacing:-.01em;margin:0 0 10px}
+.cta p{color:rgba(255,255,255,.8);font-size:16px;line-height:1.6;margin:0 0 26px}
+.cta .term{margin-bottom:26px;text-align:left}
+
+.foot{background:var(--navy);color:#fff;border-top:1px solid rgba(255,255,255,.16);padding:28px 0}
+.foot-inner{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap}
+.foot-brand{display:flex;align-items:center;gap:12px}
+.mono-light{background:#fff;color:var(--navy)}
+.foot-brand strong{display:block;font-size:15px}
+.foot-brand span{display:block;color:rgba(255,255,255,.65);font-size:12.5px;margin-top:1px}
+.foot-note{margin:0;color:rgba(255,255,255,.58);font-size:12.5px;line-height:1.7;max-width:660px}
+
+@media (max-width:980px){
+  .hero-grid{grid-template-columns:1fr;gap:36px}
+  .explain-grid{grid-template-columns:1fr;gap:24px}
+  .pb-grid{grid-template-columns:1fr}
+}
+@media (max-width:720px){
+  .nav-links{display:none}
+  .hero h1{font-size:34px}
+  .stats div{padding:2px 18px}
+  .stats strong{font-size:24px}
+  .news-list li{grid-template-columns:1fr;gap:8px}
+  .news-list time{padding-top:0}
+}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="shell nav-inner">
+    <a class="brand" href="#top">
+      <span class="monogram">DIA</span>
+      <span>
+        <span class="brand-campus">UC San Diego</span>
+        <span class="brand-name">Data, Insights &amp; Analytics</span>
+      </span>
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#skills">Skills</a>
+      <a href="#playbooks">Playbooks</a>
+      <a href="#roadmap">Roadmap</a>
+      <a href="#whats-new">What's new</a>
+    </nav>
+    <div class="nav-right">
+      <span class="ver-chip">v1.0</span>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+<section class="hero">
+  <div class="shell hero-grid">
+    <div>
+      <p class="eyebrow"><i data-lucide="library"></i>DIA Skill Library</p>
+      <h1>Skills &amp; playbooks for Data, Insights &amp; Analytics</h1>
+      <p class="lede">A practical skill system for the DIA team: sequenced, named, and tuned so every workflow runs the same trusted way, from first transcript to approved ClickUp tasks.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#skills"><i data-lucide="compass"></i>Browse skills</a>
+        <a class="btn btn-ghost" href="#playbooks">See playbooks<i data-lucide="arrow-right"></i></a>
+      </div>
+      <div class="stats">
+      <div><strong>9</strong><span>skills</span></div>
+      <div><strong>3</strong><span>playbooks</span></div>
+        <div><strong>4</strong><span>skill groups</span></div>
+        <div><strong>7</strong><span>planned groups</span></div>
+      </div>
+    </div>
+    <div class="term">
+      <div class="term-head"><span class="term-dot"></span>dia-harness-skills</div>
+      <pre><code><span class="t-prompt">$</span> pwsh -File .\scripts\install-skill.ps1 -Skill dia-start-my-day
+<span class="t-ok">+ 1 skill installed to %USERPROFILE%\.tritonai-harness\codex\skills</span>
+<span class="t-dim">Restart TritonAI Harness, then try: $dia-start-my-day</span></code></pre>
+    </div>
+  </div>
+</section>
+
+<section class="explain">
+  <div class="shell explain-grid">
+    <div class="explain-item">
+      <i data-lucide="puzzle"></i>
+      <h3>What is a skill?</h3>
+      <p>A small, sharp instruction your agent runs the same way every time: connecting ClickUp, validating a project folder, writing a daily brief.</p>
+    </div>
+    <div class="explain-item">
+      <i data-lucide="route"></i>
+      <h3>What is a playbook?</h3>
+      <p>A curated sequence of skills for an end-to-end workflow. Each skill's output becomes the next skill's input.</p>
+    </div>
+    <div class="explain-item">
+      <i data-lucide="trending-up"></i>
+      <h3>Why it compounds</h3>
+      <p>Every skill lives in one reviewed repository. Tuning one step improves every workflow that runs through it.</p>
+    </div>
+  </div>
+</section>
+
+<section id="skills" class="skills">
+  <div class="shell">
+    <div class="section-head">
+      <h2>Skills</h2>
+      <p>Grouped by when you reach for them. Every skill is invoked explicitly with its <code>$dia-</code> command.</p>
+    </div>
+
+    <div class="group" id="g1">
+      <div class="group-head">
+        <span class="group-num">01</span>
+        <div class="group-title">
+          <h3><span class="dot" style="--c:var(--blue)"></span>Connect &amp; Setup</h3>
+          <p>One-time connections and project scaffolding. Everything else depends on this.</p>
+        </div>
+        <div class="group-start">
+          <span class="start-label">Start with</span>
+          <span class="cmd-chip mono"><i data-lucide="terminal"></i>$dia-clickup-mcp-setup</span>
+        </div>
+      </div>
+      <div class="skill-grid">
+        <article class="skill">
+          <h4 class="skill-cmd">$dia-clickup-mcp-setup</h4>
+          <p>Connect TritonAI Harness to ClickUp through official OAuth and verify Workspace access.</p>
+        </article>
+        <article class="skill">
+          <h4 class="skill-cmd">$dia-setup-project-folder</h4>
+          <p>Create or validate a business-insights project folder connected to ClickUp resources.</p>
+        </article>
+      </div>
+    </div>
+
+    <div class="group" id="g2">
+      <div class="group-head">
+        <span class="group-num">02</span>
+        <div class="group-title">
+          <h3><span class="dot" style="--c:var(--turquoise)"></span>Meeting Workflow</h3>
+          <p>From a raw transcript to published notes and approved tasks.</p>
+        </div>
+        <div class="group-start">
+          <span class="start-label">Start with</span>
+          <span class="cmd-chip mono"><i data-lucide="terminal"></i>$dia-process-meeting-transcript</span>
+        </div>
+      </div>
+      <div class="skill-grid">
+        <article class="skill">
+          <h4 class="skill-cmd">$dia-transcript-to-meeting-notes</h4>
+          <p>Turn a Zoom transcript into detailed local meeting notes, with no ClickUp writes.</p>
+        </article>
+        <article class="skill">
+          <h4 class="skill-cmd">$dia-transcript-to-requirements</h4>
+          <p>Turn a business-owner requirements conversation into a structured requirements document.</p>
+        </article>
+        <article class="skill">
+          <h4 class="skill-cmd">$dia-transcript-to-process-map</h4>
+          <p>Save the transcript, create meeting notes, and render the discussed process as a diagram.</p>
+        </article>
+        <article class="skill">
+          <h4 class="skill-cmd">$dia-process-meeting-transcript</h4>
+          <p>Draft the Project Hub note, then create only the ClickUp tasks the user approves.</p>
+        </article>
+      </div>
+    </div>
+
+    <div class="group" id="g3">
+      <div class="group-head">
+        <span class="group-num">03</span>
+        <div class="group-title">
+          <h3><span class="dot" style="--c:var(--green)"></span>Daily Rituals</h3>
+          <p>Short, repeatable routines that keep the day honest.</p>
+        </div>
+      </div>
+      <div class="skill-grid">
+        <article class="skill">
+          <h4 class="skill-cmd">$dia-start-my-day</h4>
+          <p>Rank one to three priorities from ClickUp and Outlook, with an HTML brief and approved follow-ups.</p>
+        </article>
+      </div>
+    </div>
+
+    <div class="group" id="g4">
+      <div class="group-head">
+        <span class="group-num">04</span>
+        <div class="group-title">
+          <h3><span class="dot" style="--c:var(--magenta)"></span>Data Analysis</h3>
+          <p>Scaffold full analysis workspaces or answer one CSV with read-only SQL.</p>
+        </div>
+      </div>
+      <div class="skill-grid">
+        <article class="skill">
+          <h4 class="skill-cmd">$dia-analyze-local-data</h4>
+          <p>Create a local DuckDB workspace for one CSV and answer questions with read-only SQL.</p>
+        </article>
+        <article class="skill">
+          <h4 class="skill-cmd">$dia-new-data-analysis-workspace</h4>
+          <p>Scaffold a fresh local data-analysis workspace with raw inputs, numbered pipeline scripts, and dashboard-ready output.</p>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="playbooks" class="playbooks">
+  <div class="shell">
+    <div class="section-head">
+      <h2>Playbooks</h2>
+      <p>Collections of sequential skills: the library, strung into end-to-end workflows.</p>
+    </div>
+    <div class="pb-grid">
+      <article class="pb">
+        <span class="pb-tag"><span class="dot" style="--c:var(--turquoise)"></span>Meetings</span>
+        <h3>Meeting notes to ClickUp tasks</h3>
+        <p class="pb-desc">Take one readable transcript from raw capture to a published Project Hub note and approved DIA tasks.</p>
+        <ol class="steps">
+          <li><span class="step-num">1</span><code>$dia-clickup-mcp-setup</code></li>
+          <li><span class="step-num">2</span><code>$dia-setup-project-folder</code></li>
+          <li><span class="step-num">3</span><code>$dia-process-meeting-transcript</code></li>
+        </ol>
+        <div class="pb-foot">
+          <span class="pb-meta"><i data-lucide="list-ordered"></i>3 skills &middot; setup once, run per meeting</span>
+          <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/meeting-notes-to-tasks.md">Open playbook<i data-lucide="arrow-right"></i></a>
+        </div>
+      </article>
+      <article class="pb">
+        <span class="pb-tag"><span class="dot" style="--c:var(--green)"></span>Ritual</span>
+        <h3>Start of day</h3>
+        <p class="pb-desc">Verify ClickUp access, then turn live evidence into a defensible daily focus.</p>
+        <ol class="steps">
+          <li><span class="step-num">1</span><code>$dia-clickup-mcp-setup</code></li>
+          <li><span class="step-num">2</span><code>$dia-start-my-day</code></li>
+        </ol>
+        <div class="pb-foot">
+          <span class="pb-meta"><i data-lucide="list-ordered"></i>2 skills &middot; setup once, run daily</span>
+          <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/start-of-day.md">Open playbook<i data-lucide="arrow-right"></i></a>
+        </div>
+      </article>
+      <article class="pb">
+        <span class="pb-tag"><span class="dot" style="--c:var(--blue)"></span>Meetings</span>
+        <h3>Requirements to process map</h3>
+        <p class="pb-desc">Turn a business-owner requirements conversation into a structured requirements document and a rendered process map.</p>
+        <ol class="steps">
+          <li><span class="step-num">1</span><code>$dia-transcript-to-requirements</code></li>
+          <li><span class="step-num">2</span><code>$dia-transcript-to-process-map</code></li>
+        </ol>
+        <div class="pb-foot">
+          <span class="pb-meta"><i data-lucide="list-ordered"></i>2 skills &middot; run per requirements conversation</span>
+          <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/requirements-to-process-map.md">Open playbook<i data-lucide="arrow-right"></i></a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="roadmap" class="roadmap">
+  <div class="shell">
+    <div class="section-head">
+      <h2>Roadmap</h2>
+      <p>Planned skill groups that will complete the analytics spine. Each follows the same <code>dia-</code> naming convention.</p>
+    </div>
+    <div class="rm-grid">
+      <div class="rm">
+        <h4><span class="dot" style="--c:var(--turquoise)"></span>Discover &amp; Scope <span class="rm-tag">Planned</span></h4>
+        <p>Frame the question, lock metrics, find the data, and scope effort before any query runs.</p>
+      </div>
+      <div class="rm">
+        <h4><span class="dot" style="--c:var(--blue)"></span>Main Flow <span class="rm-tag">Planned</span></h4>
+        <p>Build the dataset, validate it, analyze, visualize, and write the narrative, in order.</p>
+      </div>
+      <div class="rm">
+        <h4><span class="dot" style="--c:var(--magenta)"></span>Deep Dives <span class="rm-tag">Planned</span></h4>
+        <p>Drill down on surprising numbers and investigate anomalies with structured evidence trails.</p>
+      </div>
+      <div class="rm">
+        <h4><span class="dot" style="--c:var(--gold)"></span>Data Operations <span class="rm-tag">Planned</span></h4>
+        <p>Map lineage, document datasets, run QA checklists, and draft access requests.</p>
+      </div>
+      <div class="rm">
+        <h4><span class="dot" style="--c:var(--turquoise)"></span>Collaboration <span class="rm-tag">Planned</span></h4>
+        <p>Stakeholder interviews, handoff packaging, plain-English rewrites, and briefing prep.</p>
+      </div>
+      <div class="rm">
+        <h4><span class="dot" style="--c:var(--gold)"></span>Reference Skills <span class="rm-tag">Planned</span></h4>
+        <p>The metric glossary, chart choice, SQL style, and Python style every other skill cites.</p>
+      </div>
+      <div class="rm">
+        <h4><span class="dot" style="--c:var(--green)"></span>Project Management <span class="rm-tag">Planned</span></h4>
+        <p>Expand today's ritual loop with status reports, decision logs, and roadmap checks.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="whats-new" class="news">
+  <div class="shell">
+    <div class="section-head">
+      <h2>What's new</h2>
+      <p>The library is versioned like any other campus artifact.</p>
+    </div>
+    <ul class="news-list">
+      <li>
+        <span class="ver">v1.1</span>
+        <time>Oct 2026</time>
+        <div>
+          <h3>Data analysis workspace scaffold</h3>
+          <p><code>$dia-new-data-analysis-workspace</code> creates a fresh local workspace with immutable raw inputs, numbered pipeline scripts, a dependency manifest, and a dashboard-ready output layer.</p>
+        </div>
+      </li>
+      <li>
+        <span class="ver">v1.0</span>
+        <time>Oct 2026</time>
+        <div>
+          <h3>DIA naming convention</h3>
+          <p>The <code>dia-</code> prefix became the library standard: five skills were renamed and three new transcript skills were added for meeting notes, requirements, and process maps. Playbooks were introduced as ordered sequences in the repository.</p>
+        </div>
+      </li>
+      <li>
+        <span class="ver">v1.2</span>
+        <time>Planned</time>
+        <div>
+          <h3>Analysis spine skills</h3>
+          <p>Dataset building, data validation, and visualization as the first Main Flow skills.</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="shell cta-inner">
+    <h2>Load the library into your agent</h2>
+    <p>Clone the repository, install the skills you want, restart TritonAI Harness, and type the skill's dollar command. Everything lives in one reviewed repo.</p>
+    <div class="term">
+      <pre><code><span class="t-prompt">$</span> pwsh -File .\scripts\install-skill.ps1 -Skill dia-start-my-day</code></pre>
+    </div>
+    <a class="btn btn-yellow" href="#skills">Start with the skills<i data-lucide="arrow-right"></i></a>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="shell foot-inner">
+    <div class="foot-brand">
+      <span class="monogram mono-light">DIA</span>
+      <div>
+        <strong>Data, Insights &amp; Analytics</strong>
+        <span>UC San Diego</span>
+      </div>
+    </div>
+    <p class="foot-note">This page mirrors the reviewed skill catalog in this repository. Source skills live under <code>skills/</code>, playbook sequences under <code>playbooks/</code>. Colors from the approved UC San Diego brand palette.</p>
+  </div>
+</footer>
+
+<script>
+lucide.createIcons();
+</script>
+</body>
+</html>

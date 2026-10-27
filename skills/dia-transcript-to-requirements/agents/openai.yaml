@@ -1,0 +1,7 @@
+interface:
+  display_name: "DIA Transcript to Requirements"
+  short_description: "Turn a requirements Zoom transcript into a structured requirements document"
+  default_prompt: "Use $dia-transcript-to-requirements to turn a business-owner requirements Zoom transcript into a structured requirements document."
+
+policy:
+  allow_implicit_invocation: false

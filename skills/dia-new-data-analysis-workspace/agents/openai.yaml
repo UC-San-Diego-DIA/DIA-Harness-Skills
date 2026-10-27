@@ -1,0 +1,6 @@
+interface:
+  display_name: "New Data Analysis Workspace"
+  short_description: "Create a fresh local data-analysis workspace"
+  default_prompt: "Use $dia-new-data-analysis-workspace to create a fresh local data-analysis workspace."
+policy:
+  allow_implicit_invocation: false

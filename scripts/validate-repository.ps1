@@ -116,7 +116,7 @@ else {
     }
 }
 
-$explicitOnlySkills = @('analyze-csv-with-duckdb', 'connect-clickup', 'process-meeting-transcript', 'setup-project-folder', 'start-my-day')
+$explicitOnlySkills = @('dia-analyze-local-data', 'dia-clickup-mcp-setup', 'dia-new-data-analysis-workspace', 'dia-process-meeting-transcript', 'dia-setup-project-folder', 'dia-start-my-day', 'dia-transcript-to-process-map', 'dia-transcript-to-requirements')
 foreach ($explicitOnlySkill in $explicitOnlySkills) {
     $explicitMetadata = Join-Path $skillsRoot "$explicitOnlySkill\agents\openai.yaml"
     if (-not (Test-Path -LiteralPath $explicitMetadata -PathType Leaf)) {

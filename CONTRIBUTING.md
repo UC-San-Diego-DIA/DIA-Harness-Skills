@@ -15,6 +15,7 @@ Keep changes small enough to review as one coherent decision.
 - Add a script only when deterministic behavior reduces a real failure risk.
 - Never add credentials, copied user configuration, personal task IDs, source CSVs, DuckDB databases, analysis outputs, or live ClickUp content.
 - Keep `agents/openai.yaml` consistent with the skill name and invocation policy.
+- Follow the naming convention: the slug is `dia-` plus the lowercase hyphenated display name, and the invocation is `$dia-<name>`. A rename must update the folder, `SKILL.md`, `agents/openai.yaml`, both catalogs, and every script or workflow reference together.
 
 ## Validation
 
