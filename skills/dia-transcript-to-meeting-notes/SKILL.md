@@ -1,6 +1,8 @@
 ---
 name: dia-transcript-to-meeting-notes
 description: Turn a Zoom transcript (.txt) into detailed project meeting notes in Markdown with summary, key decisions, action items, and open questions. Use when the user provides a Zoom transcript and asks for meeting notes, a recap, or minutes.
+metadata:
+  status: production
 ---
 
 # DIA Transcript to Meeting Notes

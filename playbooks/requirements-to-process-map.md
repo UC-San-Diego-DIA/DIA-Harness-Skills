@@ -10,7 +10,7 @@ Move one business-owner requirements conversation from raw transcript to a struc
 ## Sequence
 
 1. `$dia-transcript-to-requirements` - one run per conversation. Saves the transcript locally and produces the requirements document: actors and roles, current-state process, problems, requested capabilities, success criteria, constraints, out-of-scope items, and open questions.
-2. `$dia-transcript-to-process-map` - one run per conversation. Produces meeting notes from the same transcript and renders the process map. When the requirements document from step 1 exists, the map uses it as its process source instead of re-reading the transcript.
+2. `$dia-transcript-to-process-map` - one run per conversation. Writes a process outline from the same transcript and waits for the user to confirm it before rendering the process map. When the requirements document from step 1 exists, the outline uses it as its process source instead of re-reading the transcript.
 
 Variant: when the requirements document is enough and no diagram is needed, run only step 1.
 

@@ -1,6 +1,8 @@
 ---
 name: dia-clickup-mcp-setup
 description: Connect or verify ClickUp in TritonAI Harness on managed Windows through ClickUp's official OAuth MCP server. Use only when explicitly invoked as $dia-clickup-mcp-setup, with optional ClickUp Space URLs. Do not use for ClickUp task management or legacy MCP migration.
+metadata:
+  status: production
 ---
 
 # ClickUp MCP Setup

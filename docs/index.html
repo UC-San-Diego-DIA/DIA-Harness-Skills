@@ -142,18 +142,22 @@ section[id]{scroll-margin-top:84px}
 .cmd-chip svg.lucide{width:14px;height:14px}
 .skill-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
 .skill{
-  background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px;
+  display:block;background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px;
+  text-decoration:none;color:inherit;
   transition:border-color .15s,transform .15s,box-shadow .15s;
 }
 .skill:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:0 6px 16px rgba(24,43,73,.08)}
+.skill-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}
+.skill-head svg.lucide{width:15px;height:15px;color:var(--muted);transition:color .15s}
+.skill:hover .skill-head svg.lucide{color:var(--blue)}
 .skill-cmd{
-  margin:0 0 7px;font-size:14px;font-weight:700;color:var(--blue);
+  margin:0;font-size:14px;font-weight:700;color:var(--blue);
   overflow-wrap:anywhere;
 }
 .skill p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.55}
 
 .playbooks{background:var(--sand);padding:64px 0}
-.pb-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.pb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .pb{
   background:#fff;border:1px solid var(--line);border-radius:8px;
   padding:22px;display:flex;flex-direction:column;
@@ -192,35 +196,6 @@ section[id]{scroll-margin-top:84px}
 }
 .btn-link:hover{text-decoration:underline}
 
-.roadmap{padding:56px 0}
-.rm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
-.rm{
-  border:1px dashed var(--line);border-radius:8px;padding:16px;
-  color:var(--muted);
-}
-.rm h4{margin:0 0 6px;font-size:15px;color:var(--navy);display:flex;align-items:center;gap:8px}
-.rm p{margin:0;font-size:13.5px;line-height:1.55}
-.rm-tag{
-  font-size:11px;font-weight:700;color:var(--gold);
-  background:rgba(198,146,20,.12);padding:2px 7px;border-radius:4px;
-}
-
-.news{padding:56px 0 64px;border-top:1px solid var(--line)}
-.news-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
-.news-list li{
-  display:grid;grid-template-columns:88px 92px 1fr;gap:18px;
-  padding:20px 0;border-bottom:1px solid var(--line);
-}
-.ver{
-  justify-self:start;align-self:start;
-  font-family:"JetBrains Mono","Cascadia Code",Consolas,monospace;
-  font-size:12.5px;font-weight:800;color:var(--navy);
-  background:var(--yellow);padding:4px 9px;border-radius:5px;
-}
-.news-list time{color:rgba(24,43,73,.55);font-size:13.5px;padding-top:5px}
-.news-list h3{margin:0 0 4px;font-size:16px}
-.news-list p{margin:0;color:var(--muted);font-size:14px;line-height:1.55}
-
 .cta{background:var(--navy);color:#fff;border-top:4px solid var(--yellow);padding:64px 0}
 .cta-inner{max-width:660px;margin:0 auto;text-align:center}
 .cta h2{font-size:30px;letter-spacing:-.01em;margin:0 0 10px}
@@ -245,8 +220,6 @@ section[id]{scroll-margin-top:84px}
   .hero h1{font-size:34px}
   .stats div{padding:2px 18px}
   .stats strong{font-size:24px}
-  .news-list li{grid-template-columns:1fr;gap:8px}
-  .news-list time{padding-top:0}
 }
 </style>
 </head>
@@ -264,8 +237,6 @@ section[id]{scroll-margin-top:84px}
     <nav class="nav-links" aria-label="Primary">
       <a href="#skills">Skills</a>
       <a href="#playbooks">Playbooks</a>
-      <a href="#roadmap">Roadmap</a>
-      <a href="#whats-new">What's new</a>
     </nav>
     <div class="nav-right">
       <span class="ver-chip">v1.0</span>
@@ -286,10 +257,9 @@ section[id]{scroll-margin-top:84px}
         <a class="btn btn-ghost" href="#playbooks">See playbooks<i data-lucide="arrow-right"></i></a>
       </div>
       <div class="stats">
-      <div><strong>9</strong><span>skills</span></div>
+      <div><strong>7</strong><span>skills</span></div>
       <div><strong>3</strong><span>playbooks</span></div>
-        <div><strong>4</strong><span>skill groups</span></div>
-        <div><strong>7</strong><span>planned groups</span></div>
+      <div><strong>4</strong><span>skill groups</span></div>
       </div>
     </div>
     <div class="term">
@@ -333,7 +303,7 @@ section[id]{scroll-margin-top:84px}
         <span class="group-num">01</span>
         <div class="group-title">
           <h3><span class="dot" style="--c:var(--blue)"></span>Connect &amp; Setup</h3>
-          <p>One-time connections and project scaffolding. Everything else depends on this.</p>
+          <p>One-time connections. Everything else depends on this.</p>
         </div>
         <div class="group-start">
           <span class="start-label">Start with</span>
@@ -341,14 +311,13 @@ section[id]{scroll-margin-top:84px}
         </div>
       </div>
       <div class="skill-grid">
-        <article class="skill">
-          <h4 class="skill-cmd">$dia-clickup-mcp-setup</h4>
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-clickup-mcp-setup" title="View dia-clickup-mcp-setup on GitHub">
+          <div class="skill-head">
+            <h4 class="skill-cmd">$dia-clickup-mcp-setup</h4>
+            <i data-lucide="github"></i>
+          </div>
           <p>Connect TritonAI Harness to ClickUp through official OAuth and verify Workspace access.</p>
-        </article>
-        <article class="skill">
-          <h4 class="skill-cmd">$dia-setup-project-folder</h4>
-          <p>Create or validate a business-insights project folder connected to ClickUp resources.</p>
-        </article>
+        </a>
       </div>
     </div>
 
@@ -357,30 +326,35 @@ section[id]{scroll-margin-top:84px}
         <span class="group-num">02</span>
         <div class="group-title">
           <h3><span class="dot" style="--c:var(--turquoise)"></span>Meeting Workflow</h3>
-          <p>From a raw transcript to published notes and approved tasks.</p>
+          <p>From a raw transcript to meeting notes, requirements, and process maps.</p>
         </div>
         <div class="group-start">
           <span class="start-label">Start with</span>
-          <span class="cmd-chip mono"><i data-lucide="terminal"></i>$dia-process-meeting-transcript</span>
+          <span class="cmd-chip mono"><i data-lucide="terminal"></i>$dia-transcript-to-process-map</span>
         </div>
       </div>
       <div class="skill-grid">
-        <article class="skill">
-          <h4 class="skill-cmd">$dia-transcript-to-meeting-notes</h4>
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-meeting-notes" title="View dia-transcript-to-meeting-notes on GitHub">
+          <div class="skill-head">
+            <h4 class="skill-cmd">$dia-transcript-to-meeting-notes</h4>
+            <i data-lucide="github"></i>
+          </div>
           <p>Turn a Zoom transcript into detailed local meeting notes, with no ClickUp writes.</p>
-        </article>
-        <article class="skill">
-          <h4 class="skill-cmd">$dia-transcript-to-requirements</h4>
+        </a>
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-requirements" title="View dia-transcript-to-requirements on GitHub">
+          <div class="skill-head">
+            <h4 class="skill-cmd">$dia-transcript-to-requirements</h4>
+            <i data-lucide="github"></i>
+          </div>
           <p>Turn a business-owner requirements conversation into a structured requirements document.</p>
-        </article>
-        <article class="skill">
-          <h4 class="skill-cmd">$dia-transcript-to-process-map</h4>
-          <p>Save the transcript, create meeting notes, and render the discussed process as a diagram.</p>
-        </article>
-        <article class="skill">
-          <h4 class="skill-cmd">$dia-process-meeting-transcript</h4>
-          <p>Draft the Project Hub note, then create only the ClickUp tasks the user approves.</p>
-        </article>
+        </a>
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-process-map" title="View dia-transcript-to-process-map on GitHub">
+          <div class="skill-head">
+            <h4 class="skill-cmd">$dia-transcript-to-process-map</h4>
+            <i data-lucide="github"></i>
+          </div>
+          <p>Save the transcript, outline the discussed process for your confirmation, then render the approved map as a diagram.</p>
+        </a>
       </div>
     </div>
 
@@ -393,10 +367,13 @@ section[id]{scroll-margin-top:84px}
         </div>
       </div>
       <div class="skill-grid">
-        <article class="skill">
-          <h4 class="skill-cmd">$dia-start-my-day</h4>
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-start-my-day" title="View dia-start-my-day on GitHub">
+          <div class="skill-head">
+            <h4 class="skill-cmd">$dia-start-my-day</h4>
+            <i data-lucide="github"></i>
+          </div>
           <p>Rank one to three priorities from ClickUp and Outlook, with an HTML brief and approved follow-ups.</p>
-        </article>
+        </a>
       </div>
     </div>
 
@@ -409,14 +386,20 @@ section[id]{scroll-margin-top:84px}
         </div>
       </div>
       <div class="skill-grid">
-        <article class="skill">
-          <h4 class="skill-cmd">$dia-analyze-local-data</h4>
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-analyze-local-data" title="View dia-analyze-local-data on GitHub">
+          <div class="skill-head">
+            <h4 class="skill-cmd">$dia-analyze-local-data</h4>
+            <i data-lucide="github"></i>
+          </div>
           <p>Create a local DuckDB workspace for one CSV and answer questions with read-only SQL.</p>
-        </article>
-        <article class="skill">
-          <h4 class="skill-cmd">$dia-new-data-analysis-workspace</h4>
+        </a>
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-new-data-analysis-workspace" title="View dia-new-data-analysis-workspace on GitHub">
+          <div class="skill-head">
+            <h4 class="skill-cmd">$dia-new-data-analysis-workspace</h4>
+            <i data-lucide="github"></i>
+          </div>
           <p>Scaffold a fresh local data-analysis workspace with raw inputs, numbered pipeline scripts, and dashboard-ready output.</p>
-        </article>
+        </a>
       </div>
     </div>
   </div>
@@ -429,20 +412,6 @@ section[id]{scroll-margin-top:84px}
       <p>Collections of sequential skills: the library, strung into end-to-end workflows.</p>
     </div>
     <div class="pb-grid">
-      <article class="pb">
-        <span class="pb-tag"><span class="dot" style="--c:var(--turquoise)"></span>Meetings</span>
-        <h3>Meeting notes to ClickUp tasks</h3>
-        <p class="pb-desc">Take one readable transcript from raw capture to a published Project Hub note and approved DIA tasks.</p>
-        <ol class="steps">
-          <li><span class="step-num">1</span><code>$dia-clickup-mcp-setup</code></li>
-          <li><span class="step-num">2</span><code>$dia-setup-project-folder</code></li>
-          <li><span class="step-num">3</span><code>$dia-process-meeting-transcript</code></li>
-        </ol>
-        <div class="pb-foot">
-          <span class="pb-meta"><i data-lucide="list-ordered"></i>3 skills &middot; setup once, run per meeting</span>
-          <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/meeting-notes-to-tasks.md">Open playbook<i data-lucide="arrow-right"></i></a>
-        </div>
-      </article>
       <article class="pb">
         <span class="pb-tag"><span class="dot" style="--c:var(--green)"></span>Ritual</span>
         <h3>Start of day</h3>
@@ -469,81 +438,21 @@ section[id]{scroll-margin-top:84px}
           <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/requirements-to-process-map.md">Open playbook<i data-lucide="arrow-right"></i></a>
         </div>
       </article>
-    </div>
-  </div>
-</section>
-
-<section id="roadmap" class="roadmap">
-  <div class="shell">
-    <div class="section-head">
-      <h2>Roadmap</h2>
-      <p>Planned skill groups that will complete the analytics spine. Each follows the same <code>dia-</code> naming convention.</p>
-    </div>
-    <div class="rm-grid">
-      <div class="rm">
-        <h4><span class="dot" style="--c:var(--turquoise)"></span>Discover &amp; Scope <span class="rm-tag">Planned</span></h4>
-        <p>Frame the question, lock metrics, find the data, and scope effort before any query runs.</p>
-      </div>
-      <div class="rm">
-        <h4><span class="dot" style="--c:var(--blue)"></span>Main Flow <span class="rm-tag">Planned</span></h4>
-        <p>Build the dataset, validate it, analyze, visualize, and write the narrative, in order.</p>
-      </div>
-      <div class="rm">
-        <h4><span class="dot" style="--c:var(--magenta)"></span>Deep Dives <span class="rm-tag">Planned</span></h4>
-        <p>Drill down on surprising numbers and investigate anomalies with structured evidence trails.</p>
-      </div>
-      <div class="rm">
-        <h4><span class="dot" style="--c:var(--gold)"></span>Data Operations <span class="rm-tag">Planned</span></h4>
-        <p>Map lineage, document datasets, run QA checklists, and draft access requests.</p>
-      </div>
-      <div class="rm">
-        <h4><span class="dot" style="--c:var(--turquoise)"></span>Collaboration <span class="rm-tag">Planned</span></h4>
-        <p>Stakeholder interviews, handoff packaging, plain-English rewrites, and briefing prep.</p>
-      </div>
-      <div class="rm">
-        <h4><span class="dot" style="--c:var(--gold)"></span>Reference Skills <span class="rm-tag">Planned</span></h4>
-        <p>The metric glossary, chart choice, SQL style, and Python style every other skill cites.</p>
-      </div>
-      <div class="rm">
-        <h4><span class="dot" style="--c:var(--green)"></span>Project Management <span class="rm-tag">Planned</span></h4>
-        <p>Expand today's ritual loop with status reports, decision logs, and roadmap checks.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="whats-new" class="news">
-  <div class="shell">
-    <div class="section-head">
-      <h2>What's new</h2>
-      <p>The library is versioned like any other campus artifact.</p>
-    </div>
-    <ul class="news-list">
-      <li>
-        <span class="ver">v1.1</span>
-        <time>Oct 2026</time>
-        <div>
-          <h3>Data analysis workspace scaffold</h3>
-          <p><code>$dia-new-data-analysis-workspace</code> creates a fresh local workspace with immutable raw inputs, numbered pipeline scripts, a dependency manifest, and a dashboard-ready output layer.</p>
+      <article class="pb">
+        <span class="pb-tag"><span class="dot" style="--c:var(--magenta)"></span>Meetings</span>
+        <h3>Meeting notes to ClickUp tasks</h3>
+        <p class="pb-desc">Move one transcript through published Project Hub meeting notes and approved DIA-owned ClickUp tasks.</p>
+        <ol class="steps">
+          <li><span class="step-num">1</span><code>ClickUp connection setup</code></li>
+          <li><span class="step-num">2</span><code>Project folder setup</code></li>
+          <li><span class="step-num">3</span><code>Process meeting transcript</code></li>
+        </ol>
+        <div class="pb-foot">
+          <span class="pb-meta"><i data-lucide="list-ordered"></i>3 skills &middot; setup once per project, run per meeting</span>
+          <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/meeting-notes-to-tasks.md">Open playbook<i data-lucide="arrow-right"></i></a>
         </div>
-      </li>
-      <li>
-        <span class="ver">v1.0</span>
-        <time>Oct 2026</time>
-        <div>
-          <h3>DIA naming convention</h3>
-          <p>The <code>dia-</code> prefix became the library standard: five skills were renamed and three new transcript skills were added for meeting notes, requirements, and process maps. Playbooks were introduced as ordered sequences in the repository.</p>
-        </div>
-      </li>
-      <li>
-        <span class="ver">v1.2</span>
-        <time>Planned</time>
-        <div>
-          <h3>Analysis spine skills</h3>
-          <p>Dataset building, data validation, and visualization as the first Main Flow skills.</p>
-        </div>
-      </li>
-    </ul>
+      </article>
+    </div>
   </div>
 </section>
 
