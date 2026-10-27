@@ -1,6 +1,8 @@
 ---
 name: dia-transcript-to-requirements
 description: Turn a Zoom transcript of a business-owner requirements conversation into a structured requirements document saved in the working directory. Use only when explicitly invoked as $dia-transcript-to-requirements. Do not use for general meeting notes, diagram rendering, ClickUp tasks, or Project Hub publication.
+metadata:
+  status: production
 ---
 
 # DIA Transcript to Requirements

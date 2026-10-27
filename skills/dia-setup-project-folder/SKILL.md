@@ -1,6 +1,8 @@
 ---
 name: dia-setup-project-folder
 description: Create or validate a DIA business-insights local project folder connected to existing ClickUp resources. Use only when explicitly invoked as $dia-setup-project-folder. Do not create ClickUp content or perform project work.
+metadata:
+  status: testing
 ---
 
 # Set up a project folder

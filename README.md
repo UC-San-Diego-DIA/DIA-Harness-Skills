@@ -10,11 +10,13 @@ This repository is the reviewed source for DIA skills used in TritonAI Harness o
 | [`dia-clickup-mcp-setup`](skills/dia-clickup-mcp-setup/SKILL.md) | Connecting TritonAI Harness to ClickUp through the official OAuth MCP server | `$dia-clickup-mcp-setup` |
 | [`dia-new-data-analysis-workspace`](skills/dia-new-data-analysis-workspace/SKILL.md) | Creating a fresh local data-analysis workspace with raw inputs, numbered pipeline scripts, and dashboard-ready output | `$dia-new-data-analysis-workspace` |
 | [`dia-transcript-to-meeting-notes`](skills/dia-transcript-to-meeting-notes/SKILL.md) | Converting a Zoom transcript into a detailed local project meeting-note Markdown file | `$dia-transcript-to-meeting-notes` |
-| [`dia-transcript-to-process-map`](skills/dia-transcript-to-process-map/SKILL.md) | Saving a Zoom transcript locally, creating meeting notes, and rendering its process map | `$dia-transcript-to-process-map` |
+| [`dia-transcript-to-process-map`](skills/dia-transcript-to-process-map/SKILL.md) | Saving a Zoom transcript locally, writing a confirmable process outline, and rendering the confirmed process map | `$dia-transcript-to-process-map` |
 | [`dia-transcript-to-requirements`](skills/dia-transcript-to-requirements/SKILL.md) | Converting a business-owner requirements Zoom transcript into a structured requirements document | `$dia-transcript-to-requirements` |
-| [`dia-process-meeting-transcript`](skills/dia-process-meeting-transcript/SKILL.md) | Turning a project transcript into meeting notes and DIA-owned ClickUp tasks | `$dia-process-meeting-transcript` |
-| [`dia-setup-project-folder`](skills/dia-setup-project-folder/SKILL.md) | Creating or validating a business-insights project folder connected to ClickUp | `$dia-setup-project-folder` |
+| [`dia-process-meeting-transcript`](skills/dia-process-meeting-transcript/SKILL.md) *(testing)* | Turning a project transcript into meeting notes and DIA-owned ClickUp tasks | `$dia-process-meeting-transcript` |
+| [`dia-setup-project-folder`](skills/dia-setup-project-folder/SKILL.md) *(testing)* | Creating or validating a business-insights project folder connected to ClickUp | `$dia-setup-project-folder` |
 | [`dia-start-my-day`](skills/dia-start-my-day/SKILL.md) | Choosing today's focus from ClickUp, Outlook calendar, and Outlook mail | `$dia-start-my-day` |
+
+Each skill's `SKILL.md` frontmatter declares its lifecycle with `metadata.status: production` or `testing`. The landing page in `docs/index.html` catalogs production skills only, and the repository validator enforces that rule.
 
 ## Playbooks
 
@@ -36,7 +38,7 @@ Replace the skill name with another catalog entry when installing a different sk
 
 The installer copies the source skill into `%USERPROFILE%\.tritonai-harness\codex\skills`. It asks before replacing an installed copy and keeps the previous copy in a timestamped backup directory.
 
-`dia-transcript-to-process-map` additionally requires the `dia-transcript-to-meeting-notes` skill and the MIT-licensed `diagram-design` skill from https://github.com/cathrynlavery/diagram-design. Install `diagram-design` into TritonAI Harness separately, for example with the Harness skill installer, before using that skill.
+`dia-transcript-to-process-map` additionally requires the MIT-licensed `diagram-design` skill from https://github.com/cathrynlavery/diagram-design. Install it into TritonAI Harness separately, for example with the Harness skill installer, before using that skill.
 
 After installation, restart TritonAI Harness so it reloads the skill catalog. Invoke the skill explicitly:
 

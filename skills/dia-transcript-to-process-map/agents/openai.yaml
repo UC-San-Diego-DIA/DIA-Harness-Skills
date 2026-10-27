@@ -1,7 +1,7 @@
 interface:
   display_name: "DIA Transcript to Process Map"
-  short_description: "Turn a Zoom transcript into meeting notes and a process map"
-  default_prompt: "Use $dia-transcript-to-process-map to save a Zoom transcript, create meeting notes, and render its process map."
+  short_description: "Turn a Zoom transcript into a confirmed process outline and a process map"
+  default_prompt: "Use $dia-transcript-to-process-map to save a Zoom transcript, outline its process, and render the confirmed process map after I approve the outline."
 
 policy:
   allow_implicit_invocation: false

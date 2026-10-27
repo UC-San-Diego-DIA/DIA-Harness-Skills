@@ -1,6 +1,8 @@
 ---
 name: dia-process-meeting-transcript
 description: Draft meeting notes and create approved ClickUp tasks from one readable transcript in a schema-1 DIA business-insights local project folder. Use only when explicitly invoked as $dia-process-meeting-transcript. Do not use for transcript capture, general task management, or project-folder setup.
+metadata:
+  status: testing
 ---
 
 # Process a meeting transcript

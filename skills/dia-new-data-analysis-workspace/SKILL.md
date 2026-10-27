@@ -1,6 +1,8 @@
 ---
 name: dia-new-data-analysis-workspace
 description: Create a fresh local data-analysis workspace with immutable raw inputs, numbered pipeline scripts, and dashboard-ready output. Use only when explicitly invoked as $dia-new-data-analysis-workspace. Do not analyze data or write pipeline scripts.
+metadata:
+  status: production
 ---
 
 # New data analysis workspace

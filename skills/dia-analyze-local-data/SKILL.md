@@ -1,6 +1,8 @@
 ---
 name: dia-analyze-local-data
 description: Create and use a local DuckDB analysis workspace for one user-provided CSV. Use only when explicitly invoked as $dia-analyze-local-data. Do not use for production pipelines, recurring refreshes, or multi-file data models.
+metadata:
+  status: production
 ---
 
 # Analyze Local Data

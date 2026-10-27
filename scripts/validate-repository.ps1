@@ -6,6 +6,7 @@ $ErrorActionPreference = 'Stop'
 $repositoryRoot = Split-Path -Parent $PSScriptRoot
 $skillsRoot = Join-Path $repositoryRoot 'skills'
 $errors = [System.Collections.Generic.List[string]]::new()
+$testingSkills = [System.Collections.Generic.List[string]]::new()
 
 function Add-ValidationError {
     param([string]$Message)
@@ -83,6 +84,26 @@ else {
         if (-not $nameMatch.Success -or $nameMatch.Groups['value'].Value.Trim() -ne $skillName) {
             Add-ValidationError "$(Get-RelativePath $entryPath): frontmatter name must equal folder name"
         }
+        $metadataMatch = [regex]::Match($frontmatterText, '(?ms)^metadata:\s*\r?\n(?<block>(?:^[ \t]+[^\r\n]*\r?\n?)+)')
+        $statusText = ''
+        if ($metadataMatch.Success) {
+            $statusMatch = [regex]::Match(
+                $metadataMatch.Groups['block'].Value,
+                "(?m)^[ \t]+status:\s*[""']?(?<value>[^""'\r\n]+)"
+            )
+            if ($statusMatch.Success) {
+                $statusText = $statusMatch.Groups['value'].Value.Trim()
+            }
+        }
+        if ($statusText -eq '') {
+            Add-ValidationError "$(Get-RelativePath $entryPath): frontmatter metadata.status is missing"
+        }
+        elseif ($statusText -notin @('production', 'testing')) {
+            Add-ValidationError "$(Get-RelativePath $entryPath): frontmatter metadata.status must be 'production' or 'testing', found '$statusText'"
+        }
+        elseif ($statusText -eq 'testing') {
+            $testingSkills.Add($skillName)
+        }
         if (-not $descriptionMatch.Success -or [string]::IsNullOrWhiteSpace($descriptionMatch.Groups['value'].Value)) {
             Add-ValidationError "$(Get-RelativePath $entryPath): missing description"
         }
@@ -112,6 +133,16 @@ else {
             if (-not $metadataText.Contains($expectedInvocation)) {
                 Add-ValidationError "$(Get-RelativePath $metadataPath): default prompt must mention $expectedInvocation"
             }
+        }
+    }
+}
+
+$indexPagePath = Join-Path $repositoryRoot 'docs\index.html'
+if (Test-Path -LiteralPath $indexPagePath -PathType Leaf) {
+    $indexPageText = Get-Content -Raw -LiteralPath $indexPagePath
+    foreach ($testingSkill in $testingSkills) {
+        if ($indexPageText.Contains('$' + $testingSkill)) {
+            Add-ValidationError "docs/index.html: testing skill '$testingSkill' must not appear in the landing page catalog"
         }
     }
 }
