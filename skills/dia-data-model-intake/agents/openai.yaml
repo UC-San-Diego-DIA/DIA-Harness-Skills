@@ -1,0 +1,7 @@
+interface:
+  display_name: "DIA Data Model Intake"
+  short_description: "Extract facts from one BI Publisher data model"
+  default_prompt: "Use $dia-data-model-intake to extract deterministic facts from one Oracle BI Publisher data model into model-facts.yaml."
+
+policy:
+  allow_implicit_invocation: false

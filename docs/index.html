@@ -142,12 +142,20 @@ section[id]{scroll-margin-top:84px}
 .cmd-chip svg.lucide{width:14px;height:14px}
 .skill-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
 .skill{
-  display:block;background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px;
+  position:relative;display:block;background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px;
   text-decoration:none;color:inherit;
   transition:border-color .15s,transform .15s,box-shadow .15s;
 }
 .skill:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:0 6px 16px rgba(24,43,73,.08)}
-.skill-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}
+.skill-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;padding-right:70px}
+.status-chip{
+  position:absolute;top:10px;right:10px;
+  font-size:9px;font-weight:800;text-transform:uppercase;line-height:1;
+  padding:3px 6px;border-radius:4px;
+}
+.status-chip.production{background:var(--green);color:#fff}
+.status-chip.testing{background:var(--turquoise);color:var(--navy)}
+.status-chip.development{background:rgba(24,43,73,.08);color:var(--muted)}
 .skill-head svg.lucide{width:15px;height:15px;color:var(--muted);transition:color .15s}
 .skill:hover .skill-head svg.lucide{color:var(--blue)}
 .skill-cmd{
@@ -257,7 +265,7 @@ section[id]{scroll-margin-top:84px}
         <a class="btn btn-ghost" href="#playbooks">See playbooks<i data-lucide="arrow-right"></i></a>
       </div>
       <div class="stats">
-      <div><strong>7</strong><span>skills</span></div>
+      <div><strong>9</strong><span>skills</span></div>
       <div><strong>3</strong><span>playbooks</span></div>
       <div><strong>4</strong><span>skill groups</span></div>
       </div>
@@ -312,11 +320,20 @@ section[id]{scroll-margin-top:84px}
       </div>
       <div class="skill-grid">
         <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-clickup-mcp-setup" title="View dia-clickup-mcp-setup on GitHub">
+          <span class="status-chip production">production</span>
           <div class="skill-head">
             <h4 class="skill-cmd">$dia-clickup-mcp-setup</h4>
             <i data-lucide="github"></i>
           </div>
           <p>Connect TritonAI Harness to ClickUp through official OAuth and verify Workspace access.</p>
+        </a>
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-setup-project-folder" title="View dia-setup-project-folder on GitHub">
+          <span class="status-chip testing">testing</span>
+          <div class="skill-head">
+            <h4 class="skill-cmd">$dia-setup-project-folder</h4>
+            <i data-lucide="github"></i>
+          </div>
+          <p>Create or validate a business-insights project folder connected to ClickUp resources.</p>
         </a>
       </div>
     </div>
@@ -335,6 +352,7 @@ section[id]{scroll-margin-top:84px}
       </div>
       <div class="skill-grid">
         <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-meeting-notes" title="View dia-transcript-to-meeting-notes on GitHub">
+          <span class="status-chip testing">testing</span>
           <div class="skill-head">
             <h4 class="skill-cmd">$dia-transcript-to-meeting-notes</h4>
             <i data-lucide="github"></i>
@@ -342,6 +360,7 @@ section[id]{scroll-margin-top:84px}
           <p>Turn a Zoom transcript into detailed local meeting notes, with no ClickUp writes.</p>
         </a>
         <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-requirements" title="View dia-transcript-to-requirements on GitHub">
+          <span class="status-chip testing">testing</span>
           <div class="skill-head">
             <h4 class="skill-cmd">$dia-transcript-to-requirements</h4>
             <i data-lucide="github"></i>
@@ -349,11 +368,20 @@ section[id]{scroll-margin-top:84px}
           <p>Turn a business-owner requirements conversation into a structured requirements document.</p>
         </a>
         <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-process-map" title="View dia-transcript-to-process-map on GitHub">
+          <span class="status-chip testing">testing</span>
           <div class="skill-head">
             <h4 class="skill-cmd">$dia-transcript-to-process-map</h4>
             <i data-lucide="github"></i>
           </div>
-          <p>Save the transcript, outline the discussed process for your confirmation, then render the approved map as a diagram.</p>
+          <p>Save the transcript, outline the discussed process and its current-state timing for your confirmation, then render the approved map as a diagram.</p>
+        </a>
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-process-meeting-transcript" title="View dia-process-meeting-transcript on GitHub">
+          <span class="status-chip testing">testing</span>
+          <div class="skill-head">
+            <h4 class="skill-cmd">$dia-process-meeting-transcript</h4>
+            <i data-lucide="github"></i>
+          </div>
+          <p>Publish one transcript's meeting notes to Project Hub and create the approved ClickUp tasks.</p>
         </a>
       </div>
     </div>
@@ -368,6 +396,7 @@ section[id]{scroll-margin-top:84px}
       </div>
       <div class="skill-grid">
         <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-start-my-day" title="View dia-start-my-day on GitHub">
+          <span class="status-chip testing">testing</span>
           <div class="skill-head">
             <h4 class="skill-cmd">$dia-start-my-day</h4>
             <i data-lucide="github"></i>
@@ -387,6 +416,7 @@ section[id]{scroll-margin-top:84px}
       </div>
       <div class="skill-grid">
         <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-analyze-local-data" title="View dia-analyze-local-data on GitHub">
+          <span class="status-chip testing">testing</span>
           <div class="skill-head">
             <h4 class="skill-cmd">$dia-analyze-local-data</h4>
             <i data-lucide="github"></i>
@@ -394,6 +424,7 @@ section[id]{scroll-margin-top:84px}
           <p>Create a local DuckDB workspace for one CSV and answer questions with read-only SQL.</p>
         </a>
         <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-new-data-analysis-workspace" title="View dia-new-data-analysis-workspace on GitHub">
+          <span class="status-chip testing">testing</span>
           <div class="skill-head">
             <h4 class="skill-cmd">$dia-new-data-analysis-workspace</h4>
             <i data-lucide="github"></i>

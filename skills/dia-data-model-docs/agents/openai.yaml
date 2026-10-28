@@ -1,0 +1,7 @@
+interface:
+  display_name: "DIA Data Model Docs"
+  short_description: "Draft analyst documentation from model facts"
+  default_prompt: "Use $dia-data-model-docs to draft four analyst-facing documents from one model-facts.yaml file."
+
+policy:
+  allow_implicit_invocation: false

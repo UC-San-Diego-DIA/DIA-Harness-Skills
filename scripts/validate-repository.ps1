@@ -7,6 +7,8 @@ $repositoryRoot = Split-Path -Parent $PSScriptRoot
 $skillsRoot = Join-Path $repositoryRoot 'skills'
 $errors = [System.Collections.Generic.List[string]]::new()
 $testingSkills = [System.Collections.Generic.List[string]]::new()
+$developmentSkills = [System.Collections.Generic.List[string]]::new()
+$catalogSkills = [System.Collections.Generic.List[string]]::new()
 
 function Add-ValidationError {
     param([string]$Message)
@@ -98,11 +100,17 @@ else {
         if ($statusText -eq '') {
             Add-ValidationError "$(Get-RelativePath $entryPath): frontmatter metadata.status is missing"
         }
-        elseif ($statusText -notin @('production', 'testing')) {
-            Add-ValidationError "$(Get-RelativePath $entryPath): frontmatter metadata.status must be 'production' or 'testing', found '$statusText'"
+        elseif ($statusText -notin @('development', 'testing', 'production')) {
+            Add-ValidationError "$(Get-RelativePath $entryPath): frontmatter metadata.status must be 'development', 'testing', or 'production', found '$statusText'"
         }
         elseif ($statusText -eq 'testing') {
             $testingSkills.Add($skillName)
+        }
+        elseif ($statusText -eq 'development') {
+            $developmentSkills.Add($skillName)
+        }
+        else {
+            $catalogSkills.Add($skillName)
         }
         if (-not $descriptionMatch.Success -or [string]::IsNullOrWhiteSpace($descriptionMatch.Groups['value'].Value)) {
             Add-ValidationError "$(Get-RelativePath $entryPath): missing description"
@@ -140,14 +148,19 @@ else {
 $indexPagePath = Join-Path $repositoryRoot 'docs\index.html'
 if (Test-Path -LiteralPath $indexPagePath -PathType Leaf) {
     $indexPageText = Get-Content -Raw -LiteralPath $indexPagePath
-    foreach ($testingSkill in $testingSkills) {
-        if ($indexPageText.Contains('$' + $testingSkill)) {
-            Add-ValidationError "docs/index.html: testing skill '$testingSkill' must not appear in the landing page catalog"
+    foreach ($catalogSkill in $catalogSkills) {
+        if (-not $indexPageText.Contains('$' + $catalogSkill)) {
+            Add-ValidationError "docs/index.html: cataloged skill '$catalogSkill' must appear in the landing page catalog"
+        }
+    }
+    foreach ($developmentSkill in $developmentSkills) {
+        if ($indexPageText.Contains('$' + $developmentSkill)) {
+            Add-ValidationError "docs/index.html: development skill '$developmentSkill' must not appear in the landing page catalog"
         }
     }
 }
 
-$explicitOnlySkills = @('dia-analyze-local-data', 'dia-clickup-mcp-setup', 'dia-new-data-analysis-workspace', 'dia-process-meeting-transcript', 'dia-setup-project-folder', 'dia-start-my-day', 'dia-transcript-to-process-map', 'dia-transcript-to-requirements')
+$explicitOnlySkills = @('dia-analyze-local-data', 'dia-clickup-mcp-setup', 'dia-data-model-docs', 'dia-data-model-intake', 'dia-new-data-analysis-workspace', 'dia-process-meeting-transcript', 'dia-setup-project-folder', 'dia-start-my-day', 'dia-transcript-to-process-map', 'dia-transcript-to-requirements')
 foreach ($explicitOnlySkill in $explicitOnlySkills) {
     $explicitMetadata = Join-Path $skillsRoot "$explicitOnlySkill\agents\openai.yaml"
     if (-not (Test-Path -LiteralPath $explicitMetadata -PathType Leaf)) {

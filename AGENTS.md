@@ -37,6 +37,10 @@ Only add optional directories when the skill uses them. Do not add a README or c
 
 `dia-clickup-mcp-setup` owns configuration, OAuth login, restart guidance, and read-only connection verification. It does not own ClickUp task management, workflow rules, legacy server migration, or fallback authentication.
 
+`dia-data-model-intake` owns local, deterministic extraction of facts from one Oracle BI Publisher data model into `model-facts.yaml`. It does not execute the model's SQL, connect to data sources, interpret business meaning, author documentation, or change source files.
+
+`dia-data-model-docs` owns drafting the overview card, data dictionary, business-questions catalog, and when-to-use guidance from one schema-version-1 `model-facts.yaml` file after analyst confirmation. It does not extract facts, connect to databases, execute SQL, publish documentation, or modify the facts file.
+
 `dia-transcript-to-meeting-notes` owns converting a Zoom transcript into a detailed project meeting-note Markdown file saved in the user's working directory. It does not publish to Project Hub, create ClickUp tasks, capture transcripts, or set up project folders.
 
 `dia-transcript-to-process-map` owns saving one supplied Zoom transcript locally, writing a process-outline Markdown file, obtaining the user's explicit confirmation of that outline, and rendering the confirmed process as a process-map diagram through the installed diagram-design skill, using the process source from a requirements document for the same transcript when one exists. It does not own meeting notes, diagram design rules, transcript capture, requirements-gathering extraction, ClickUp content, or Project Hub publication.
@@ -55,7 +59,7 @@ Only add optional directories when the skill uses them. Do not add a README or c
 - Keep each skill focused on one outcome.
 - Use lowercase hyphenated skill names prefixed with `dia-` for skill folders.
 - Keep the display name and slug consistent: a skill's folder, `SKILL.md` `name`, and `agents/openai.yaml` slug are `dia-` plus the lowercase hyphenated display name, and users invoke it as `$dia-<name>` (for example, "Analyze Local Data" is `dia-analyze-local-data`, invoked as `$dia-analyze-local-data`). When naming or renaming a skill, update the folder, `SKILL.md`, `agents/openai.yaml`, the `README.md` and `docs/index.html` catalogs, and any scripts, tests, or workflows that reference the slug.
-- Declare each skill's lifecycle in its `SKILL.md` frontmatter as `metadata.status: production` or `testing`. Testing skills stay out of the `docs/index.html` catalog; the repository validator enforces this.
+- Declare each skill's lifecycle in its `SKILL.md` frontmatter as `metadata.status: development`, `testing`, or `production`. Skills start in development, get promoted to testing, and finally to production. The `docs/index.html` catalog shows production and testing skills, each with a small lifecycle indicator; development skills stay out of the catalog; the repository validator enforces this.
 - Keep user-specific data and secrets out of the repository.
 - Preserve explicit invocation policies.
 - Update the catalog and workspace map when paths or skill boundaries change.

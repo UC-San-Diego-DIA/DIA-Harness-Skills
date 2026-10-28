@@ -10,6 +10,7 @@ Keep changes small enough to review as one coherent decision.
 
 ## Skill changes
 
+- New skills start in `development` and are promoted to `testing`, then `production`, by updating `metadata.status` in `SKILL.md`.
 - Put routing, the main workflow, and safety boundaries in `SKILL.md`.
 - Put team IDs or conditional detail in a linked reference.
 - Add a script only when deterministic behavior reduces a real failure risk.

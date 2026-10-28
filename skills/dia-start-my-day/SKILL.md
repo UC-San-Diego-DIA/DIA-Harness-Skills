@@ -2,7 +2,7 @@
 name: dia-start-my-day
 description: Create a focused daily brief from ClickUp, Outlook calendar, and Outlook mail, then write a matching local HTML file. Use only when explicitly invoked as $dia-start-my-day. Do not use for connection setup or other evidence sources.
 metadata:
-  status: production
+  status: testing
 ---
 
 # Start my day

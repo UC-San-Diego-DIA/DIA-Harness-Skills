@@ -28,7 +28,7 @@ $destination = Join-Path $resolvedTestRoot 'installed-skills'
 $whatIfDestination = Join-Path $resolvedTestRoot 'what-if-skills'
 
 try {
-    $skillsToInstall = @('dia-analyze-local-data', 'dia-clickup-mcp-setup', 'dia-new-data-analysis-workspace', 'dia-process-meeting-transcript', 'dia-setup-project-folder', 'dia-start-my-day', 'dia-transcript-to-process-map')
+    $skillsToInstall = @('dia-analyze-local-data', 'dia-clickup-mcp-setup', 'dia-data-model-docs', 'dia-data-model-intake', 'dia-new-data-analysis-workspace', 'dia-process-meeting-transcript', 'dia-setup-project-folder', 'dia-start-my-day', 'dia-transcript-to-process-map')
     foreach ($skillName in $skillsToInstall) {
         & $installer -Skill $skillName -Destination $destination -Force
 
@@ -46,6 +46,9 @@ try {
     $workspaceAgentsTemplate = Join-Path $destination 'dia-new-data-analysis-workspace\assets\workspace-AGENTS.md'
     $meetingNoteFormat = Join-Path $destination 'dia-process-meeting-transcript\references\meeting-note-format.md'
     $dailyBriefTemplate = Join-Path $destination 'dia-start-my-day\assets\brief-template.html'
+    $dataModelFactsHelper = Join-Path $destination 'dia-data-model-intake\scripts\extract_model_facts.py'
+    $dataModelFactsContract = Join-Path $destination 'dia-data-model-docs\references\model-facts-contract.md'
+    $dataModelDocumentationTemplates = Join-Path $destination 'dia-data-model-docs\references\documentation-templates.md'
     Assert-True (Test-Path -LiteralPath $duckdbHelper -PathType Leaf) 'DuckDB helper script was not installed.'
     Assert-True (Test-Path -LiteralPath $projectFolderHelper -PathType Leaf) 'Project-folder helper script was not installed.'
     Assert-True (Test-Path -LiteralPath $projectAgentsTemplate -PathType Leaf) 'Project AGENTS template was not installed.'
@@ -53,6 +56,9 @@ try {
     Assert-True (Test-Path -LiteralPath $workspaceAgentsTemplate -PathType Leaf) 'Workspace AGENTS template was not installed.'
     Assert-True (Test-Path -LiteralPath $meetingNoteFormat -PathType Leaf) 'Meeting-note format reference was not installed.'
     Assert-True (Test-Path -LiteralPath $dailyBriefTemplate -PathType Leaf) 'Start My Day HTML template was not installed.'
+    Assert-True (Test-Path -LiteralPath $dataModelFactsHelper -PathType Leaf) 'Data-model facts helper was not installed.'
+    Assert-True (Test-Path -LiteralPath $dataModelFactsContract -PathType Leaf) 'Model-facts contract was not installed.'
+    Assert-True (Test-Path -LiteralPath $dataModelDocumentationTemplates -PathType Leaf) 'Data-model documentation templates were not installed.'
 
     $marker = 'installer-backup-test-marker'
     Set-Content -LiteralPath $installedEntry -Value $marker

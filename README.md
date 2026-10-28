@@ -6,17 +6,19 @@ This repository is the reviewed source for DIA skills used in TritonAI Harness o
 
 | Skill | Use it for | Invocation |
 | --- | --- | --- |
-| [`dia-analyze-local-data`](skills/dia-analyze-local-data/SKILL.md) | Creating a local DuckDB workspace for ad hoc analysis of one CSV | `$dia-analyze-local-data` |
-| [`dia-clickup-mcp-setup`](skills/dia-clickup-mcp-setup/SKILL.md) | Connecting TritonAI Harness to ClickUp through the official OAuth MCP server | `$dia-clickup-mcp-setup` |
-| [`dia-new-data-analysis-workspace`](skills/dia-new-data-analysis-workspace/SKILL.md) | Creating a fresh local data-analysis workspace with raw inputs, numbered pipeline scripts, and dashboard-ready output | `$dia-new-data-analysis-workspace` |
-| [`dia-transcript-to-meeting-notes`](skills/dia-transcript-to-meeting-notes/SKILL.md) | Converting a Zoom transcript into a detailed local project meeting-note Markdown file | `$dia-transcript-to-meeting-notes` |
-| [`dia-transcript-to-process-map`](skills/dia-transcript-to-process-map/SKILL.md) | Saving a Zoom transcript locally, writing a confirmable process outline, and rendering the confirmed process map | `$dia-transcript-to-process-map` |
-| [`dia-transcript-to-requirements`](skills/dia-transcript-to-requirements/SKILL.md) | Converting a business-owner requirements Zoom transcript into a structured requirements document | `$dia-transcript-to-requirements` |
+| [`dia-analyze-local-data`](skills/dia-analyze-local-data/SKILL.md) *(testing)* | Creating a local DuckDB workspace for ad hoc analysis of one CSV | `$dia-analyze-local-data` |
+| [`dia-clickup-mcp-setup`](skills/dia-clickup-mcp-setup/SKILL.md) *(production)* | Connecting TritonAI Harness to ClickUp through the official OAuth MCP server | `$dia-clickup-mcp-setup` |
+| [`dia-data-model-docs`](skills/dia-data-model-docs/SKILL.md) *(development)* | Drafting four analyst-facing documents from one extracted model-facts file | `$dia-data-model-docs` |
+| [`dia-data-model-intake`](skills/dia-data-model-intake/SKILL.md) *(development)* | Extracting deterministic facts from one Oracle BI Publisher data model | `$dia-data-model-intake` |
+| [`dia-new-data-analysis-workspace`](skills/dia-new-data-analysis-workspace/SKILL.md) *(testing)* | Creating a fresh local data-analysis workspace with raw inputs, numbered pipeline scripts, and dashboard-ready output | `$dia-new-data-analysis-workspace` |
+| [`dia-transcript-to-meeting-notes`](skills/dia-transcript-to-meeting-notes/SKILL.md) *(testing)* | Converting a Zoom transcript into a detailed local project meeting-note Markdown file | `$dia-transcript-to-meeting-notes` |
+| [`dia-transcript-to-process-map`](skills/dia-transcript-to-process-map/SKILL.md) *(testing)* | Saving a Zoom transcript locally, writing a confirmable process outline with current-state timing, and rendering the confirmed process map | `$dia-transcript-to-process-map` |
+| [`dia-transcript-to-requirements`](skills/dia-transcript-to-requirements/SKILL.md) *(testing)* | Converting a business-owner requirements Zoom transcript into a structured requirements document | `$dia-transcript-to-requirements` |
 | [`dia-process-meeting-transcript`](skills/dia-process-meeting-transcript/SKILL.md) *(testing)* | Turning a project transcript into meeting notes and DIA-owned ClickUp tasks | `$dia-process-meeting-transcript` |
 | [`dia-setup-project-folder`](skills/dia-setup-project-folder/SKILL.md) *(testing)* | Creating or validating a business-insights project folder connected to ClickUp | `$dia-setup-project-folder` |
-| [`dia-start-my-day`](skills/dia-start-my-day/SKILL.md) | Choosing today's focus from ClickUp, Outlook calendar, and Outlook mail | `$dia-start-my-day` |
+| [`dia-start-my-day`](skills/dia-start-my-day/SKILL.md) *(testing)* | Choosing today's focus from ClickUp, Outlook calendar, and Outlook mail | `$dia-start-my-day` |
 
-Each skill's `SKILL.md` frontmatter declares its lifecycle with `metadata.status: production` or `testing`. The landing page in `docs/index.html` catalogs production skills only, and the repository validator enforces that rule.
+Each skill's `SKILL.md` frontmatter declares its lifecycle with `metadata.status: development`, `testing`, or `production`. Skills start in development, get promoted to testing, and finally to production. The landing page in `docs/index.html` catalogs production and testing skills, marks each entry with a small lifecycle indicator, and the repository validator enforces that rule.
 
 ## Playbooks
 
