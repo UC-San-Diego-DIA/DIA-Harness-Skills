@@ -77,6 +77,75 @@ try {
     & $installer -Skill dia-analyze-local-data -Destination $whatIfDestination -Force -WhatIf
     Assert-True (-not (Test-Path -LiteralPath $whatIfDestination)) 'WhatIf created a destination directory.'
 
+    $allDestination = Join-Path $resolvedTestRoot 'all-skills'
+    & $installer -All -Destination $allDestination -Force
+
+    $sourceSkillDirectories = @(Get-ChildItem -LiteralPath (Join-Path $PSScriptRoot '..\skills') -Directory)
+    Assert-True ($sourceSkillDirectories.Count -gt 0) 'No source skill directories found for the -All test.'
+    foreach ($sourceSkillDirectory in $sourceSkillDirectories) {
+        $installedAllEntry = Join-Path $allDestination "$($sourceSkillDirectory.Name)\SKILL.md"
+        Assert-True (Test-Path -LiteralPath $installedAllEntry -PathType Leaf) "$($sourceSkillDirectory.Name) was not installed by -All."
+    }
+
+    $conflictRejected = $false
+    try {
+        & $installer -All -Skill dia-start-my-day -Destination $allDestination -Force | Out-Null
+    }
+    catch {
+        $conflictRejected = $true
+    }
+    Assert-True $conflictRejected 'Installer did not reject -Skill combined with -All.'
+
+    $statusDestination = Join-Path $resolvedTestRoot 'status-skills'
+    & $installer -Status production,testing -Destination $statusDestination -Force
+
+    $expectedStatusSkills = @(
+        'dia-analyze-local-data',
+        'dia-clickup-mcp-setup',
+        'dia-new-data-analysis-workspace',
+        'dia-start-my-day',
+        'dia-transcript-to-meeting-notes',
+        'dia-transcript-to-process-map',
+        'dia-transcript-to-requirements'
+    )
+    foreach ($expectedSkill in $expectedStatusSkills) {
+        $installedStatusEntry = Join-Path $statusDestination "$expectedSkill\SKILL.md"
+        Assert-True (Test-Path -LiteralPath $installedStatusEntry -PathType Leaf) "$expectedSkill was not installed by -Status production,testing."
+    }
+
+    foreach ($unexpectedSkill in @(
+        'dia-data-model-docs',
+        'dia-data-model-intake',
+        'dia-process-meeting-transcript',
+        'dia-setup-project-folder'
+    )) {
+        $unexpectedPath = Join-Path $statusDestination $unexpectedSkill
+        Assert-True (-not (Test-Path -LiteralPath $unexpectedPath)) "$unexpectedSkill must not be installed by -Status production,testing."
+    }
+
+    foreach ($conflictingArguments in @(
+        @{ Status = 'production'; Skill = 'dia-start-my-day' },
+        @{ Status = 'production'; All = $true }
+    )) {
+        $conflictRejected = $false
+        try {
+            & $installer @conflictingArguments -Destination $statusDestination -Force | Out-Null
+        }
+        catch {
+            $conflictRejected = $true
+        }
+        Assert-True $conflictRejected 'Installer did not reject conflicting selection parameters.'
+    }
+
+    $invalidStatusRejected = $false
+    try {
+        & $installer -Status beta -Destination $statusDestination -Force | Out-Null
+    }
+    catch {
+        $invalidStatusRejected = $true
+    }
+    Assert-True $invalidStatusRejected 'Installer did not reject an unknown lifecycle status.'
+
     Write-Host 'Installer tests passed.'
 }
 finally {

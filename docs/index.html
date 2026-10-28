@@ -130,16 +130,6 @@ section[id]{scroll-margin-top:84px}
 .group-title h3{margin:0;font-size:19px;display:flex;align-items:center;gap:9px}
 .group-title p{margin:5px 0 0;color:var(--muted);font-size:14.5px}
 .dot{width:9px;height:9px;border-radius:3px;background:var(--c,var(--blue));display:inline-block}
-.group-start{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.start-label{font-size:13px;color:rgba(24,43,73,.55)}
-.cmd-chip{
-  display:inline-flex;align-items:center;gap:7px;
-  background:var(--yellow);color:var(--navy);
-  font-family:"JetBrains Mono","Cascadia Code",Consolas,monospace;
-  font-size:13px;font-weight:700;
-  padding:7px 12px;border-radius:6px;
-}
-.cmd-chip svg.lucide{width:14px;height:14px}
 .skill-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
 .skill{
   position:relative;display:block;background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px;
@@ -163,6 +153,22 @@ section[id]{scroll-margin-top:84px}
   overflow-wrap:anywhere;
 }
 .skill p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.55}
+
+.install{margin:40px 0 24px}
+.install-head h3{font-size:22px;letter-spacing:-.01em;margin:0 0 6px}
+.install-head p{margin:0 0 18px;color:var(--muted);font-size:15px;line-height:1.6;max-width:640px}
+.copy-btn{
+  margin-left:auto;display:inline-flex;align-items:center;justify-content:center;
+  width:32px;height:26px;
+  background:transparent;border:1px solid rgba(255,255,255,.28);border-radius:5px;
+  color:rgba(255,255,255,.78);cursor:pointer;
+  transition:background .15s,color .15s,border-color .15s;
+}
+.copy-btn:hover{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.55)}
+.copy-btn:focus-visible{outline:2px solid var(--turquoise);outline-offset:2px}
+.copy-btn .icon-check{display:none;color:var(--turquoise)}
+.copy-btn.copied .icon-copy{display:none}
+.copy-btn.copied .icon-check{display:inline-block}
 
 .playbooks{background:var(--sand);padding:64px 0}
 .pb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
@@ -208,14 +214,12 @@ section[id]{scroll-margin-top:84px}
 .cta-inner{max-width:660px;margin:0 auto;text-align:center}
 .cta h2{font-size:30px;letter-spacing:-.01em;margin:0 0 10px}
 .cta p{color:rgba(255,255,255,.8);font-size:16px;line-height:1.6;margin:0 0 26px}
-.cta .term{margin-bottom:26px;text-align:left}
-
 .foot{background:var(--navy);color:#fff;border-top:1px solid rgba(255,255,255,.16);padding:28px 0}
 .foot-inner{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap}
 .foot-brand{display:flex;align-items:center;gap:12px}
 .mono-light{background:#fff;color:var(--navy)}
 .foot-brand strong{display:block;font-size:15px}
-.foot-brand span{display:block;color:rgba(255,255,255,.65);font-size:12.5px;margin-top:1px}
+.foot-brand .foot-sub{display:block;color:rgba(255,255,255,.65);font-size:12.5px;margin-top:1px}
 .foot-note{margin:0;color:rgba(255,255,255,.58);font-size:12.5px;line-height:1.7;max-width:660px}
 
 @media (max-width:980px){
@@ -265,16 +269,21 @@ section[id]{scroll-margin-top:84px}
         <a class="btn btn-ghost" href="#playbooks">See playbooks<i data-lucide="arrow-right"></i></a>
       </div>
       <div class="stats">
-      <div><strong>9</strong><span>skills</span></div>
+      <div><strong>7</strong><span>skills</span></div>
       <div><strong>3</strong><span>playbooks</span></div>
       <div><strong>4</strong><span>skill groups</span></div>
       </div>
     </div>
     <div class="term">
-      <div class="term-head"><span class="term-dot"></span>dia-harness-skills</div>
-      <pre><code><span class="t-prompt">$</span> pwsh -File .\scripts\install-skill.ps1 -Skill dia-start-my-day
-<span class="t-ok">+ 1 skill installed to %USERPROFILE%\.tritonai-harness\codex\skills</span>
-<span class="t-dim">Restart TritonAI Harness, then try: $dia-start-my-day</span></code></pre>
+      <div class="term-head">
+        <span class="term-dot"></span>
+        <span>Want to install these skills?</span>
+        <button type="button" class="copy-btn" data-copy-target="hero-install-prompt" aria-label="Copy install prompt" title="Copy prompt">
+          <i data-lucide="copy" class="icon-copy"></i>
+          <i data-lucide="check" class="icon-check"></i>
+        </button>
+      </div>
+      <pre><code id="hero-install-prompt">Clone https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills into my workspace, then install every production and testing skill from it using its installer, replacing any that are already installed. When you finish, remind me to restart TritonAI Harness.</code></pre>
     </div>
   </div>
 </section>
@@ -313,10 +322,6 @@ section[id]{scroll-margin-top:84px}
           <h3><span class="dot" style="--c:var(--blue)"></span>Connect &amp; Setup</h3>
           <p>One-time connections. Everything else depends on this.</p>
         </div>
-        <div class="group-start">
-          <span class="start-label">Start with</span>
-          <span class="cmd-chip mono"><i data-lucide="terminal"></i>$dia-clickup-mcp-setup</span>
-        </div>
       </div>
       <div class="skill-grid">
         <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-clickup-mcp-setup" title="View dia-clickup-mcp-setup on GitHub">
@@ -327,14 +332,6 @@ section[id]{scroll-margin-top:84px}
           </div>
           <p>Connect TritonAI Harness to ClickUp through official OAuth and verify Workspace access.</p>
         </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-setup-project-folder" title="View dia-setup-project-folder on GitHub">
-          <span class="status-chip testing">testing</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-setup-project-folder</h4>
-            <i data-lucide="github"></i>
-          </div>
-          <p>Create or validate a business-insights project folder connected to ClickUp resources.</p>
-        </a>
       </div>
     </div>
 
@@ -344,10 +341,6 @@ section[id]{scroll-margin-top:84px}
         <div class="group-title">
           <h3><span class="dot" style="--c:var(--turquoise)"></span>Meeting Workflow</h3>
           <p>From a raw transcript to meeting notes, requirements, and process maps.</p>
-        </div>
-        <div class="group-start">
-          <span class="start-label">Start with</span>
-          <span class="cmd-chip mono"><i data-lucide="terminal"></i>$dia-transcript-to-process-map</span>
         </div>
       </div>
       <div class="skill-grid">
@@ -374,14 +367,6 @@ section[id]{scroll-margin-top:84px}
             <i data-lucide="github"></i>
           </div>
           <p>Save the transcript, outline the discussed process and its current-state timing for your confirmation, then render the approved map as a diagram.</p>
-        </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-process-meeting-transcript" title="View dia-process-meeting-transcript on GitHub">
-          <span class="status-chip testing">testing</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-process-meeting-transcript</h4>
-            <i data-lucide="github"></i>
-          </div>
-          <p>Publish one transcript's meeting notes to Project Hub and create the approved ClickUp tasks.</p>
         </a>
       </div>
     </div>
@@ -431,6 +416,24 @@ section[id]{scroll-margin-top:84px}
           </div>
           <p>Scaffold a fresh local data-analysis workspace with raw inputs, numbered pipeline scripts, and dashboard-ready output.</p>
         </a>
+      </div>
+    </div>
+
+    <div class="install">
+      <div class="install-head">
+        <h3>Want to install these skills?</h3>
+        <p>Click the copy icon, paste this prompt into TritonAI Harness, and send it. It installs every production and testing skill in the library, and it keeps working as new skills are added.</p>
+      </div>
+      <div class="term">
+        <div class="term-head">
+          <span class="term-dot"></span>
+          <span>harness prompt</span>
+          <button type="button" class="copy-btn" data-copy-target="skills-install-prompt" aria-label="Copy install prompt" title="Copy prompt">
+            <i data-lucide="copy" class="icon-copy"></i>
+            <i data-lucide="check" class="icon-check"></i>
+          </button>
+        </div>
+        <pre><code id="skills-install-prompt">Clone https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills into my workspace, then install every production and testing skill from it using its installer, replacing any that are already installed. When you finish, remind me to restart TritonAI Harness.</code></pre>
       </div>
     </div>
   </div>
@@ -490,11 +493,7 @@ section[id]{scroll-margin-top:84px}
 <section class="cta">
   <div class="shell cta-inner">
     <h2>Load the library into your agent</h2>
-    <p>Clone the repository, install the skills you want, restart TritonAI Harness, and type the skill's dollar command. Everything lives in one reviewed repo.</p>
-    <div class="term">
-      <pre><code><span class="t-prompt">$</span> pwsh -File .\scripts\install-skill.ps1 -Skill dia-start-my-day</code></pre>
-    </div>
-    <a class="btn btn-yellow" href="#skills">Start with the skills<i data-lucide="arrow-right"></i></a>
+    <p>The copyable prompt at the top of this page installs every production and testing skill in one paste, and it keeps working as the library grows. Prefer PowerShell? The README documents single-skill installs, lifecycle filters, and an install-everything command.</p>
   </div>
 </section>
 
@@ -506,7 +505,7 @@ section[id]{scroll-margin-top:84px}
       <span class="monogram mono-light">DIA</span>
       <div>
         <strong>Data, Insights &amp; Analytics</strong>
-        <span>UC San Diego</span>
+        <span class="foot-sub">UC San Diego</span>
       </div>
     </div>
     <p class="foot-note">This page mirrors the reviewed skill catalog in this repository. Source skills live under <code>skills/</code>, playbook sequences under <code>playbooks/</code>. Colors from the approved UC San Diego brand palette.</p>
@@ -515,6 +514,48 @@ section[id]{scroll-margin-top:84px}
 
 <script>
 lucide.createIcons();
+
+function fallbackCopyText(text) {
+  var area = document.createElement('textarea');
+  area.value = text;
+  area.setAttribute('readonly', '');
+  area.style.position = 'fixed';
+  area.style.opacity = '0';
+  document.body.appendChild(area);
+  area.select();
+  document.execCommand('copy');
+  document.body.removeChild(area);
+}
+
+function markCopied(button) {
+  button.classList.add('copied');
+  button.setAttribute('aria-label', 'Prompt copied');
+  window.setTimeout(function () {
+    button.classList.remove('copied');
+    button.setAttribute('aria-label', 'Copy install prompt');
+  }, 1800);
+}
+
+document.querySelectorAll('.copy-btn').forEach(function (button) {
+  button.addEventListener('click', function () {
+    var target = document.getElementById(button.getAttribute('data-copy-target'));
+    if (!target) {
+      return;
+    }
+    var text = target.textContent.trim();
+    var mark = function () { markCopied(button); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(mark, function () {
+        fallbackCopyText(text);
+        mark();
+      });
+    }
+    else {
+      fallbackCopyText(text);
+      mark();
+    }
+  });
+});
 </script>
 </body>
 </html>

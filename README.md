@@ -14,8 +14,8 @@ This repository is the reviewed source for DIA skills used in TritonAI Harness o
 | [`dia-transcript-to-meeting-notes`](skills/dia-transcript-to-meeting-notes/SKILL.md) *(testing)* | Converting a Zoom transcript into a detailed local project meeting-note Markdown file | `$dia-transcript-to-meeting-notes` |
 | [`dia-transcript-to-process-map`](skills/dia-transcript-to-process-map/SKILL.md) *(testing)* | Saving a Zoom transcript locally, writing a confirmable process outline with current-state timing, and rendering the confirmed process map | `$dia-transcript-to-process-map` |
 | [`dia-transcript-to-requirements`](skills/dia-transcript-to-requirements/SKILL.md) *(testing)* | Converting a business-owner requirements Zoom transcript into a structured requirements document | `$dia-transcript-to-requirements` |
-| [`dia-process-meeting-transcript`](skills/dia-process-meeting-transcript/SKILL.md) *(testing)* | Turning a project transcript into meeting notes and DIA-owned ClickUp tasks | `$dia-process-meeting-transcript` |
-| [`dia-setup-project-folder`](skills/dia-setup-project-folder/SKILL.md) *(testing)* | Creating or validating a business-insights project folder connected to ClickUp | `$dia-setup-project-folder` |
+| [`dia-process-meeting-transcript`](skills/dia-process-meeting-transcript/SKILL.md) *(development)* | Turning a project transcript into meeting notes and DIA-owned ClickUp tasks | `$dia-process-meeting-transcript` |
+| [`dia-setup-project-folder`](skills/dia-setup-project-folder/SKILL.md) *(development)* | Creating or validating a business-insights project folder connected to ClickUp | `$dia-setup-project-folder` |
 | [`dia-start-my-day`](skills/dia-start-my-day/SKILL.md) *(testing)* | Choosing today's focus from ClickUp, Outlook calendar, and Outlook mail | `$dia-start-my-day` |
 
 Each skill's `SKILL.md` frontmatter declares its lifecycle with `metadata.status: development`, `testing`, or `production`. Skills start in development, get promoted to testing, and finally to production. The landing page in `docs/index.html` catalogs production and testing skills, marks each entry with a small lifecycle indicator, and the repository validator enforces that rule.
@@ -28,15 +28,28 @@ Playbooks in [playbooks/](playbooks/) chain reviewed skills into end-to-end DIA 
 - [Start of day](playbooks/start-of-day.md) - verify ClickUp access, then run the daily brief from ClickUp and Outlook.
 - [Requirements to process map](playbooks/requirements-to-process-map.md) - turn a requirements conversation into a structured requirements document and a rendered process map.
 
-## Install a skill
+## Install skills
 
-Clone the repository, open PowerShell in its root, and run:
+Clone the repository, open PowerShell in its root, and run the installer with one or more skill names:
 
 ```powershell
 pwsh -File .\scripts\install-skill.ps1 -Skill dia-start-my-day
+pwsh -File .\scripts\install-skill.ps1 -Skill dia-start-my-day, dia-setup-project-folder
 ```
 
-Replace the skill name with another catalog entry when installing a different skill.
+To install every skill in the repository at once, including development skills that are not listed on the landing page, run:
+
+```powershell
+pwsh -File .\scripts\install-skill.ps1 -All
+```
+
+To install only the skills that have reached a given lifecycle, filter by status:
+
+```powershell
+pwsh -File .\scripts\install-skill.ps1 -Status production,testing
+```
+
+Use `-All` when you help test skills that are still in development. Add `-Force` to replace installed copies without the per-skill confirmation prompt. The landing page in `docs/index.html` also carries a copyable prompt that asks TritonAI Harness to install every production and testing skill, so it stays current as skills are added.
 
 The installer copies the source skill into `%USERPROFILE%\.tritonai-harness\codex\skills`. It asks before replacing an installed copy and keeps the previous copy in a timestamped backup directory.
 
