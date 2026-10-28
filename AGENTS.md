@@ -37,15 +37,21 @@ Only add optional directories when the skill uses them. Do not add a README or c
 
 `dia-clickup-mcp-setup` owns configuration, OAuth login, restart guidance, and read-only connection verification. It does not own ClickUp task management, workflow rules, legacy server migration, or fallback authentication.
 
+dia-dataset-profile owns a one-time profile of one CSV or Excel file: field inventory, distributions, missingness, candidate keys, anomalies, and suggested metrics or KPIs, plus one-off answers to business questions the profile surfaces. It does not create workspaces, keep a question history, map confirmed KPIs, execute calculations, or produce other deliverables.
+
 `dia-data-model-intake` owns local, deterministic extraction of facts from one Oracle BI Publisher data model into `model-facts.yaml`. It does not execute the model's SQL, connect to data sources, interpret business meaning, author documentation, or change source files.
 
 `dia-data-model-docs` owns drafting the overview card, data dictionary, business-questions catalog, and when-to-use guidance from one schema-version-1 `model-facts.yaml` file after analyst confirmation. It does not extract facts, connect to databases, execute SQL, publish documentation, or modify the facts file.
+
+`dia-kpi-data-mapping` owns validating a confirmed KPI artifact against one user-named dataset and drafting a declarative mapping report that identifies the fields supplying each metric, the calculations to build, and explicit data gaps. It does not execute calculations, build pipeline scripts, modify the dataset, resolve open questions in the KPI artifact, or invoke other skills.
 
 `dia-transcript-to-meeting-notes` owns converting a Zoom transcript into a detailed project meeting-note Markdown file saved in the user's working directory. It does not publish to Project Hub, create ClickUp tasks, capture transcripts, or set up project folders.
 
 `dia-transcript-to-process-map` owns saving one supplied Zoom transcript locally, writing a process-outline Markdown file, obtaining the user's explicit confirmation of that outline, and rendering the confirmed process as a process-map diagram through the installed diagram-design skill, using the process source from a requirements document for the same transcript when one exists. It does not own meeting notes, diagram design rules, transcript capture, requirements-gathering extraction, ClickUp content, or Project Hub publication.
 
 `dia-transcript-to-requirements` owns converting a supplied Zoom transcript of a business-owner requirements conversation into a local structured requirements document. It does not produce meeting notes, render diagrams, create ClickUp tasks, capture transcripts, or publish to Project Hub.
+
+`dia-transcript-to-kpis` owns converting a supplied Zoom transcript of a business-owner requirements or discovery conversation into a confirmed local business-questions-and-KPIs Markdown file with a schema-version-1 `kpi-facts.yaml` beside it. It does not produce meeting notes, requirements documents, process diagrams, ClickUp content, or Project Hub publication, and it does not map KPIs to datasets.
 
 `dia-process-meeting-transcript` owns one transcript's meeting-note synthesis, Project Hub publication, DIA-owned action-item extraction, and approved task creation. It does not own transcript capture, project-folder setup, connection setup, general ClickUp task management, or follow-through in other systems.
 

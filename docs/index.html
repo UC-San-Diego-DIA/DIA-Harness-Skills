@@ -105,6 +105,19 @@ section[id]{scroll-margin-top:84px}
   color:rgba(255,255,255,.55);font-size:12.5px;
   font-family:"JetBrains Mono","Cascadia Code",Consolas,monospace;
 }
+.term-steps{
+  display:flex;flex-direction:column;align-items:flex-start;gap:8px;
+  padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.1);
+  color:rgba(255,255,255,.85);font-size:12.5px;
+}
+.term-steps span{display:inline-flex;align-items:center;gap:7px}
+.term-steps .n{
+  width:17px;height:17px;border-radius:4px;flex-shrink:0;
+  background:var(--turquoise);color:var(--navy);
+  display:inline-flex;align-items:center;justify-content:center;
+  font-family:"JetBrains Mono","Cascadia Code",Consolas,monospace;
+  font-size:10.5px;font-weight:800;
+}
 .term-dot{width:10px;height:10px;border-radius:50%;background:var(--turquoise)}
 .term pre{margin:0;padding:18px 16px;color:#E8ECF3;font-size:13.5px;line-height:1.75;white-space:pre-wrap}
 .t-prompt{color:var(--turquoise);font-weight:700}
@@ -154,9 +167,6 @@ section[id]{scroll-margin-top:84px}
 }
 .skill p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.55}
 
-.install{margin:40px 0 24px}
-.install-head h3{font-size:22px;letter-spacing:-.01em;margin:0 0 6px}
-.install-head p{margin:0 0 18px;color:var(--muted);font-size:15px;line-height:1.6;max-width:640px}
 .copy-btn{
   margin-left:auto;display:inline-flex;align-items:center;justify-content:center;
   width:32px;height:26px;
@@ -176,11 +186,20 @@ section[id]{scroll-margin-top:84px}
   background:#fff;border:1px solid var(--line);border-radius:8px;
   padding:22px;display:flex;flex-direction:column;
 }
+.pb.span2{grid-column:span 2}
+.pb-tags{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .pb-tag{
   align-self:flex-start;display:inline-flex;align-items:center;gap:8px;
   font-size:12.5px;font-weight:700;color:var(--navy);
   background:rgba(24,43,73,.07);padding:5px 10px;border-radius:5px;
 }
+.pattern-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
+  padding:5px 9px;border-radius:5px;border:1px solid var(--line);
+}
+.pattern-chip.pipeline{background:#fff;color:var(--blue);border-color:var(--blue)}
+.pattern-chip.fanout{background:var(--magenta);color:#fff;border-color:var(--magenta)}
 .pb h3{margin:14px 0 6px;font-size:19px}
 .pb-desc{margin:0 0 20px;color:var(--muted);font-size:14px;line-height:1.55}
 .steps{position:relative;list-style:none;margin:0 0 20px;padding:0}
@@ -210,6 +229,34 @@ section[id]{scroll-margin-top:84px}
 }
 .btn-link:hover{text-decoration:underline}
 
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 26px}
+.legend span{
+  display:inline-flex;align-items:center;gap:7px;
+  background:#fff;border:1px solid var(--line);border-radius:6px;
+  padding:6px 12px;font-size:13px;color:var(--navy);
+}
+.legend b{font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+
+.fan{
+  display:grid;grid-template-columns:118px 20px 1fr;gap:0 6px;
+  align-items:center;margin:4px 0 18px;position:relative;
+}
+.fan-rail{position:relative;align-self:stretch}
+.fan-rail::before{content:"";position:absolute;left:9px;top:14px;bottom:14px;width:2px;background:rgba(24,43,73,.22);border-radius:2px}
+.fan-src{align-self:stretch;display:flex;align-items:center;position:relative}
+.fan-src::after{content:"";position:absolute;right:-15px;top:50%;width:15px;height:2px;background:rgba(24,43,73,.22)}
+.fan-source{
+  width:100%;text-align:center;font-size:12px;font-weight:700;
+  background:var(--navy);color:#fff;border-radius:6px;padding:10px 6px;line-height:1.4;
+}
+.fan-outs{display:flex;flex-direction:column;gap:8px;align-self:stretch;justify-content:center}
+.fan-out{position:relative;display:flex;align-items:baseline;gap:8px;padding:6px 8px;background:rgba(0,98,155,.05);border-radius:6px}
+.fan-out::before{content:"";position:absolute;left:-17px;top:50%;width:17px;height:2px;background:rgba(24,43,73,.22)}
+.fan-out code{font-size:11.5px;font-weight:700;color:var(--blue);overflow-wrap:anywhere;white-space:normal}
+.fan-out em{font-style:normal;font-size:11.5px;color:var(--muted);flex-shrink:0}
+.fan-note{font-size:12px;color:var(--muted);margin:-8px 0 18px;display:flex;align-items:center;gap:6px}
+.fan-note svg.lucide{width:13px;height:13px}
+
 .cta{background:var(--navy);color:#fff;border-top:4px solid var(--yellow);padding:64px 0}
 .cta-inner{max-width:660px;margin:0 auto;text-align:center}
 .cta h2{font-size:30px;letter-spacing:-.01em;margin:0 0 10px}
@@ -226,6 +273,10 @@ section[id]{scroll-margin-top:84px}
   .hero-grid{grid-template-columns:1fr;gap:36px}
   .explain-grid{grid-template-columns:1fr;gap:24px}
   .pb-grid{grid-template-columns:1fr}
+  .pb.span2{grid-column:auto}
+  .fan{grid-template-columns:96px 16px 1fr}
+  .fan-out::before{width:13px;left:-13px}
+  .fan-src::after{width:8px;right:-2px}
 }
 @media (max-width:720px){
   .nav-links{display:none}
@@ -263,25 +314,30 @@ section[id]{scroll-margin-top:84px}
     <div>
       <p class="eyebrow"><i data-lucide="library"></i>DIA Skill Library</p>
       <h1>Skills &amp; playbooks for Data, Insights &amp; Analytics</h1>
-      <p class="lede">A practical skill system for the DIA team: sequenced, named, and tuned so every workflow runs the same trusted way, from first transcript to approved ClickUp tasks.</p>
+      <p class="lede">A practical skill system for the DIA team: sequenced, named, and tuned so every workflow runs the same trusted way, from first transcript to a defensible answer.</p>
       <div class="hero-actions">
         <a class="btn btn-primary" href="#skills"><i data-lucide="compass"></i>Browse skills</a>
         <a class="btn btn-ghost" href="#playbooks">See playbooks<i data-lucide="arrow-right"></i></a>
       </div>
       <div class="stats">
-      <div><strong>7</strong><span>skills</span></div>
-      <div><strong>3</strong><span>playbooks</span></div>
+      <div><strong>9</strong><span>skills</span></div>
+      <div><strong>4</strong><span>playbooks</span></div>
       <div><strong>4</strong><span>skill groups</span></div>
       </div>
     </div>
     <div class="term">
       <div class="term-head">
         <span class="term-dot"></span>
-        <span>Want to install these skills?</span>
+        <span>Install these skills in TritonAI Harness</span>
         <button type="button" class="copy-btn" data-copy-target="hero-install-prompt" aria-label="Copy install prompt" title="Copy prompt">
           <i data-lucide="copy" class="icon-copy"></i>
           <i data-lucide="check" class="icon-check"></i>
         </button>
+      </div>
+      <div class="term-steps">
+        <span><span class="n">1</span>Click the copy button</span>
+        <span><span class="n">2</span>Paste into TritonAI Harness in "No Project" or the "TritonAI" project</span>
+        <span><span class="n">3</span>Send the message</span>
       </div>
       <pre><code id="hero-install-prompt">Clone https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills into my workspace, then install every production and testing skill from it using its installer, replacing any that are already installed. When you finish, remind me to restart TritonAI Harness.</code></pre>
     </div>
@@ -352,6 +408,14 @@ section[id]{scroll-margin-top:84px}
           </div>
           <p>Turn a Zoom transcript into detailed local meeting notes, with no ClickUp writes.</p>
         </a>
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-kpis" title="View dia-transcript-to-kpis on GitHub">
+          <span class="status-chip testing">testing</span>
+          <div class="skill-head">
+            <h4 class="skill-cmd">$dia-transcript-to-kpis</h4>
+            <i data-lucide="github"></i>
+          </div>
+          <p>Extract confirmed business questions and KPIs from a requirements transcript into Markdown and kpi-facts.yaml.</p>
+        </a>
         <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-requirements" title="View dia-transcript-to-requirements on GitHub">
           <span class="status-chip testing">testing</span>
           <div class="skill-head">
@@ -396,7 +460,7 @@ section[id]{scroll-margin-top:84px}
         <span class="group-num">04</span>
         <div class="group-title">
           <h3><span class="dot" style="--c:var(--magenta)"></span>Data Analysis</h3>
-          <p>Scaffold full analysis workspaces or answer one CSV with read-only SQL.</p>
+          <p>Scaffold full analysis workspaces or answer one CSV or Excel file with read-only SQL.</p>
         </div>
       </div>
       <div class="skill-grid">
@@ -406,36 +470,27 @@ section[id]{scroll-margin-top:84px}
             <h4 class="skill-cmd">$dia-analyze-local-data</h4>
             <i data-lucide="github"></i>
           </div>
-          <p>Create a local DuckDB workspace for one CSV and answer questions with read-only SQL.</p>
+          <p>Answer ad hoc questions about one CSV or Excel file inside a data-analysis workspace with a read-only DuckDB view under <code>scratch/analysis</code>.</p>
+        </a>
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-kpi-data-mapping" title="View dia-kpi-data-mapping on GitHub">
+          <span class="status-chip testing">testing</span>
+          <div class="skill-head">
+            <h4 class="skill-cmd">$dia-kpi-data-mapping</h4>
+            <i data-lucide="github"></i>
+          </div>
+          <p>Validate a confirmed KPI artifact against one named dataset and draft a declarative mapping report naming required fields, calculations to build, and data gaps.</p>
         </a>
         <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-new-data-analysis-workspace" title="View dia-new-data-analysis-workspace on GitHub">
-          <span class="status-chip testing">testing</span>
+          <span class="status-chip production">production</span>
           <div class="skill-head">
             <h4 class="skill-cmd">$dia-new-data-analysis-workspace</h4>
             <i data-lucide="github"></i>
           </div>
-          <p>Scaffold a fresh local data-analysis workspace with raw inputs, numbered pipeline scripts, and dashboard-ready output.</p>
+          <p>Scaffold a fresh local data-analysis workspace with raw inputs, numbered pipeline scripts, dashboard-ready output, and a home for meeting transcripts.</p>
         </a>
       </div>
     </div>
 
-    <div class="install">
-      <div class="install-head">
-        <h3>Want to install these skills?</h3>
-        <p>Click the copy icon, paste this prompt into TritonAI Harness, and send it. It installs every production and testing skill in the library, and it keeps working as new skills are added.</p>
-      </div>
-      <div class="term">
-        <div class="term-head">
-          <span class="term-dot"></span>
-          <span>harness prompt</span>
-          <button type="button" class="copy-btn" data-copy-target="skills-install-prompt" aria-label="Copy install prompt" title="Copy prompt">
-            <i data-lucide="copy" class="icon-copy"></i>
-            <i data-lucide="check" class="icon-check"></i>
-          </button>
-        </div>
-        <pre><code id="skills-install-prompt">Clone https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills into my workspace, then install every production and testing skill from it using its installer, replacing any that are already installed. When you finish, remind me to restart TritonAI Harness.</code></pre>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -443,24 +498,41 @@ section[id]{scroll-margin-top:84px}
   <div class="shell">
     <div class="section-head">
       <h2>Playbooks</h2>
-      <p>Collections of sequential skills: the library, strung into end-to-end workflows.</p>
+      <p>Reviewed skills strung into end-to-end workflows, marked as pipelines or fan-outs.</p>
+    </div>
+    <div class="legend">
+      <span><b class="pattern-chip pipeline">Pipeline</b> linear handoffs, one direction</span>
+      <span><b class="pattern-chip fanout">Fan-out</b> one shared input, several outputs</span>
     </div>
     <div class="pb-grid">
-      <article class="pb">
-        <span class="pb-tag"><span class="dot" style="--c:var(--green)"></span>Ritual</span>
-        <h3>Start of day</h3>
-        <p class="pb-desc">Verify ClickUp access, then turn live evidence into a defensible daily focus.</p>
-        <ol class="steps">
-          <li><span class="step-num">1</span><code>$dia-clickup-mcp-setup</code></li>
-          <li><span class="step-num">2</span><code>$dia-start-my-day</code></li>
-        </ol>
+      <article class="pb span2">
+        <div class="pb-tags">
+          <span class="pb-tag"><span class="dot" style="--c:var(--blue)"></span>Meetings</span>
+          <span class="pattern-chip fanout">Fan-out</span>
+        </div>
+        <h3>One transcript, many artifacts</h3>
+        <p class="pb-desc">Save one Zoom transcript, then pull whichever derived documents the meeting needs. Each branch runs on its own and asks its own confirmation.</p>
+        <div class="fan">
+          <div class="fan-src"><span class="fan-source">one Zoom<br>transcript</span></div>
+          <div class="fan-rail"></div>
+          <div class="fan-outs">
+            <div class="fan-out"><code>$dia-transcript-to-meeting-notes</code><em>&rarr; local note</em></div>
+            <div class="fan-out"><code>$dia-transcript-to-requirements</code><em>&rarr; requirements doc</em></div>
+            <div class="fan-out"><code>$dia-transcript-to-process-map</code><em>&rarr; outline &rarr; map</em></div>
+            <div class="fan-out"><code>$dia-transcript-to-kpis</code><em>&rarr; KPIs + YAML</em></div>
+          </div>
+        </div>
+        <p class="fan-note"><i data-lucide="git-branch"></i>Requirements feeds the process map when both run; the other branches are independent.</p>
         <div class="pb-foot">
-          <span class="pb-meta"><i data-lucide="list-ordered"></i>2 skills &middot; setup once, run daily</span>
-          <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/start-of-day.md">Open playbook<i data-lucide="arrow-right"></i></a>
+          <span class="pb-meta"><i data-lucide="list-ordered"></i>4 skills &middot; run the outputs you need</span>
+          <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/one-transcript-many-artifacts.md">Open playbook<i data-lucide="arrow-right"></i></a>
         </div>
       </article>
       <article class="pb">
-        <span class="pb-tag"><span class="dot" style="--c:var(--blue)"></span>Meetings</span>
+        <div class="pb-tags">
+          <span class="pb-tag"><span class="dot" style="--c:var(--blue)"></span>Meetings</span>
+          <span class="pattern-chip pipeline">Pipeline</span>
+        </div>
         <h3>Requirements to process map</h3>
         <p class="pb-desc">Turn a business-owner requirements conversation into a structured requirements document and a rendered process map.</p>
         <ol class="steps">
@@ -473,17 +545,36 @@ section[id]{scroll-margin-top:84px}
         </div>
       </article>
       <article class="pb">
-        <span class="pb-tag"><span class="dot" style="--c:var(--magenta)"></span>Meetings</span>
-        <h3>Meeting notes to ClickUp tasks</h3>
-        <p class="pb-desc">Move one transcript through published Project Hub meeting notes and approved DIA-owned ClickUp tasks.</p>
+        <div class="pb-tags">
+          <span class="pb-tag"><span class="dot" style="--c:var(--magenta)"></span>Data</span>
+          <span class="pattern-chip pipeline">Pipeline</span>
+        </div>
+        <h3>Business questions to data mapping</h3>
+        <p class="pb-desc">Create the analysis workspace, confirm business questions and KPIs from the transcript, and map them to the dataset.</p>
         <ol class="steps">
-          <li><span class="step-num">1</span><code>ClickUp connection setup</code></li>
-          <li><span class="step-num">2</span><code>Project folder setup</code></li>
-          <li><span class="step-num">3</span><code>Process meeting transcript</code></li>
+          <li><span class="step-num">1</span><code>$dia-new-data-analysis-workspace</code></li>
+          <li><span class="step-num">2</span><code>$dia-transcript-to-kpis</code></li>
+          <li><span class="step-num">3</span><code>$dia-kpi-data-mapping</code></li>
         </ol>
         <div class="pb-foot">
-          <span class="pb-meta"><i data-lucide="list-ordered"></i>3 skills &middot; setup once per project, run per meeting</span>
-          <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/meeting-notes-to-tasks.md">Open playbook<i data-lucide="arrow-right"></i></a>
+          <span class="pb-meta"><i data-lucide="list-ordered"></i>3 skills &middot; per analysis project</span>
+          <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/business-questions-to-data-mapping.md">Open playbook<i data-lucide="arrow-right"></i></a>
+        </div>
+      </article>
+      <article class="pb">
+        <div class="pb-tags">
+          <span class="pb-tag"><span class="dot" style="--c:var(--magenta)"></span>Data</span>
+          <span class="pattern-chip pipeline">Pipeline</span>
+        </div>
+        <h3>Workspace to first answer</h3>
+        <p class="pb-desc">Scaffold the workspace, drop one file in <code>data/raw/</code>, link it, and answer ad hoc questions read-only.</p>
+        <ol class="steps">
+          <li><span class="step-num">1</span><code>$dia-new-data-analysis-workspace</code></li>
+          <li><span class="step-num">2</span><code>$dia-analyze-local-data</code></li>
+        </ol>
+        <div class="pb-foot">
+          <span class="pb-meta"><i data-lucide="list-ordered"></i>2 skills &middot; setup once, answer ad hoc</span>
+          <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/workspace-to-first-answer.md">Open playbook<i data-lucide="arrow-right"></i></a>
         </div>
       </article>
     </div>

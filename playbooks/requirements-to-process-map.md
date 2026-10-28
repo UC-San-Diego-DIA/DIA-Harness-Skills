@@ -1,5 +1,6 @@
 ---
 name: requirements-to-process-map
+pattern: pipeline
 description: Turn one business-owner requirements Zoom transcript into a structured requirements document and a rendered process map using reviewed DIA skills.
 ---
 

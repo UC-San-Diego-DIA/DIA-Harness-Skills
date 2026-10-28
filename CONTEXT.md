@@ -36,32 +36,40 @@ _Avoid_: Output, Artifact
 A structured document produced from a business-owner requirements conversation, capturing actors and roles, the current-state process, problems with the current state, requested capabilities, inputs and outputs, success criteria, constraints, out-of-scope items, and open questions.
 _Avoid_: Requirements spec, Business requirements document
 
+**KPI facts file**:
+The schema-versioned YAML file recorded beside a business-questions-and-KPIs document that holds confirmed business questions and KPIs with their attribution and open questions.
+_Avoid_: KPI list, Metrics spec
+
+**KPI data mapping report**:
+A declarative document that maps confirmed KPIs to the fields of one dataset, defines the calculations to build, and flags data gaps.
+_Avoid_: Field mapping, Data dictionary
+
 **Data product**:
 A reusable analytical deliverable through which stakeholders access or use data, such as a Tableau dashboard.
 _Avoid_: Dashboard file, Report
 
 **Analysis workspace**:
-A local working area for one source CSV and the ad hoc analysis derived from it.
+The per-file working area under `scratch/analysis/` of a data-analysis workspace, holding one analysis link, recorded questions, and their SQL.
 _Avoid_: Business-analysis space, Analysis area
 
 **Data analysis workspace**:
-A fresh local working area for one analysis project, holding immutable raw inputs, numbered pipeline scripts, and dashboard-ready output. It is not connected to ClickUp or GitHub.
+A fresh local working area for one analysis project, holding immutable raw inputs, numbered pipeline scripts, dashboard-ready output, and meeting transcripts with their derived documents. It is not connected to ClickUp or GitHub.
 _Avoid_: Analytics workspace, Data project scaffold
 
-**Source CSV**:
-The user-selected CSV that supplies the data for an analysis workspace.
+**Source file**:
+The user-selected CSV or Excel file that supplies the data for an analysis workspace. It stays in place and is never copied.
 _Avoid_: Input file, Dataset file
 
-**Dataset snapshot**:
-The copy of a source CSV held by an analysis workspace so later questions use the same data.
-_Avoid_: Working copy, Imported file
+**Analysis link**:
+The recorded association between an analysis folder and its source file, including the file hash. Queries fail when the file no longer matches the recorded hash.
+_Avoid_: Snapshot, Working copy, Imported file
 
 **Analysis question**:
 A business question answered from an analysis workspace and recorded with the SQL used to answer it.
 _Avoid_: Query request, Data question
 
-**Workspace refresh**:
-An explicit replacement of an analysis workspace's dataset snapshot. Earlier analysis questions remain associated with the snapshot that produced their answers.
+**Workspace re-link**:
+An explicit re-creation of an analysis link after its source file changed. Earlier analysis questions remain associated with the link that produced their answers.
 _Avoid_: Automatic update, Data sync
 
 **Connection skill**:

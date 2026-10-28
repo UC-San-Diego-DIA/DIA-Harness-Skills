@@ -8,6 +8,7 @@ Use this reference when planning, creating, or validating a local data-analysis 
 - **Raw inputs** are the untouched source files, usually Excel exports, placed in `data/raw/`.
 - **Pipeline scripts** are the numbered scripts in `scripts/` that transform raw inputs into analysis-ready output.
 - **Output tables** are the transformed, analysis-ready tables in `data/output/` that dashboards connect to.
+- **Analysis workspaces** are per-file DuckDB analysis folders under `scratch/analysis/`, created by the `$dia-analyze-local-data` skill. They keep ad hoc analysis separate from the pipeline.
 
 ## Required structure
 
@@ -23,8 +24,10 @@ Use this reference when planning, creating, or validating a local data-analysis 
 |-- reports/
 |-- docs/
 |   |-- data-dictionary.md
-|   `-- presentations/
+|   |-- presentations/
+|   `-- transcripts/
 `-- scratch/
+    `-- analysis/
 ```
 
 Folder responsibilities are fixed in schema 1:
@@ -33,10 +36,16 @@ Folder responsibilities are fixed in schema 1:
 - `data/output/` holds transformed tables written by pipeline scripts and read by dashboards. Never edited by hand.
 - `scripts/` holds the numbered pipeline, run in dependency-level order. Its `README.md` is the pipeline manifest.
 - `reports/` holds dashboards and exports, connected to `data/output/` only.
-- `docs/` holds project documentation, the data dictionary, and `docs/presentations/` for project presentations.
-- `scratch/` holds exploration and throwaway work. It is safe to delete.
+- `docs/` holds project documentation, the data dictionary, `docs/presentations/` for project presentations, and `docs/transcripts/` for saved meeting transcripts.
+- `scratch/` holds exploration, throwaway work, and analysis workspaces under `scratch/analysis/`. Throwaway work there is safe to delete, but analysis workspaces keep question history; do not delete them casually.
 
 The skill intentionally omits `sql/`, `src/`, `notebooks/`, and version-control files. Add `sql/` only if a project later needs standalone reusable queries. Promotion of shared logic happens inside pipeline scripts, not in a separate module folder.
+
+## Transcripts and meeting outputs
+
+- `docs/transcripts/` holds saved meeting transcripts, such as a Zoom export pasted into a transcript skill. A transcript the user supplies at an existing path stays where it is; skills do not copy or move it.
+- Transcript-derived artifacts keep their standard filenames and are saved in `docs/`: meeting notes, requirements documents, process outlines, process-map diagrams, and business-questions-and-KPIs files with `kpi-facts.yaml`.
+- Transcripts are meeting evidence, not pipeline inputs. Pipeline scripts never read from `docs/transcripts/`, and reading a transcript never earns a script a place in `scripts/`.
 
 ## Pipeline conventions
 

@@ -123,6 +123,7 @@ $requiredDirectories = @(
     'reports',
     'docs',
     'docs\presentations',
+    'docs\transcripts',
     'scratch'
 )
 

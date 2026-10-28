@@ -6,14 +6,17 @@ This repository is the reviewed source for DIA skills used in TritonAI Harness o
 
 | Skill | Use it for | Invocation |
 | --- | --- | --- |
-| [`dia-analyze-local-data`](skills/dia-analyze-local-data/SKILL.md) *(testing)* | Creating a local DuckDB workspace for ad hoc analysis of one CSV | `$dia-analyze-local-data` |
+| [`dia-analyze-local-data`](skills/dia-analyze-local-data/SKILL.md) *(testing)* | Answering ad hoc questions about one CSV or Excel file inside a data-analysis workspace, via a linked DuckDB view under `scratch/analysis/` | `$dia-analyze-local-data` |
+| [`dia-dataset-profile`](skills/dia-dataset-profile/SKILL.md) *(development)* | Profiling one CSV or Excel file: fields, distributions, missingness, candidate keys, anomalies, and suggested metrics or KPIs | `$dia-dataset-profile` |
 | [`dia-clickup-mcp-setup`](skills/dia-clickup-mcp-setup/SKILL.md) *(production)* | Connecting TritonAI Harness to ClickUp through the official OAuth MCP server | `$dia-clickup-mcp-setup` |
 | [`dia-data-model-docs`](skills/dia-data-model-docs/SKILL.md) *(development)* | Drafting four analyst-facing documents from one extracted model-facts file | `$dia-data-model-docs` |
 | [`dia-data-model-intake`](skills/dia-data-model-intake/SKILL.md) *(development)* | Extracting deterministic facts from one Oracle BI Publisher data model | `$dia-data-model-intake` |
-| [`dia-new-data-analysis-workspace`](skills/dia-new-data-analysis-workspace/SKILL.md) *(testing)* | Creating a fresh local data-analysis workspace with raw inputs, numbered pipeline scripts, and dashboard-ready output | `$dia-new-data-analysis-workspace` |
+| [`dia-kpi-data-mapping`](skills/dia-kpi-data-mapping/SKILL.md) *(testing)* | Mapping confirmed KPIs to one named dataset: required fields, calculations to build, and data gaps | `$dia-kpi-data-mapping` |
+| [`dia-new-data-analysis-workspace`](skills/dia-new-data-analysis-workspace/SKILL.md) *(production)* | Creating a fresh local data-analysis workspace with raw inputs, numbered pipeline scripts, dashboard-ready output, and a home for meeting transcripts | `$dia-new-data-analysis-workspace` |
 | [`dia-transcript-to-meeting-notes`](skills/dia-transcript-to-meeting-notes/SKILL.md) *(testing)* | Converting a Zoom transcript into a detailed local project meeting-note Markdown file | `$dia-transcript-to-meeting-notes` |
 | [`dia-transcript-to-process-map`](skills/dia-transcript-to-process-map/SKILL.md) *(testing)* | Saving a Zoom transcript locally, writing a confirmable process outline with current-state timing, and rendering the confirmed process map | `$dia-transcript-to-process-map` |
 | [`dia-transcript-to-requirements`](skills/dia-transcript-to-requirements/SKILL.md) *(testing)* | Converting a business-owner requirements Zoom transcript into a structured requirements document | `$dia-transcript-to-requirements` |
+| [`dia-transcript-to-kpis`](skills/dia-transcript-to-kpis/SKILL.md) *(testing)* | Extracting confirmed business questions and KPIs from a requirements transcript into Markdown and `kpi-facts.yaml` | `$dia-transcript-to-kpis` |
 | [`dia-process-meeting-transcript`](skills/dia-process-meeting-transcript/SKILL.md) *(development)* | Turning a project transcript into meeting notes and DIA-owned ClickUp tasks | `$dia-process-meeting-transcript` |
 | [`dia-setup-project-folder`](skills/dia-setup-project-folder/SKILL.md) *(development)* | Creating or validating a business-insights project folder connected to ClickUp | `$dia-setup-project-folder` |
 | [`dia-start-my-day`](skills/dia-start-my-day/SKILL.md) *(testing)* | Choosing today's focus from ClickUp, Outlook calendar, and Outlook mail | `$dia-start-my-day` |
@@ -24,9 +27,10 @@ Each skill's `SKILL.md` frontmatter declares its lifecycle with `metadata.status
 
 Playbooks in [playbooks/](playbooks/) chain reviewed skills into end-to-end DIA workflows:
 
-- [Meeting notes to ClickUp tasks](playbooks/meeting-notes-to-tasks.md) - set up the project, convert the transcript, publish notes, and create approved tasks.
-- [Start of day](playbooks/start-of-day.md) - verify ClickUp access, then run the daily brief from ClickUp and Outlook.
 - [Requirements to process map](playbooks/requirements-to-process-map.md) - turn a requirements conversation into a structured requirements document and a rendered process map.
+- [Business questions to data mapping](playbooks/business-questions-to-data-mapping.md) - create the analysis workspace, extract confirmed business questions and KPIs from the transcript, and map them to the workspace dataset.
+- [One transcript, many artifacts](playbooks/one-transcript-many-artifacts.md) - save one transcript, then derive meeting notes, requirements, a process map, or confirmed KPIs as the meeting needs.
+- [Workspace to first answer](playbooks/workspace-to-first-answer.md) - create the analysis workspace, link one source file, and answer ad hoc questions from it with read-only SQL.
 
 ## Install skills
 
@@ -86,7 +90,7 @@ pwsh -File .\scripts\validate-repository.ps1
 pwsh -File .\scripts\test-install-skill.ps1
 ```
 
-The validator checks skill packages, local Markdown links, invocation policy, and likely secrets. The installer test uses a temporary directory and never touches the active TritonAI Harness installation. The GitHub workflow also tests the DuckDB, project-folder, and workspace helpers in temporary directories.
+The validator checks skill packages, local Markdown links, invocation policy, and likely secrets. The installer test uses a temporary directory and never touches the active TritonAI Harness installation. The GitHub workflow also tests the DuckDB, project-folder, workspace, data-model intake, and dataset-profile helpers in temporary directories.
 
 ## Security
 

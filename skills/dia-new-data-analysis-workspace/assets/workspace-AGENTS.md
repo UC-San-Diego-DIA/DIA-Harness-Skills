@@ -18,6 +18,8 @@
 
 - Record field meanings, sources, and owners in `docs/data-dictionary.md`.
 - Keep project presentations in `docs/presentations/`.
+- Save meeting transcripts in `docs/transcripts/`; the documents produced from them, such as meeting notes and requirements, are saved in `docs/`.
+- Transcripts are meeting evidence, not pipeline inputs. Pipeline scripts never read them.
 
 ## Safety
 

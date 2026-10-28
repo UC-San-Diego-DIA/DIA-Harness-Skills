@@ -2,7 +2,7 @@
 name: dia-new-data-analysis-workspace
 description: Create a fresh local data-analysis workspace with immutable raw inputs, numbered pipeline scripts, and dashboard-ready output. Use only when explicitly invoked as $dia-new-data-analysis-workspace. Do not analyze data or write pipeline scripts.
 metadata:
-  status: testing
+  status: production
 ---
 
 # New data analysis workspace
@@ -64,4 +64,6 @@ Inspect the helper's JSON result:
 4. Treat the operation as successful only when the JSON result has `valid: true`. Report the created paths and preserved existing files.
 5. If the helper reports a conflict or fails partway through, report the exact path and error. Do not repair it by overwriting, moving, renaming, or deleting content.
 
-After a successful run, tell the user where to place raw files (`data/raw/`), that pipeline scripts go in `scripts/` with the numbering rules from the workspace `AGENTS.md`, and that dashboards should connect to `data/output/` only. Do not perform those steps in this skill.
+After a successful run, tell the user where to place raw files (`data/raw/`), that pipeline scripts go in `scripts/` with the numbering rules from the workspace `AGENTS.md`, that meeting transcripts are saved in `docs/transcripts/` with their derived documents in `docs/`, and that dashboards should connect to `data/output/` only. Do not perform those steps in this skill.
+
+When the user is ready to analyze a data file in this workspace, tell them to invoke `$dia-analyze-local-data`. Do not run that skill or its helper yourself.

@@ -22,3 +22,4 @@ Data flows in one direction:
 - `scratch/` is for exploration and throwaway work. It is safe to delete.
 - A script earns a place in `scripts/` only when it is part of the pipeline: it reads from `data/raw/` or an earlier script's output and writes to `data/output/` or feeds the reports. Everything else belongs in `scratch/`.
 - Document fields in `docs/data-dictionary.md` as they are used: what each field means, where it comes from, and who owns it.
+- Meeting transcripts are stored in `docs/transcripts/`; the documents produced from them, such as meeting notes and requirements, live in `docs/`.

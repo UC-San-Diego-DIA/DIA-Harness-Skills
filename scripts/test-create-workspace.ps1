@@ -70,6 +70,7 @@ try {
         'scripts',
         'reports',
         'docs\presentations',
+        'docs\transcripts',
         'scratch'
     )
     foreach ($relativeDirectory in $requiredDirectories) {

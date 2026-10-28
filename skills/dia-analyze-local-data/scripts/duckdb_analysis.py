@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create, refresh, and query a one-CSV DuckDB analysis workspace."""
+"""Create, re-link, and query a DuckDB analysis workspace over one source file."""
 
 from __future__ import annotations
 
@@ -15,6 +15,8 @@ import shutil
 import sys
 import tempfile
 import unicodedata
+import xml.etree.ElementTree as ET
+import zipfile
 from pathlib import Path
 from typing import Any, Sequence
 
@@ -39,8 +41,17 @@ TABLE_NAME = "dataset"
 DATABASE_NAME = "analysis.duckdb"
 ANALYSIS_NAME = "ANALYSIS.md"
 QUESTIONS_HEADING = "## Questions"
+SOURCE_FORMATS = {".csv": "csv", ".xlsx": "xlsx"}
 WORKSPACE_NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 QUERY_FILE_PATTERN = re.compile(r"^(\d+)-.*\.sql$", re.IGNORECASE)
+DATA_ANALYSIS_MARKERS = (
+    ("AGENTS.md", True),
+    ("data/raw", False),
+    ("data/output", False),
+    ("scripts", False),
+    ("scripts/README.md", True),
+)
+XLSX_SHEET_TAG = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}sheet"
 ENCODING_ALIASES = {
     "utf-8": "utf-8",
     "utf8": "utf-8",
@@ -73,32 +84,70 @@ def is_within(path: Path, parent: Path) -> bool:
         return False
 
 
-def validate_setup_paths(root_raw: str, source_raw: str, workspace_raw: str) -> tuple[Path, Path, Path]:
-    root = require_absolute_path(root_raw, "Root")
-    source = require_absolute_path(source_raw, "Source")
-    workspace = require_absolute_path(workspace_raw, "Workspace")
+def sql_string_literal(value: str) -> str:
+    return "'" + value.replace("'", "''") + "'"
 
-    if not root.is_dir():
-        raise WorkspaceError(f"Root folder does not exist: {root}")
-    if not source.is_file():
-        raise WorkspaceError(f"Source CSV does not exist or is not a regular file: {source}")
-    if source.suffix.casefold() != ".csv":
-        raise WorkspaceError(f"Source must have a .csv extension: {source}")
-    if not WORKSPACE_NAME_PATTERN.fullmatch(workspace.name):
+
+def validate_data_analysis_root(root: Path) -> None:
+    missing = []
+    for relative, is_file in DATA_ANALYSIS_MARKERS:
+        path = root / relative
+        if is_file and not path.is_file():
+            missing.append(str(path))
+        if not is_file and not path.is_dir():
+            missing.append(str(path))
+    if missing:
         raise WorkspaceError(
-            "Workspace folder name must use lowercase letters, digits, and single hyphens: "
-            f"{workspace.name}"
+            "Target is not a data-analysis workspace. Missing: " + ", ".join(missing)
         )
 
-    analysis_root = (root / "analysis").resolve(strict=False)
-    if workspace.parent != analysis_root:
-        raise WorkspaceError(f"Workspace must be directly under {analysis_root}: {workspace}")
-    if analysis_root.exists() and not is_within(analysis_root.resolve(), root):
-        raise WorkspaceError(f"Analysis folder resolves outside the current folder: {analysis_root}")
-    if is_within(source, workspace):
-        raise WorkspaceError("Source CSV cannot be inside the analysis workspace.")
 
-    return root, source, workspace
+def validate_setup_paths(workspace_raw: str, source_raw: str) -> tuple[Path, Path, Path]:
+    workspace = require_absolute_path(workspace_raw, "Workspace")
+    source = require_absolute_path(source_raw, "Source")
+
+    if not WORKSPACE_NAME_PATTERN.fullmatch(workspace.name):
+        raise WorkspaceError(
+            "Analysis workspace folder name must use lowercase letters, digits, and "
+            f"single hyphens: {workspace.name}"
+        )
+    if workspace.parent.name.casefold() != "analysis":
+        raise WorkspaceError(
+            "Analysis workspace must be directly under a scratch\\analysis folder: "
+            f"{workspace.parent}"
+        )
+    scratch = workspace.parent.parent
+    if scratch.name.casefold() != "scratch":
+        raise WorkspaceError(
+            f"Analysis workspace must live under a scratch folder: {scratch}"
+        )
+    root = scratch.parent
+    if not root.is_dir():
+        raise WorkspaceError(f"Data-analysis workspace root does not exist: {root}")
+    validate_data_analysis_root(root)
+
+    if not source.is_file():
+        raise WorkspaceError(f"Source does not exist or is not a regular file: {source}")
+    if source.suffix.casefold() not in SOURCE_FORMATS:
+        raise WorkspaceError(
+            "Source must be a .csv or .xlsx file. Convert .xls workbooks to .xlsx first: "
+            f"{source}"
+        )
+
+    source_resolved = source.resolve(strict=False)
+    allowed_areas = [
+        (root / "data" / "raw").resolve(strict=False),
+        (root / "data" / "output").resolve(strict=False),
+    ]
+    if not any(is_within(source_resolved, area) for area in allowed_areas):
+        raise WorkspaceError(
+            "Source must live under data\\raw or data\\output of the data-analysis "
+            f"workspace: {root}"
+        )
+    if is_within(source_resolved, workspace.resolve(strict=False)):
+        raise WorkspaceError("Source cannot be inside the analysis workspace.")
+
+    return workspace, source, root
 
 
 def normalize_header(header: str) -> str:
@@ -114,14 +163,11 @@ def normalize_header(header: str) -> str:
     return normalized
 
 
-def normalized_headers(raw_headers: Sequence[str]) -> list[str]:
-    if not raw_headers:
-        raise WorkspaceError("CSV header row is empty.")
-
+def validate_header_names(raw_headers: Sequence[str]) -> None:
     blank_headers = [index + 1 for index, value in enumerate(raw_headers) if not value.strip()]
     if blank_headers:
         joined = ", ".join(str(index) for index in blank_headers)
-        raise WorkspaceError(f"CSV has blank headers in column positions: {joined}")
+        raise WorkspaceError(f"Source has blank headers in column positions: {joined}")
 
     duplicates: dict[str, list[str]] = {}
     for value in raw_headers:
@@ -129,8 +175,11 @@ def normalized_headers(raw_headers: Sequence[str]) -> list[str]:
     duplicate_groups = [values for values in duplicates.values() if len(values) > 1]
     if duplicate_groups:
         rendered = "; ".join(", ".join(repr(value) for value in group) for group in duplicate_groups)
-        raise WorkspaceError(f"CSV has duplicate headers: {rendered}")
+        raise WorkspaceError(f"Source has duplicate headers: {rendered}")
 
+
+def normalized_headers(raw_headers: Sequence[str]) -> list[str]:
+    validate_header_names(raw_headers)
     normalized = [normalize_header(value) for value in raw_headers]
     collisions: dict[str, list[str]] = {}
     for original, sql_name in zip(raw_headers, normalized):
@@ -139,7 +188,6 @@ def normalized_headers(raw_headers: Sequence[str]) -> list[str]:
     if collision_groups:
         rendered = "; ".join(", ".join(repr(value) for value in group) for group in collision_groups)
         raise WorkspaceError(f"Headers collide after snake_case normalization: {rendered}")
-
     return normalized
 
 
@@ -159,15 +207,9 @@ def utc_now() -> str:
     return dt.datetime.now(dt.timezone.utc).isoformat(timespec="microseconds").replace("+00:00", "Z")
 
 
-def snapshot_id(imported_at: str, source_hash: str) -> str:
-    compact_time = re.sub(r"[-:.+]", "", imported_at)
+def link_id(linked_at: str, source_hash: str) -> str:
+    compact_time = re.sub(r"[-:.+]", "", linked_at)
     return f"{compact_time}-{source_hash[:12]}"
-
-
-def configure_no_extension_install(connection: Any) -> None:
-    connection.execute("SET autoinstall_known_extensions = false")
-    connection.execute("SET autoload_known_extensions = false")
-    connection.execute("SET allow_community_extensions = false")
 
 
 def normalize_encoding(encoding: str | None) -> str | None:
@@ -184,34 +226,96 @@ def normalize_encoding(encoding: str | None) -> str | None:
     return canonical
 
 
-def csv_options(args: argparse.Namespace) -> dict[str, Any]:
-    encoding = normalize_encoding(args.encoding)
-    options: dict[str, Any] = {
-        "header": True,
-        "sample_size": -1,
-        "ignore_errors": False,
-        "normalize_names": False,
-    }
-    optional_values = {
-        "delimiter": args.delimiter,
-        "encoding": encoding,
-        "quotechar": args.quote,
-        "escapechar": args.escape,
-        "skiprows": args.skip_rows,
-        "date_format": args.date_format,
-        "timestamp_format": args.timestamp_format,
-    }
-    options.update({key: value for key, value in optional_values.items() if value is not None})
-    if args.all_varchar:
-        options["all_varchar"] = True
-    if args.null_padding:
-        options["null_padding"] = True
-    return options
+def configure_base_extensions(connection: Any) -> None:
+    connection.execute("SET autoinstall_known_extensions = false")
+    connection.execute("SET autoload_known_extensions = false")
+    connection.execute("SET allow_community_extensions = false")
 
 
-def read_csv_table_function(
-    source: Path, args: argparse.Namespace
-) -> tuple[str, list[Any]]:
+def load_source_extension(connection: Any, source_format: str, allow_install: bool) -> None:
+    configure_base_extensions(connection)
+    if source_format != "xlsx":
+        return
+    try:
+        connection.execute("LOAD excel")
+        return
+    except duckdb.Error:
+        pass
+    if not allow_install:
+        raise WorkspaceError(
+            "The official DuckDB 'excel' extension is required to read .xlsx files and is "
+            "not installed. After the user confirms, rerun this command with "
+            "--install-excel-extension, or export the sheet to CSV."
+        )
+    try:
+        connection.execute("INSTALL excel")
+        connection.execute("LOAD excel")
+    except duckdb.Error as exc:
+        raise WorkspaceError(
+            "Could not install the official DuckDB 'excel' extension. Export the sheet to "
+            "CSV instead."
+        ) from exc
+
+
+def xlsx_sheet_names(source: Path) -> list[str]:
+    try:
+        with zipfile.ZipFile(source) as archive:
+            content = archive.read("xl/workbook.xml")
+        tree = ET.fromstring(content)
+        names = [
+            element.attrib["name"]
+            for element in tree.iter(XLSX_SHEET_TAG)
+            if element.attrib.get("name")
+        ]
+    except (OSError, zipfile.BadZipFile, ET.ParseError) as exc:
+        raise WorkspaceError(f"Could not read the .xlsx workbook: {source}: {exc}") from exc
+    if not names:
+        raise WorkspaceError(f"The .xlsx workbook has no named sheets: {source}")
+    return names
+
+
+def resolve_sheet(source: Path, requested: str | None) -> str:
+    sheets = xlsx_sheet_names(source)
+    if requested is None:
+        return sheets[0]
+    for name in sheets:
+        if name.casefold() == requested.casefold():
+            return name
+    raise WorkspaceError(
+        f"Sheet {requested!r} not found in the workbook. Available sheets: "
+        + ", ".join(repr(name) for name in sheets)
+    )
+
+
+def xlsx_relation(source: Path, sheet: str) -> str:
+    return (
+        f"read_xlsx({sql_string_literal(str(source))}, header = true, "
+        f"sheet = {sql_string_literal(sheet)})"
+    )
+
+
+def xlsx_header_row_relation(source: Path, sheet: str) -> str:
+    # header = false keeps the first row as data, so it can be read back as
+    # the header row even though the view relation uses header = true.
+    return (
+        f"read_xlsx({sql_string_literal(str(source))}, header = false, "
+        f"sheet = {sql_string_literal(sheet)})"
+    )
+
+
+def read_xlsx_headers(connection: Any, source: Path, sheet: str) -> tuple[list[str], list[str]]:
+    cursor = connection.execute(
+        f"SELECT * FROM {xlsx_header_row_relation(source, sheet)} LIMIT 1"
+    )
+    relation_names = [str(column[0]) for column in cursor.description]
+    row = cursor.fetchone()
+    if row is None:
+        raise WorkspaceError(f"Sheet {sheet!r} contains no rows to use as a header.")
+    headers = ["" if value is None else str(value) for value in row]
+    return relation_names, headers
+
+
+def csv_relation(source: Path, args: argparse.Namespace) -> str:
     encoding = normalize_encoding(args.encoding)
     clauses = [
         "header = true",
@@ -219,7 +323,6 @@ def read_csv_table_function(
         "ignore_errors = false",
         "normalize_names = false",
     ]
-    parameters: list[Any] = [str(source)]
     option_map = (
         ("delim", args.delimiter),
         ("encoding", encoding),
@@ -229,15 +332,14 @@ def read_csv_table_function(
         ("dateformat", args.date_format),
         ("timestampformat", args.timestamp_format),
     )
-    for sql_name, value in option_map:
+    for name, value in option_map:
         if value is not None:
-            clauses.append(f"{sql_name} = ?")
-            parameters.append(value)
+            clauses.append(f"{name} = {sql_string_literal(str(value))}")
     if args.all_varchar:
         clauses.append("all_varchar = true")
     if args.null_padding:
         clauses.append("null_padding = true")
-    return f"read_csv(?, {', '.join(clauses)})", parameters
+    return f"read_csv({sql_string_literal(str(source))}, {', '.join(clauses)})"
 
 
 def sniff_dialect(connection: Any, source: Path, args: argparse.Namespace) -> tuple[str, str, str, int, bool]:
@@ -311,19 +413,20 @@ def read_raw_headers(
     return [str(value) for value in header]
 
 
-def existing_snapshots(database_path: Path) -> list[dict[str, Any]]:
+def existing_links(database_path: Path) -> list[dict[str, Any]]:
     if not database_path.is_file():
         raise WorkspaceError(f"Workspace database is missing: {database_path}")
     connection = None
     try:
         connection = duckdb.connect(str(database_path), read_only=True)
-        configure_read_only_query(connection)
+        configure_base_extensions(connection)
         rows = connection.execute(
             """
-            SELECT snapshot_id, imported_at, source_path, source_file, source_hash,
-                   row_count, read_options, python_executable, is_current
-            FROM _analysis_snapshots
-            ORDER BY imported_at
+            SELECT link_id, linked_at, source_path, source_file, source_hash,
+                   source_format, sheet, row_count, read_options, python_executable,
+                   is_current
+            FROM _analysis_links
+            ORDER BY linked_at
             """
         ).fetchall()
     except Exception as exc:
@@ -332,11 +435,13 @@ def existing_snapshots(database_path: Path) -> list[dict[str, Any]]:
         if connection is not None:
             connection.close()
     keys = (
-        "snapshot_id",
-        "imported_at",
+        "link_id",
+        "linked_at",
         "source_path",
         "source_file",
         "source_hash",
+        "source_format",
+        "sheet",
         "row_count",
         "read_options",
         "python_executable",
@@ -345,64 +450,64 @@ def existing_snapshots(database_path: Path) -> list[dict[str, Any]]:
     return [dict(zip(keys, row)) for row in rows]
 
 
-def current_snapshot(snapshots: Sequence[dict[str, Any]]) -> dict[str, Any]:
-    current = [snapshot for snapshot in snapshots if snapshot["is_current"]]
+def current_link(links: Sequence[dict[str, Any]]) -> dict[str, Any]:
+    current = [link for link in links if link["is_current"]]
     if len(current) != 1:
-        raise WorkspaceError("Workspace must contain exactly one current snapshot.")
+        raise WorkspaceError("Workspace must contain exactly one current source link.")
     return current[0]
 
 
-def build_database(
+def build_workspace(
     database_path: Path,
-    snapshot_csv: Path,
     source: Path,
     args: argparse.Namespace,
-    prior_snapshots: Sequence[dict[str, Any]],
+    prior_links: Sequence[dict[str, Any]],
 ) -> dict[str, Any]:
-    imported_at = utc_now()
-    source_hash = file_sha256(snapshot_csv)
-    new_snapshot_id = snapshot_id(imported_at, source_hash)
-    options = csv_options(args)
+    source_format = SOURCE_FORMATS[source.suffix.casefold()]
+    sheet = resolve_sheet(source, args.sheet) if source_format == "xlsx" else None
+    linked_at = utc_now()
+    source_hash = file_sha256(source)
+    new_link_id = link_id(linked_at, source_hash)
 
     connection = duckdb.connect(str(database_path))
     try:
-        configure_no_extension_install(connection)
-        delimiter, quote, escape, skip_rows, has_header = sniff_dialect(
-            connection, snapshot_csv, args
-        )
-        if not has_header and not args.force_header:
-            raise WorkspaceError(
-                "DuckDB did not detect a header row. Retry with --force-header only if the first data row is the header."
-            )
-        raw_headers = read_raw_headers(
-            snapshot_csv, delimiter, quote, escape, skip_rows, args.encoding
-        )
-        sql_headers = normalized_headers(raw_headers)
+        load_source_extension(connection, source_format, args.install_excel_extension)
+        if source_format == "csv":
+            delimiter, quote, escape, skip_rows, has_header = sniff_dialect(connection, source, args)
+            if not has_header and not args.force_header:
+                raise WorkspaceError(
+                    "DuckDB did not detect a header row. Retry with --force-header only "
+                    "if the first data row is the header."
+                )
+            raw_headers = read_raw_headers(source, delimiter, quote, escape, skip_rows, args.encoding)
+            sql_headers = normalized_headers(raw_headers)
+            relation = csv_relation(source, args)
+            header_cursor = connection.execute(f"SELECT * FROM {relation} LIMIT 0")
+            relation_names = [str(column[0]) for column in header_cursor.description]
+        else:
+            relation_names, raw_headers = read_xlsx_headers(connection, source, sheet)
+            sql_headers = normalized_headers(raw_headers)
+            relation = xlsx_relation(source, sheet)
+            header_cursor = connection.execute(f"SELECT * FROM {relation} LIMIT 0")
+            relation_names = [str(column[0]) for column in header_cursor.description]
 
-        table_function, table_parameters = read_csv_table_function(snapshot_csv, args)
-        header_cursor = connection.execute(
-            f"SELECT * FROM {table_function} LIMIT 0", table_parameters
-        )
-        duckdb_headers = [str(column[0]) for column in header_cursor.description]
-        if len(duckdb_headers) != len(raw_headers):
+        if len(relation_names) != len(raw_headers):
             raise WorkspaceError(
                 "DuckDB parsed a different number of columns than the header row: "
-                f"header={len(raw_headers)}, parsed={len(duckdb_headers)}"
+                f"header={len(raw_headers)}, parsed={len(relation_names)}"
             )
 
         projection = ", ".join(
             f"{quote_identifier(actual)} AS {quote_identifier(normalized)}"
-            for actual, normalized in zip(duckdb_headers, sql_headers)
+            for actual, normalized in zip(relation_names, sql_headers)
         )
         connection.execute(
-            f"CREATE TABLE {quote_identifier(TABLE_NAME)} AS "
-            f"SELECT {projection} FROM {table_function}",
-            table_parameters,
+            f"CREATE VIEW {quote_identifier(TABLE_NAME)} AS SELECT {projection} FROM {relation}"
         )
 
         row_count = int(connection.execute(f"SELECT count(*) FROM {TABLE_NAME}").fetchone()[0])
-        type_rows = connection.execute(f"PRAGMA table_info('{TABLE_NAME}')").fetchall()
-        type_by_name = {str(row[1]): str(row[2]) for row in type_rows}
+        described = connection.execute(f"DESCRIBE {TABLE_NAME}").fetchall()
+        type_by_name = {str(row[0]): str(row[1]) for row in described}
         null_projection = ", ".join(
             f"count(*) FILTER (WHERE {quote_identifier(name)} IS NULL)"
             for name in sql_headers
@@ -413,12 +518,14 @@ def build_database(
 
         connection.execute(
             """
-            CREATE TABLE _analysis_snapshots (
-                snapshot_id VARCHAR PRIMARY KEY,
-                imported_at VARCHAR NOT NULL,
+            CREATE TABLE _analysis_links (
+                link_id VARCHAR PRIMARY KEY,
+                linked_at VARCHAR NOT NULL,
                 source_path VARCHAR NOT NULL,
                 source_file VARCHAR NOT NULL,
                 source_hash VARCHAR NOT NULL,
+                source_format VARCHAR NOT NULL,
+                sheet VARCHAR,
                 row_count BIGINT NOT NULL,
                 read_options VARCHAR NOT NULL,
                 python_executable VARCHAR NOT NULL,
@@ -426,33 +533,62 @@ def build_database(
             )
             """
         )
-        for snapshot in prior_snapshots:
+        for link in prior_links:
             connection.execute(
                 """
-                INSERT INTO _analysis_snapshots VALUES (?, ?, ?, ?, ?, ?, ?, ?, false)
+                INSERT INTO _analysis_links VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, false)
                 """,
                 [
-                    snapshot["snapshot_id"],
-                    snapshot["imported_at"],
-                    snapshot["source_path"],
-                    snapshot["source_file"],
-                    snapshot["source_hash"],
-                    snapshot["row_count"],
-                    snapshot["read_options"],
-                    snapshot["python_executable"],
+                    link["link_id"],
+                    link["linked_at"],
+                    link["source_path"],
+                    link["source_file"],
+                    link["source_hash"],
+                    link["source_format"],
+                    link["sheet"],
+                    link["row_count"],
+                    link["read_options"],
+                    link["python_executable"],
                 ],
             )
-        serialized_options = json.dumps(options, sort_keys=True)
+        if source_format == "xlsx":
+            read_options: dict[str, Any] = {"sheet": sheet}
+        else:
+            read_options = {
+                "header": True,
+                "sample_size": -1,
+                "ignore_errors": False,
+                "normalize_names": False,
+            }
+            optional_values = {
+                "delimiter": args.delimiter,
+                "encoding": normalize_encoding(args.encoding),
+                "quotechar": args.quote,
+                "escapechar": args.escape,
+                "skiprows": args.skip_rows,
+                "date_format": args.date_format,
+                "timestamp_format": args.timestamp_format,
+            }
+            read_options.update(
+                {key: value for key, value in optional_values.items() if value is not None}
+            )
+            if args.all_varchar:
+                read_options["all_varchar"] = True
+            if args.null_padding:
+                read_options["null_padding"] = True
+        serialized_options = json.dumps(read_options, sort_keys=True)
         connection.execute(
             """
-            INSERT INTO _analysis_snapshots VALUES (?, ?, ?, ?, ?, ?, ?, ?, true)
+            INSERT INTO _analysis_links VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, true)
             """,
             [
-                new_snapshot_id,
-                imported_at,
+                new_link_id,
+                linked_at,
                 str(source),
                 source.name,
                 source_hash,
+                source_format,
+                sheet,
                 row_count,
                 serialized_options,
                 sys.executable,
@@ -462,7 +598,7 @@ def build_database(
         connection.execute(
             """
             CREATE TABLE _analysis_columns (
-                snapshot_id VARCHAR NOT NULL,
+                link_id VARCHAR NOT NULL,
                 ordinal INTEGER NOT NULL,
                 original_name VARCHAR NOT NULL,
                 sql_name VARCHAR NOT NULL,
@@ -486,7 +622,7 @@ def build_database(
             connection.execute(
                 "INSERT INTO _analysis_columns VALUES (?, ?, ?, ?, ?, ?)",
                 [
-                    new_snapshot_id,
+                    new_link_id,
                     ordinal,
                     original,
                     sql_name,
@@ -498,32 +634,35 @@ def build_database(
     finally:
         connection.close()
 
-    snapshots = [dict(snapshot, is_current=False) for snapshot in prior_snapshots]
-    snapshots.append(
+    links = [dict(link, is_current=False) for link in prior_links]
+    links.append(
         {
-            "snapshot_id": new_snapshot_id,
-            "imported_at": imported_at,
+            "link_id": new_link_id,
+            "linked_at": linked_at,
             "source_path": str(source),
             "source_file": source.name,
             "source_hash": source_hash,
+            "source_format": source_format,
+            "sheet": sheet,
             "row_count": row_count,
-            "read_options": json.dumps(options, sort_keys=True),
+            "read_options": serialized_options,
             "python_executable": sys.executable,
             "is_current": True,
         }
     )
     return {
-        "snapshot_id": new_snapshot_id,
-        "imported_at": imported_at,
+        "link_id": new_link_id,
+        "linked_at": linked_at,
         "source_path": str(source),
         "source_file": source.name,
-        "snapshot_file": f"data/{source.name}",
+        "source_format": source_format,
+        "sheet": sheet,
         "source_hash": source_hash,
         "row_count": row_count,
-        "read_options": options,
+        "read_options": read_options,
         "python_executable": sys.executable,
         "columns": columns,
-        "snapshots": snapshots,
+        "links": links,
     }
 
 
@@ -541,28 +680,36 @@ def render_analysis_markdown(summary: dict[str, Any], existing_analysis: str | N
     lines = [
         f"# Analysis: {Path(summary['source_file']).stem}",
         "",
-        "This workspace contains a local snapshot of one source CSV for ad hoc analysis.",
-        "The original CSV is never watched. Refresh happens only when requested and confirmed.",
+        "This workspace answers questions directly against one source file. No data is copied.",
+        "The `dataset` view references:",
         "",
-        "## Current snapshot",
+        f"`{summary['source_path']}`",
         "",
-        f"- Snapshot ID: `{summary['snapshot_id']}`",
-        f"- Imported at: `{summary['imported_at']}`",
-        f"- Original source: `{summary['source_path']}`",
-        f"- Snapshot file: `{summary['snapshot_file']}`",
-        f"- SHA-256: `{summary['source_hash']}`",
-        f"- DuckDB table: `{TABLE_NAME}`",
-        f"- Python executable: `{summary['python_executable']}`",
-        f"- Rows: {summary['row_count']}",
-        f"- Read options: `{json.dumps(summary['read_options'], sort_keys=True)}`",
+        "If that file changes, questions stop until a confirmed re-link updates this workspace.",
         "",
-        "Later changes to the original CSV do not affect this snapshot. Run a confirmed workspace refresh to replace it.",
+        "## Current source",
         "",
-        "## Columns",
-        "",
-        "| # | Original header | SQL name | DuckDB type | Nulls |",
-        "| ---: | --- | --- | --- | ---: |",
+        f"- Link ID: `{summary['link_id']}`",
+        f"- Linked at: `{summary['linked_at']}`",
+        f"- Source path: `{summary['source_path']}`",
+        f"- Format: {summary['source_format']}",
     ]
+    if summary["source_format"] == "xlsx":
+        lines.append(f"- Sheet: `{summary['sheet']}`")
+    lines.extend(
+        [
+            f"- SHA-256: `{summary['source_hash']}`",
+            f"- DuckDB view: `{TABLE_NAME}`",
+            f"- Python executable: `{summary['python_executable']}`",
+            f"- Rows: {summary['row_count']}",
+            f"- Read options: `{json.dumps(summary['read_options'], sort_keys=True)}`",
+            "",
+            "## Columns",
+            "",
+            "| # | Original header | SQL name | DuckDB type | Nulls |",
+            "| ---: | --- | --- | --- | ---: |",
+        ]
+    )
     for column in summary["columns"]:
         lines.append(
             "| {ordinal} | {original} | `{sql_name}` | `{duckdb_type}` | {null_count} |".format(
@@ -574,44 +721,16 @@ def render_analysis_markdown(summary: dict[str, Any], existing_analysis: str | N
             )
         )
 
-    lines.extend(["", "## Snapshot history", ""])
-    for snapshot in summary["snapshots"]:
-        status = "current" if snapshot["is_current"] else "superseded"
+    lines.extend(["", "## Source history", ""])
+    for link in summary["links"]:
+        status = "current" if link["is_current"] else "superseded"
         lines.append(
-            f"- `{snapshot['snapshot_id']}`: {snapshot['imported_at']}, "
-            f"{snapshot['row_count']} rows, {status}"
+            f"- `{link['link_id']}`: {link['linked_at']}, "
+            f"{link['row_count']} rows, {status}"
         )
 
     lines.extend(["", questions_section(existing_analysis).rstrip(), ""])
     return "\n".join(lines)
-
-
-def write_gitignore(path: Path) -> None:
-    path.write_text("*\n!.gitignore\n", encoding="utf-8", newline="\n")
-
-
-def setup_stage(
-    stage: Path,
-    source: Path,
-    args: argparse.Namespace,
-    prior_snapshots: Sequence[dict[str, Any]],
-    existing_analysis: str | None,
-) -> dict[str, Any]:
-    data_dir = stage / "data"
-    queries_dir = stage / "queries"
-    data_dir.mkdir(parents=True)
-    queries_dir.mkdir()
-    snapshot_csv = data_dir / source.name
-    shutil.copy2(source, snapshot_csv)
-
-    summary = build_database(
-        stage / DATABASE_NAME, snapshot_csv, source, args, prior_snapshots
-    )
-    (stage / ANALYSIS_NAME).write_text(
-        render_analysis_markdown(summary, existing_analysis), encoding="utf-8", newline="\n"
-    )
-    write_gitignore(stage / ".gitignore")
-    return summary
 
 
 def remove_checked_tree(path: Path, expected_parent: Path) -> None:
@@ -634,7 +753,7 @@ def replace_refreshed_files(stage: Path, workspace: Path) -> None:
     backup = Path(
         tempfile.mkdtemp(prefix=f".{workspace.name}.backup-", dir=str(workspace.parent))
     )
-    names = ("data", DATABASE_NAME, ANALYSIS_NAME, ".gitignore")
+    names = (DATABASE_NAME, ANALYSIS_NAME)
     moved_old: list[str] = []
     moved_new: list[str] = []
     completed = False
@@ -668,7 +787,7 @@ def replace_refreshed_files(stage: Path, workspace: Path) -> None:
         if rollback_errors:
             details = "; ".join(rollback_errors)
             raise WorkspaceError(
-                f"Refresh failed and rollback was incomplete. Recovery files remain at {backup}. "
+                f"Re-link failed and rollback was incomplete. Recovery files remain at {backup}. "
                 f"Rollback errors: {details}"
             ) from refresh_error
         raise
@@ -677,61 +796,76 @@ def replace_refreshed_files(stage: Path, workspace: Path) -> None:
             remove_checked_tree(backup, workspace.parent)
 
 
-def validate_existing_workspace(workspace: Path, source: Path) -> tuple[list[dict[str, Any]], str]:
+def validate_existing_workspace(workspace: Path, source: Path, requested_sheet: str | None) -> tuple[list[dict[str, Any]], str]:
     required = (
         workspace / DATABASE_NAME,
         workspace / ANALYSIS_NAME,
-        workspace / ".gitignore",
-        workspace / "data",
         workspace / "queries",
     )
     missing = [str(path) for path in required if not path.exists()]
     if missing:
         raise WorkspaceError("Existing target is not a valid workspace. Missing: " + ", ".join(missing))
-    snapshots = existing_snapshots(workspace / DATABASE_NAME)
-    current = current_snapshot(snapshots)
+    links = existing_links(workspace / DATABASE_NAME)
+    current = current_link(links)
     current_source = os.path.normcase(os.path.normpath(str(current["source_path"])))
     requested_source = os.path.normcase(os.path.normpath(str(source)))
     if current_source != requested_source:
         raise WorkspaceError(
-            "Existing workspace belongs to a different source CSV: "
+            "Existing workspace belongs to a different source file: "
             f"{current['source_path']}"
         )
+    current_format = str(current["source_format"])
+    if current_format != SOURCE_FORMATS[source.suffix.casefold()]:
+        raise WorkspaceError(
+            f"Existing workspace expects a {current_format} source: {current['source_path']}"
+        )
+    if current_format == "xlsx":
+        current_sheet = current["sheet"]
+        resolved_sheet = resolve_sheet(source, requested_sheet)
+        if str(current_sheet) != resolved_sheet:
+            raise WorkspaceError(
+                f"Existing workspace belongs to sheet {current_sheet!r}, not {resolved_sheet!r}."
+            )
     existing_analysis = (workspace / ANALYSIS_NAME).read_text(encoding="utf-8")
-    return snapshots, existing_analysis
+    return links, existing_analysis
 
 
 def setup_command(args: argparse.Namespace) -> dict[str, Any]:
-    _, source, workspace = validate_setup_paths(args.root, args.source, args.workspace)
+    workspace, source, root = validate_setup_paths(args.workspace, args.source)
     workspace.parent.mkdir(parents=True, exist_ok=True)
 
-    prior_snapshots: list[dict[str, Any]] = []
+    prior_links: list[dict[str, Any]] = []
     existing_analysis: str | None = None
     if args.refresh:
         if not workspace.is_dir():
             raise WorkspaceError(f"Refresh requires an existing workspace: {workspace}")
-        prior_snapshots, existing_analysis = validate_existing_workspace(workspace, source)
+        prior_links, existing_analysis = validate_existing_workspace(workspace, source, args.sheet)
     elif workspace.exists():
-        raise WorkspaceError(f"Workspace already exists. Use a different name or confirm refresh: {workspace}")
+        raise WorkspaceError(f"Workspace already exists. Use a different name or confirm re-link: {workspace}")
 
     stage = Path(
         tempfile.mkdtemp(prefix=f".{workspace.name}.staging-", dir=str(workspace.parent))
     )
     try:
         try:
-            summary = setup_stage(stage, source, args, prior_snapshots, existing_analysis)
+            summary = build_workspace(stage / DATABASE_NAME, source, args, prior_links)
+            (stage / ANALYSIS_NAME).write_text(
+                render_analysis_markdown(summary, existing_analysis), encoding="utf-8", newline="\n"
+            )
+            (stage / "queries").mkdir()
         except duckdb.Error as exc:
-            raise WorkspaceError(f"DuckDB could not import the CSV: {exc}") from exc
+            raise WorkspaceError(f"DuckDB could not prepare the source: {exc}") from exc
         if args.refresh:
             replace_refreshed_files(stage, workspace)
         else:
             install_created_workspace(stage, workspace)
         summary.update(
             {
-                "action": "refreshed" if args.refresh else "created",
+                "action": "relinked" if args.refresh else "created",
                 "workspace": str(workspace),
                 "database": str(workspace / DATABASE_NAME),
-                "table": TABLE_NAME,
+                "view": TABLE_NAME,
+                "data_analysis_root": str(root),
             }
         )
         return summary
@@ -774,10 +908,28 @@ def next_query_path(queries_dir: Path, question: str) -> Path:
     return queries_dir / f"{next_number:03d}-{query_slug(question)}.sql"
 
 
-def configure_read_only_query(connection: Any) -> None:
-    configure_no_extension_install(connection)
+def configure_query_connection(connection: Any, source: Path, source_format: str, allow_install: bool) -> None:
+    load_source_extension(connection, source_format, allow_install)
+    connection.execute(f"SET allowed_paths = [{sql_string_literal(str(source))}]")
     connection.execute("SET enable_external_access = false")
     connection.execute("SET lock_configuration = true")
+
+
+def verify_source_matches(current: dict[str, Any], source: Path) -> None:
+    if not source.is_file():
+        raise WorkspaceError(
+            "Source file is missing: "
+            f"{source}. Restore it, or confirm a re-link with the user and rerun setup "
+            "with --refresh."
+        )
+    actual_hash = file_sha256(source)
+    if actual_hash != str(current["source_hash"]):
+        raise WorkspaceError(
+            "The source file changed since this workspace was linked. Recorded SHA-256: "
+            f"{current['source_hash']}. Current SHA-256: {actual_hash}. Earlier answers "
+            "describe the earlier version. After confirming with the user, rerun setup "
+            "with --refresh to re-link this workspace."
+        )
 
 
 def query_command(args: argparse.Namespace) -> dict[str, Any]:
@@ -797,19 +949,22 @@ def query_command(args: argparse.Namespace) -> dict[str, Any]:
     required = (
         database_path,
         workspace / ANALYSIS_NAME,
-        workspace / ".gitignore",
-        workspace / "data",
         queries_dir,
     )
     if any(not path.exists() for path in required):
         raise WorkspaceError(f"Target is not a valid analysis workspace: {workspace}")
+    links = existing_links(database_path)
+    current = current_link(links)
+    source = Path(str(current["source_path"]))
+    verify_source_matches(current, source)
+
     sql = sql_file.read_text(encoding="utf-8").strip()
     if not sql:
         raise WorkspaceError("SQL file is empty.")
 
     connection = duckdb.connect(str(database_path), read_only=True)
     try:
-        configure_read_only_query(connection)
+        configure_query_connection(connection, source, str(current["source_format"]), args.install_excel_extension)
         statements = connection.extract_statements(sql)
         if len(statements) != 1 or statements[0].type != duckdb.StatementType.SELECT:
             statement_types = [statement.type.name for statement in statements]
@@ -825,12 +980,7 @@ def query_command(args: argparse.Namespace) -> dict[str, Any]:
         fetched = cursor.fetchmany(args.max_rows + 1)
         truncated = len(fetched) > args.max_rows
         rows = fetched[: args.max_rows]
-        snapshot_row = connection.execute(
-            "SELECT snapshot_id FROM _analysis_snapshots WHERE is_current = true"
-        ).fetchone()
-        if snapshot_row is None:
-            raise WorkspaceError("Workspace has no current snapshot metadata.")
-        active_snapshot_id = str(snapshot_row[0])
+        active_link_id = str(current["link_id"])
     finally:
         connection.close()
 
@@ -838,7 +988,7 @@ def query_command(args: argparse.Namespace) -> dict[str, Any]:
     saved_sql.write_text(sql + "\n", encoding="utf-8", newline="\n")
     return {
         "workspace": str(workspace),
-        "snapshot_id": active_snapshot_id,
+        "link_id": active_link_id,
         "question": args.question,
         "sql_file": str(saved_sql),
         "columns": column_names,
@@ -847,6 +997,22 @@ def query_command(args: argparse.Namespace) -> dict[str, Any]:
         "truncated": truncated,
         "max_rows": args.max_rows,
     }
+
+
+def inspect_command(args: argparse.Namespace) -> dict[str, Any]:
+    source = require_absolute_path(args.source, "Source")
+    if not source.is_file():
+        raise WorkspaceError(f"Source does not exist or is not a regular file: {source}")
+    suffix = source.suffix.casefold()
+    if suffix not in SOURCE_FORMATS:
+        raise WorkspaceError(
+            "Source must be a .csv or .xlsx file. Convert .xls workbooks to .xlsx first: "
+            f"{source}"
+        )
+    result: dict[str, Any] = {"source": str(source), "format": SOURCE_FORMATS[suffix]}
+    if suffix == ".xlsx":
+        result["sheets"] = xlsx_sheet_names(source)
+    return result
 
 
 def add_csv_override_arguments(parser: argparse.ArgumentParser) -> None:
@@ -866,11 +1032,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    setup_parser = subparsers.add_parser("setup", help="Create or refresh a workspace")
-    setup_parser.add_argument("--root", required=True)
-    setup_parser.add_argument("--source", required=True)
+    setup_parser = subparsers.add_parser("setup", help="Create or re-link a workspace")
     setup_parser.add_argument("--workspace", required=True)
+    setup_parser.add_argument("--source", required=True)
+    setup_parser.add_argument("--sheet")
     setup_parser.add_argument("--refresh", action="store_true")
+    setup_parser.add_argument("--install-excel-extension", action="store_true")
     add_csv_override_arguments(setup_parser)
 
     query_parser = subparsers.add_parser("query", help="Run and save one read-only SELECT")
@@ -878,6 +1045,10 @@ def build_parser() -> argparse.ArgumentParser:
     query_parser.add_argument("--question", required=True)
     query_parser.add_argument("--sql-file", required=True)
     query_parser.add_argument("--max-rows", type=int, default=200)
+    query_parser.add_argument("--install-excel-extension", action="store_true")
+
+    inspect_parser = subparsers.add_parser("inspect", help="Report source format and sheets")
+    inspect_parser.add_argument("--source", required=True)
     return parser
 
 
@@ -887,8 +1058,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         if args.command == "setup":
             result = setup_command(args)
-        else:
+        elif args.command == "query":
             result = query_command(args)
+        else:
+            result = inspect_command(args)
         json.dump(result, sys.stdout, ensure_ascii=False, indent=2)
         sys.stdout.write("\n")
         return 0

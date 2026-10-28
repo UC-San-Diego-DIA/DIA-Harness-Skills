@@ -1,0 +1,7 @@
+interface:
+  display_name: "DIA Transcript to KPIs"
+  short_description: "Turn a discovery Zoom transcript into confirmed business questions and KPIs"
+  default_prompt: "Use $dia-transcript-to-kpis to turn a business-owner requirements or discovery Zoom transcript into a confirmed list of business questions and KPIs."
+
+policy:
+  allow_implicit_invocation: false

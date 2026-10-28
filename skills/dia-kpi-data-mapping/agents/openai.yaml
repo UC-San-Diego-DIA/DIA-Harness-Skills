@@ -1,0 +1,7 @@
+interface:
+  display_name: "DIA KPI Data Mapping"
+  short_description: "Map confirmed KPIs to one dataset and flag data gaps"
+  default_prompt: "Use $dia-kpi-data-mapping to validate my KPI artifact against one dataset and draft a KPI data mapping report with data gaps flagged."
+
+policy:
+  allow_implicit_invocation: false
