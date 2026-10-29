@@ -1,0 +1,7 @@
+interface:
+  display_name: "DIA Transcript to Project Request Draft"
+  short_description: "Turn a project-request Zoom transcript into a first-pass Project Request draft"
+  default_prompt: "Use $dia-transcript-to-project-request-draft to turn a project-request Zoom transcript into a first-pass, field-by-field Project Request draft that needs human review."
+
+policy:
+  allow_implicit_invocation: false

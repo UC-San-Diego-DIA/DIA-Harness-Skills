@@ -33,8 +33,24 @@ A stakeholder-facing outcome produced by a DIA project.
 _Avoid_: Output, Artifact
 
 **Requirements document**:
-A structured document produced from a business-owner requirements conversation, capturing actors and roles, the current-state process, problems with the current state, requested capabilities, inputs and outputs, success criteria, constraints, out-of-scope items, and open questions.
+A decision-driven document produced from a business-owner requirements conversation, capturing the decision it supports, the audience and decision context, key questions, data requirements, functional requirements, acceptance criteria, constraints and assumptions, out-of-scope items, and open questions, with meeting capture preserved in an appendix.
 _Avoid_: Requirements spec, Business requirements document
+
+**Process outline**:
+A readable intermediate document produced from a transcript or a requirements document that identifies the process boundary, actors, ordered steps, decisions, handoffs, systems, and a current-state ROI baseline before any diagram is rendered. It requires explicit user confirmation.
+_Avoid_: Process inventory, Workflow draft
+
+**Process inventory**:
+A short chat-level list of the plausible processes in one transcript, with actors, trigger, end point, evidence strength, and likely role. It is presented before any outline is written and is confirmed by the user.
+_Avoid_: Process catalog, Workflow scan
+
+**Current-state ROI baseline**:
+The measured or explicitly gap-flagged current-state effort, elapsed time, handoffs, rework, and volume for one process, with stated sources and confidence. It provides the comparison point for a future-state delta and is never silently incomplete.
+_Avoid_: Timing table, Time estimate
+
+**Project Request draft**:
+A first-pass, field-by-field fill-in document produced from a transcript that records proposed answers for the VCFA DIA Project Request Form, with evidence for each answer and explicit data gaps for anything the transcript does not support. It requires human review before any submission.
+_Avoid_: Intake form, Ticket draft
 
 **KPI facts file**:
 The schema-versioned YAML file recorded beside a business-questions-and-KPIs document that holds confirmed business questions and KPIs with their attribution and open questions.

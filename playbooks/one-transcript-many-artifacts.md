@@ -23,8 +23,8 @@ Choose branches by meeting type, not by completeness:
 Each branch is one invocation of one reviewed skill:
 
 - `$dia-transcript-to-meeting-notes` - detailed local meeting notes with decisions, action items, and open questions. No ClickUp writes.
-- `$dia-transcript-to-requirements` - a structured requirements document: actors and roles, current-state process, problems, requested capabilities, inputs and outputs, success criteria, constraints, out-of-scope items, and open questions.
-- `$dia-transcript-to-process-map` - a process outline the user confirms, then a rendered process-map diagram with current-state timing. Uses the requirements document as its process source when one exists.
+- `$dia-transcript-to-requirements` - a decision-driven requirements document: the decision it supports, audience and decision context, key questions, data requirements, functional requirements, acceptance criteria, constraints and assumptions, out-of-scope items, and open questions, with meeting capture in an appendix.
+- `$dia-transcript-to-process-map` - an inventory of possible processes; after the user confirms which ones to analyze, it produces a confirmable process outline and rendered process-map diagram per process, each with a current-state ROI baseline. Uses the requirements document as its process source when one exists.
 - `$dia-transcript-to-kpis` - confirmed business questions and KPIs as a readable Markdown file plus a schema-version-1 `kpi-facts.yaml`.
 
 ## Handoffs

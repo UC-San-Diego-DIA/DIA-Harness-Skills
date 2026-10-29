@@ -178,7 +178,7 @@ if (Test-Path -LiteralPath $indexPagePath -PathType Leaf) {
     }
 }
 
-$explicitOnlySkills = @('dia-analyze-local-data', 'dia-clickup-mcp-setup', 'dia-data-model-docs', 'dia-data-model-intake', 'dia-new-data-analysis-workspace', 'dia-process-meeting-transcript', 'dia-setup-project-folder', 'dia-start-my-day', 'dia-transcript-to-process-map', 'dia-transcript-to-requirements')
+$explicitOnlySkills = @('dia-analyze-local-data', 'dia-clickup-mcp-setup', 'dia-data-model-docs', 'dia-data-model-intake', 'dia-new-data-analysis-workspace', 'dia-process-meeting-transcript', 'dia-setup-project-folder', 'dia-start-my-day', 'dia-transcript-to-process-map', 'dia-transcript-to-project-request-draft', 'dia-transcript-to-requirements')
 foreach ($explicitOnlySkill in $explicitOnlySkills) {
     $explicitMetadata = Join-Path $skillsRoot "$explicitOnlySkill\agents\openai.yaml"
     if (-not (Test-Path -LiteralPath $explicitMetadata -PathType Leaf)) {

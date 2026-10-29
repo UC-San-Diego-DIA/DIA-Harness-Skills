@@ -28,7 +28,7 @@ $destination = Join-Path $resolvedTestRoot 'installed-skills'
 $whatIfDestination = Join-Path $resolvedTestRoot 'what-if-skills'
 
 try {
-    $skillsToInstall = @('dia-analyze-local-data', 'dia-clickup-mcp-setup', 'dia-data-model-docs', 'dia-data-model-intake', 'dia-new-data-analysis-workspace', 'dia-process-meeting-transcript', 'dia-setup-project-folder', 'dia-start-my-day', 'dia-transcript-to-process-map')
+    $skillsToInstall = @('dia-analyze-local-data', 'dia-clickup-mcp-setup', 'dia-data-model-docs', 'dia-data-model-intake', 'dia-new-data-analysis-workspace', 'dia-process-meeting-transcript', 'dia-setup-project-folder', 'dia-start-my-day', 'dia-transcript-to-process-map', 'dia-transcript-to-project-request-draft')
     foreach ($skillName in $skillsToInstall) {
         & $installer -Skill $skillName -Destination $destination -Force
 
@@ -109,6 +109,7 @@ try {
         'dia-start-my-day',
         'dia-transcript-to-meeting-notes',
         'dia-transcript-to-process-map',
+        'dia-transcript-to-project-request-draft',
         'dia-transcript-to-requirements'
     )
     foreach ($expectedSkill in $expectedStatusSkills) {
