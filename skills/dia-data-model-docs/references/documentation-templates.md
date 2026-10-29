@@ -72,12 +72,35 @@ Write the business definition in plain, non-technical language a business reader
 - [Each field whose business definition is not established in the facts.]
 ```
 
-## Business questions catalog
+## KPI and business-questions catalog
 
 ```markdown
-# Business questions: [model.name]
+# KPIs and business questions: [model.name]
 
-These questions were confirmed by [analyst or role supplied by user] on [date]. Each question is answerable from the documented model.
+Candidate KPIs and confirmed business questions for this model, derived only from [extraction.source_file] and confirmed by [analyst or role supplied by user] on [date].
+
+## How KPIs and business questions differ
+
+- A **business question** is a question the model can answer on demand. You run the model, read the result, and act; the definition lives in the question itself.
+- A **KPI** is a standing measure tracked repeatedly over time. It has a fixed name, a fixed formula over the model's output rows, and a decision it informs. A KPI answers the same question every period without re-deciding what to compute.
+
+## Before you compute anything
+
+- [Grain or caveat bullet that would silently corrupt any calculation over the output rows, with its fact path. Include this section only when such a caveat exists; otherwise omit it.]
+
+## KPI-01: [name]
+
+**What it measures:** [One sentence in business terms, stated only from output columns and confirmed facts.]
+
+**Why it matters:** [One or two sentences on the decision, risk, or recurring question this measure informs. If the facts do not establish the business value, write Needs analyst confirmation.]
+
+**How to build it:** [The aggregation over the model's output rows: which columns, which grouping, and which deduplication the profile requires before summing. A short SQL sketch over the output dataset is welcome but optional.]
+
+Caveat: [Confirmed condition that changes the number, or Needs analyst confirmation on the open point. Omit this line only when nothing applies.]
+
+**Status:** Confirmed
+
+## Business questions
 
 ## BQ-01: [confirmed question]
 
@@ -101,10 +124,14 @@ These questions were confirmed by [analyst or role supplied by user] on [date]. 
 
 ## Out of scope
 
-- [Confirmed question the model cannot answer] — [the missing filter, field, grain, or source, in plain English.]
+- [Confirmed KPI or question the model cannot support] — [the missing filter, field, grain, or source, in plain English.]
+
+## Suggested starting set
+
+- [When more than three KPIs are confirmed, name the two or three to start with and the recurring leadership question each answers. Omit this section with three or fewer.]
 ```
 
-Number questions sequentially as `BQ-01`, `BQ-02`, and so on. Add one section per confirmed question. Do not add an unconfirmed question.
+Number KPIs sequentially as `KPI-01`, `KPI-02`, and so on, and questions as `BQ-01`, `BQ-02`, and so on. Add one section per confirmed KPI and per confirmed question. Do not add an unconfirmed KPI or question. Propose only KPIs buildable from the model's output columns; anything needing data the model does not select belongs under Out of scope, not as an invented KPI.
 
 ## When-to-use guidance
 

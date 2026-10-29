@@ -43,7 +43,7 @@ dia-dataset-profile owns a one-time profile of one CSV or Excel file: field inve
 
 `dia-data-model-intake` owns local, deterministic extraction of facts from one Oracle BI Publisher data model into `model-facts.yaml`. It does not execute the model's SQL, connect to data sources, interpret business meaning, author documentation, or change source files.
 
-`dia-data-model-docs` owns drafting the overview card, data dictionary, business-questions catalog, and when-to-use guidance from one schema-version-1 `model-facts.yaml` file after analyst confirmation. It does not extract facts, connect to databases, execute SQL, publish documentation, or modify the facts file.
+`dia-data-model-docs` owns drafting the overview card, data dictionary, KPI and business-questions catalog, and when-to-use guidance from one schema-version-1 `model-facts.yaml` file after analyst confirmation. It does not extract facts, connect to databases, execute SQL, publish documentation, or modify the facts file.
 
 `dia-kpi-data-mapping` owns validating a confirmed KPI artifact against one user-named dataset and drafting a declarative mapping report that identifies the fields supplying each metric, the calculations to build, and explicit data gaps. It does not execute calculations, build pipeline scripts, modify the dataset, resolve open questions in the KPI artifact, or invoke other skills.
 
