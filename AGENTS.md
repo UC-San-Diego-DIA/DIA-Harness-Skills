@@ -61,6 +61,12 @@ dia-dataset-profile owns a one-time profile of one CSV or Excel file: field inve
 
 `dia-setup-project-folder` owns local creation and validation of the schema-1 business-insights project folder for existing ClickUp resources. It does not create or change ClickUp content, migrate conflicting folders, process project files, analyze data, or create deliverables.
 
+`dia-tableau-workbook-intake` owns local, deterministic extraction of facts from one Tableau workbook package or workbook XML document into `workbook-facts.yaml`. It does not open Tableau, connect to Tableau Server, read the package's data extract, interpret business meaning, author documentation, or change source files.
+
+`dia-tableau-dashboard-docs` owns drafting internal dashboard-reference and sheet-specs documentation from one schema-version-1 `workbook-facts.yaml` file after analyst confirmation, covering only sheets that appear on a dashboard. It does not extract facts, open Tableau, publish documentation, or modify the facts file.
+
+`dia-tableau-workbook-audit` owns a factual workbook-wide inventory and health report from one schema-version-1 `workbook-facts.yaml` file, including sheet usage, orphan sheets, duplicate names, calculation reuse, and parameters. It does not extract facts, interpret business meaning, recommend changes, or produce dashboard documentation.
+
 ## Working rules
 
 - Read `README.md`, `CONTEXT.md`, and the relevant skill before changing behavior.

@@ -45,3 +45,7 @@ jobs:
       - name: Test dataset-profile helper
         shell: pwsh
         run: .\scripts\test-dataset-profile.ps1 -Python python
+
+      - name: Test workbook-intake helper
+        shell: pwsh
+        run: .\scripts\test-workbook-intake.ps1 -Python python

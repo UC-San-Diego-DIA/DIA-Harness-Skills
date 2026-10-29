@@ -133,7 +133,7 @@ def parse_size(dashboard) -> dict:
     return size
 
 
-def zone_entry(zone, worksheet_names):
+def zone_entry(zone, worksheet_names, captions):
     """Classify one dashboard zone into a layout entry.
 
     Returns a dict, the string "empty", or None for layout containers.
@@ -145,7 +145,7 @@ def zone_entry(zone, worksheet_names):
     if not zone_type and not name:
         return None
     if zone_type == "filter":
-        return {
+        entry = {
             "kind": "filter",
             "source_sheet": name,
             "field": zone.get("param", ""),
@@ -153,19 +153,32 @@ def zone_entry(zone, worksheet_names):
             "show_apply": zone.get("show-apply", "") in ("true", "1"),
             "values": zone.get("values", ""),
         }
+        field_caption = resolve_field_caption(zone.get("param", ""), captions)
+        if field_caption:
+            entry["field_caption"] = field_caption
+        return entry
     if zone_type in ("color", "size", "shape"):
-        return {
+        entry = {
             "kind": "legend",
             "legend_kind": zone_type,
             "source_sheet": name,
             "field": zone.get("param", ""),
         }
+        field_caption = resolve_field_caption(zone.get("param", ""), captions)
+        if field_caption:
+            entry["field_caption"] = field_caption
+        return entry
     if zone_type == "paramctrl":
-        return {
+        entry = {
             "kind": "parameter",
             "parameter": zone.get("param", ""),
             "caption": zone.get("caption", ""),
         }
+        if not entry["caption"]:
+            parameter_caption = resolve_field_caption(zone.get("param", ""), captions)
+            if parameter_caption:
+                entry["caption"] = parameter_caption
+        return entry
     if zone_type == "title":
         return {"kind": "title"}
     if zone_type == "text":
@@ -182,7 +195,47 @@ def zone_entry(zone, worksheet_names):
     return {"kind": "other", "zone_type": zone_type or "untyped", "name": name}
 
 
-def parse_dashboard(dashboard, worksheet_names, warnings) -> dict:
+def resolve_field_caption(field, captions):
+    """Resolve a qualified zone field to its human-readable column caption."""
+    if not field:
+        return None
+    match = re.search(r"\]\.\[(.*)\]$", field)
+    content = match.group(1) if match else field.strip("[]")
+    candidates = [f"[{content}]"]
+    if ":" in content:
+        candidates.extend(f"[{part}]" for part in content.split(":"))
+    for candidate in candidates:
+        caption = captions.get(candidate)
+        if caption:
+            return caption
+    if ":" not in content:
+        return content.strip()
+    return None
+
+
+def collect_captions(root, worksheets_element) -> dict:
+    """Map bracketed column names to their captions across the workbook."""
+    captions = {}
+    sources = []
+    datasources_element = child(root, "datasources")
+    if datasources_element is not None:
+        sources.extend(children(datasources_element, "datasource"))
+    if worksheets_element is not None:
+        for worksheet in children(worksheets_element, "worksheet"):
+            view = child(child(worksheet, "table"), "view")
+            if view is not None:
+                for dependency in children(view, "datasource-dependencies"):
+                    sources.append(dependency)
+    for source in sources:
+        for column in children(source, "column"):
+            column_name = column.get("name", "")
+            caption = column.get("caption", "")
+            if column_name and caption and column_name not in captions:
+                captions[column_name] = caption
+    return captions
+
+
+def parse_dashboard(dashboard, worksheet_names, captions, warnings) -> dict:
     name = dashboard.get("name", "")
     datasources = []
     for datasource in descendants(dashboard, "datasource"):
@@ -196,7 +249,7 @@ def parse_dashboard(dashboard, worksheet_names, warnings) -> dict:
     if zones_element is not None:
         def walk(zone):
             nonlocal empty_zones
-            entry = zone_entry(zone, worksheet_names)
+            entry = zone_entry(zone, worksheet_names, captions)
             if entry == "empty":
                 empty_zones += 1
             elif entry is not None:
@@ -250,7 +303,7 @@ def parse_dashboard(dashboard, worksheet_names, warnings) -> dict:
     }
 
 
-def parse_worksheet(worksheet) -> dict:
+def parse_worksheet(worksheet, captions) -> dict:
     name = worksheet.get("name", "")
     view = child(child(worksheet, "table"), "view")
     datasources = []
@@ -271,12 +324,16 @@ def parse_worksheet(worksheet) -> dict:
         filters_element = child(view, "filters")
         if filters_element is not None:
             for sheet_filter in children(filters_element, "filter"):
-                filters.append(
-                    {
-                        "column": sheet_filter.get("column", ""),
-                        "class": sheet_filter.get("class", ""),
-                    }
+                sheet_filter_entry = {
+                    "column": sheet_filter.get("column", ""),
+                    "class": sheet_filter.get("class", ""),
+                }
+                column_caption = resolve_field_caption(
+                    sheet_filter.get("column", ""), captions
                 )
+                if column_caption:
+                    sheet_filter_entry["column_caption"] = column_caption
+                filters.append(sheet_filter_entry)
 
     calculations = []
     seen_calculations = set()
@@ -311,7 +368,11 @@ def parse_worksheet(worksheet) -> dict:
         if identity in seen_encodings:
             continue
         seen_encodings.add(identity)
-        encodings.append({"attr": attribute, "field": field})
+        encoding_entry = {"attr": attribute, "field": field}
+        field_caption = resolve_field_caption(field, captions)
+        if field_caption:
+            encoding_entry["field_caption"] = field_caption
+        encodings.append(encoding_entry)
 
     return {
         "name": name,
@@ -329,6 +390,8 @@ def parse_worksheet(worksheet) -> dict:
 def parse_workbook(root, warnings: list[str]) -> dict:
     datasources = []
     parameters = []
+    worksheets_element = child(root, "worksheets")
+    captions = collect_captions(root, worksheets_element)
     datasources_element = child(root, "datasources")
     if datasources_element is not None:
         for datasource in children(datasources_element, "datasource"):
@@ -360,17 +423,18 @@ def parse_workbook(root, warnings: list[str]) -> dict:
 
     worksheets = []
     worksheet_names = []
-    worksheets_element = child(root, "worksheets")
     if worksheets_element is not None:
         for worksheet in children(worksheets_element, "worksheet"):
-            worksheets.append(parse_worksheet(worksheet))
+            worksheets.append(parse_worksheet(worksheet, captions))
             worksheet_names.append(worksheet.get("name", ""))
 
     dashboards = []
     dashboards_element = child(root, "dashboards")
     if dashboards_element is not None:
         for dashboard in children(dashboards_element, "dashboard"):
-            dashboards.append(parse_dashboard(dashboard, worksheet_names, warnings))
+            dashboards.append(
+                parse_dashboard(dashboard, worksheet_names, captions, warnings)
+            )
 
     if child(root, "stories") is not None:
         warnings.append("workbook contains stories; story sheets are not inventoried")
@@ -441,6 +505,8 @@ def is_safe_scalar(value: str) -> bool:
     if lowered in BOOL_LIKE:
         return False
     if INT_RE.fullmatch(value) or FLOAT_RE.fullmatch(value):
+        return False
+    if ": " in value or value.endswith(":") or " #" in value:
         return False
     return True
 

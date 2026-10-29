@@ -47,6 +47,7 @@ try {
       </column>
     </datasource>
     <datasource caption='Example-Transactions' hasconnection='false' name='sqlproxy.example' version='18.1'>
+      <column caption='Location Name' datatype='string' name='[LocationName]' role='dimension' type='nominal' />
       <column caption='Current FYTD Sales' datatype='real' name='[Calculation_1]' role='measure' type='quantitative'>
         <calculation class='tableau' formula='IF [Fiscal Year] = [Current FY] THEN [PaymentAmount] END' />
       </column>
@@ -148,6 +149,7 @@ try {
             <zone h='5000' id='15' name='Sales by Location' show-title='false' w='20000' x='20000' y='0' />
           </zone>
           <zone h='2000' id='16' mode='checkdropdown' name='KPI Card' param='[sqlproxy.example].[LocationName]' show-apply='true' type-v2='filter' values='relevant' w='20000' x='0' y='50000' />
+          <zone h='2000' id='18' mode='checkdropdown' name='Sales by Location' param='[sqlproxy.example].[Uncaptioned Thing ]' show-apply='true' type-v2='filter' values='relevant' w='20000' x='0' y='70000' />
           <zone h='2000' id='17' caption='Segment' param='[Parameters].[Parameter 1]' type-v2='paramctrl' w='20000' x='20000' y='50000' />
         </zone>
       </zones>
@@ -178,14 +180,17 @@ try {
         'schema_version: 1',
         'name: Example Overview',
         'title_text: Example Overview | Sample caveat.',
-        'title_text: Total Sales | How much revenue?',
+        'title_text: "Total Sales | How much revenue?"',
         'caption: Segment Performance',
         'IF [Fiscal Year] = [Current FY] THEN [PaymentAmount] END',
         '- KPI Card',
         '- Sales by Location',
         'orphan_sheets:',
         '- Sheet 15',
-        'field: "[sqlproxy.example].[LocationName]"'
+        'field: "[sqlproxy.example].[LocationName]"',
+        'field_caption: Location Name',
+        'column_caption: Location Name',
+        'field_caption: Uncaptioned Thing'
     )) {
         Assert-True ($twbFacts.Contains($needle)) "Expected '$needle' in the bare .twb facts output."
     }

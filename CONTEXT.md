@@ -44,6 +44,10 @@ _Avoid_: KPI list, Metrics spec
 A declarative document that maps confirmed KPIs to the fields of one dataset, defines the calculations to build, and flags data gaps.
 _Avoid_: Field mapping, Data dictionary
 
+**Workbook facts file**:
+The schema-versioned YAML file recorded beside a Tableau workbook package that holds deterministic facts about its dashboards, dashboard-used sheets, filters, parameters, and calculations.
+_Avoid_: Workbook inventory, TWB extract
+
 **Data product**:
 A reusable analytical deliverable through which stakeholders access or use data, such as a Tableau dashboard.
 _Avoid_: Dashboard file, Report

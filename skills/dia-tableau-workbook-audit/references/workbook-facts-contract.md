@@ -21,8 +21,8 @@ This file describes the facts that `$dia-tableau-workbook-intake` extracts from 
 - `title_text`: the dashboard title and subtitle text, normalized.
 - `sheets`: worksheet names placed on the dashboard, in layout order.
 - `layout`: every non-container zone in layout order. Each entry has a `kind` of `sheet`, `filter`, `legend`, `parameter`, `title`, `text`, `image`, `web`, or `other`, plus kind-specific fields.
-- `filters`: quick filters with `source_sheet`, `field`, `mode`, `show_apply`, and `values`.
-- `legends`: legends with `legend_kind` (color, size, or shape), `source_sheet`, and `field`.
+- `filters`: quick filters with `source_sheet`, `field`, `field_caption` (workbook caption when available, otherwise the readable column name), `mode`, `show_apply`, and `values`.
+- `legends`: legends with `legend_kind` (color, size, or shape), `source_sheet`, `field`, and `field_caption` (same resolution rule).
 - `parameter_controls`: parameter controls with `parameter` and `caption`.
 - `actions`: dashboard actions with `title` and `source_sheet`, when present.
 
@@ -33,9 +33,9 @@ This file describes the facts that `$dia-tableau-workbook-intake` extracts from 
 - `datasources`: data source names the sheet references.
 - `rows` and `cols`: field tokens on the rows and columns shelves, in shelf order.
 - `calculations`: one entry per calculation field with `caption`, `kind` (Tableau calculation class), and `formula` (verbatim Tableau formula text).
-- `filters`: sheet-level filters with `column` and `class`.
+- `filters`: sheet-level filters with `column`, `column_caption` (same resolution rule), and `class`.
 - `mark_types`: mark types such as `Automatic` or `bar`.
-- `encodings`: mark encodings with `attr` (color, size, label, and similar) and `field`.
+- `encodings`: mark encodings with `attr` (color, size, label, and similar), `field`, and `field_caption` (same resolution rule).
 
 ## Normalization rules
 
