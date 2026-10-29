@@ -46,11 +46,15 @@ This dictionary describes the BI Publisher output fields. It is derived only fro
 
 ## Output columns
 
-| # | Output name | Label | Data type | Group | Source expression | Analyst definition | Evidence |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | [name] | [label] | [data_type] | [group] | [matching select alias expression] | [fact-based definition or Needs analyst confirmation.] | `output_columns[0]`, `datasets[0]...` |
+| # | Output name | Label | Data type | Group | Source expression | Business definition |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | [name] | [label] | [data_type] | [group] | [matching select alias expression] | [plain, non-technical definition or Needs analyst confirmation.] |
 
 Match an output column to a selected expression by comparing names case-insensitively. When no match exists, use the output column's `value` and mark the business definition for analyst confirmation.
+
+Every row traces to `output_columns` and the matched select alias in `datasets[*].main_query.select_aliases`; that shared fact path in the section introduction replaces a per-row evidence column.
+
+Write the business definition in plain, non-technical language a business reader can use without knowing Oracle schema names or SQL. State the best definition the facts support; use `Needs analyst confirmation.` only when the facts leave the meaning genuinely open.
 
 ## Source tables
 
@@ -77,19 +81,27 @@ These questions were confirmed by [analyst or role supplied by user] on [date]. 
 
 ## BQ-01: [confirmed question]
 
-**Answer:** [What the model returns, stated only from facts.]
+**What it answers**
 
-**Supporting fields:** [relevant output columns and selected expressions.]
+[One to three plain sentences. Lead with what the model returns, stated only from facts.]
 
-**Supporting logic:** [relevant filters, joins, grouping, or CASE mappings.]
+**Fields that matter**
 
-**Gotchas:** [confirmed conditions that change interpretation, or None documented.]
+- [Output column] — [one short phrase: its role in the answer.]
+
+**Logic that shapes the answer**
+
+- [Filter, join, grouping, or CASE mapping] — [plain-English effect on the answer.]
+
+**Read it with care**
+
+- [Confirmed condition that changes interpretation] — [plain-English interpretation effect.]
 
 **Status:** Confirmed
 
 ## Out of scope
 
-- [Each confirmed question the model cannot answer, with the missing filter, field, grain, or source as evidence.]
+- [Confirmed question the model cannot answer] — [the missing filter, field, grain, or source, in plain English.]
 ```
 
 Number questions sequentially as `BQ-01`, `BQ-02`, and so on. Add one section per confirmed question. Do not add an unconfirmed question.
@@ -129,6 +141,8 @@ Number questions sequentially as `BQ-01`, `BQ-02`, and so on. Add one section pe
 
 - Keep the four documents mutually consistent. If a fact changes, update every affected document.
 - Prefer exact source terms over synonyms for tables, aliases, columns, and parameters.
+- Write definitions and explanations as prose. Never copy raw fact values such as Python tuple strings, YAML anchors, or literal quote-wrapped source comments into a definition cell.
+- Keep tables narrow. If a cell would hold more than about one line of text, shorten it and move the detail to a bullet under the table, or split the row.
 - Keep SQL fragments short and quote them exactly when needed. Do not reformat SQL in a way that changes meaning.
 - Do not expose credentials. If a fact appears to contain a secret, omit the value and tell the user.
 - Do not claim data quality, refresh schedule, ownership, or business purpose unless the user confirmed it during this run.

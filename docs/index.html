@@ -605,24 +605,6 @@ section[id]{scroll-margin-top:84px}
           <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/one-transcript-many-artifacts.md">Open playbook<i data-lucide="arrow-right"></i></a>
         </div>
       </article>
-      <article class="pb spanfull">
-        <h3>Data model to documentation</h3>
-        <p class="pb-desc">Extract facts from one Oracle BI Publisher data model, then profile its structure and draft analyst-facing documentation from the same facts file.</p>
-        <div class="fan">
-          <div class="fan-src"><span class="fan-source">one Oracle<br>data model</span></div>
-          <div class="fan-rail"></div>
-          <div class="fan-outs">
-            <div class="fan-out"><code>$dia-data-model-intake</code><em>&rarr; model-facts.yaml</em></div>
-            <div class="fan-out"><code>$dia-data-model-profiler</code><em>&rarr; profile</em></div>
-            <div class="fan-out"><code>$dia-data-model-docs</code><em>&rarr; four docs</em></div>
-          </div>
-        </div>
-        <p class="fan-note"><i data-lucide="git-branch"></i>Intake produces the shared facts file; profiler and docs are independent branches that consume it.</p>
-        <div class="pb-foot">
-          <span class="pb-meta"><i data-lucide="list-ordered"></i>3 skills &middot; intake first, then run either branch</span>
-          <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/data-model-to-documentation.md">Open playbook<i data-lucide="arrow-right"></i></a>
-        </div>
-      </article>
     </div>
     <h3 class="pb-kind">Pipelines <span class="pattern-chip pipeline">Pipeline</span> <span class="pb-kind-note">linear handoffs, one direction</span></h3>
     <div class="pb-grid">
@@ -650,6 +632,19 @@ section[id]{scroll-margin-top:84px}
         <div class="pb-foot">
           <span class="pb-meta"><i data-lucide="list-ordered"></i>4 skills &middot; stop after mapping if that's enough</span>
           <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/business-questions-to-dashboard-mockup.md">Open playbook<i data-lucide="arrow-right"></i></a>
+        </div>
+      </article>
+      <article class="pb">
+        <h3>Data model to documentation</h3>
+        <p class="pb-desc">Extract facts from one Oracle BI Publisher data model, profile its structure for grain, filters, and lineage, then draft analyst-facing documentation. Stop after the profile when that's the deliverable.</p>
+        <ol class="steps">
+          <li><span class="step-num">1</span><code>$dia-data-model-intake</code></li>
+          <li><span class="step-num">2</span><code>$dia-data-model-profiler</code></li>
+          <li><span class="step-num">3</span><code>$dia-data-model-docs</code></li>
+        </ol>
+        <div class="pb-foot">
+          <span class="pb-meta"><i data-lucide="list-ordered"></i>3 skills &middot; stop after profiling if that's enough</span>
+          <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/data-model-to-documentation.md">Open playbook<i data-lucide="arrow-right"></i></a>
         </div>
       </article>
       <article class="pb">

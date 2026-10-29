@@ -32,7 +32,7 @@ Playbooks in [playbooks/](playbooks/) chain reviewed skills into end-to-end DIA 
 - [Business questions to dashboard mockup](playbooks/business-questions-to-dashboard-mockup.md) - create the analysis workspace, extract confirmed business questions and KPIs from the transcript, map them to the workspace dataset, and stop there or continue to a UCSD-branded HTML dashboard mockup with mock data.
 - [One transcript, many artifacts](playbooks/one-transcript-many-artifacts.md) - save one transcript, then derive meeting notes, requirements, a process map, or confirmed KPIs as the meeting needs.
 - [Workspace to first answer](playbooks/workspace-to-first-answer.md) - create the analysis workspace, link one source file, and answer ad hoc questions from it with read-only SQL.
-- [Data model to documentation](playbooks/data-model-to-documentation.md) - extract facts from one Oracle BI Publisher data model, then profile its structure and draft analyst-facing documentation from the same facts file.
+- [Data model to documentation](playbooks/data-model-to-documentation.md) - extract facts from one Oracle BI Publisher data model, profile its structure, then draft analyst-facing documentation in sequence.
 
 ## Install skills
 

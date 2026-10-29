@@ -44,7 +44,7 @@ Read the facts file and derive each section from its evidence:
 ## Write the profile
 
 1. Write `data-model-profile.md` using the profile template.
-2. Re-read the written file and verify that every claim cites a fact path and every unresolved interpretation says `Needs analyst confirmation.`
+2. Re-read the written file and verify that every claim is traceable to a cited fact path (a section-level citation is acceptable when all rows share the same path) and every unresolved interpretation says `Needs analyst confirmation.`
 3. Report the absolute output path and remind the user that no SQL was executed and no data source was contacted.
 
 ## Handle failures

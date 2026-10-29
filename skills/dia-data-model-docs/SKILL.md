@@ -18,6 +18,7 @@ Turn one extracted `model-facts.yaml` file into a consistent set of analyst-faci
 - Make every factual claim traceable to a field in `model-facts.yaml`. Cite the fact path or the containing fact path in the document.
 - Mark information that is not in the facts file as `Needs analyst confirmation.` Do not invent business purpose, definitions, refresh cadence, ownership, or data quality.
 - Obtain explicit user confirmation of the proposed business questions, gotchas, and grain before writing the final documents.
+- Keep chat output compact: the markdown files are the deliverable. Report paths, decisions, and next steps; do not paste full document contents into chat.
 - Do not overwrite, rename, move, or delete an existing document. Stop on any output-path conflict.
 - Do not publish to Project Hub, create ClickUp content, send email, or modify the source model.
 - Do not install, update, or remove skills while running this workflow.
@@ -46,6 +47,8 @@ Read [references/documentation-templates.md](references/documentation-templates.
 
 For every candidate question and gotcha, show the supporting fact path. Ask the user to confirm, edit, remove, or add items. Do not infer approval from silence.
 
+Present this as a compact confirmation summary: one short line per item plus its fact path. Do not draft full document text in chat; the user confirms decisions and then reads the finished files.
+
 ## Write the documents
 
 After the user confirms the interpretation and the four exact output paths:
@@ -55,7 +58,7 @@ After the user confirms the interpretation and the four exact output paths:
 3. Write `business-questions.md` using the business-questions template. Include only confirmed questions.
 4. Write `when-to-use.md` using the when-to-use template. Include confirmed gotchas and any `Needs analyst confirmation.` gaps.
 5. Re-read each written file and verify that it contains no unconfirmed factual claim and no placeholder from the templates.
-6. Report the four absolute output paths and remind the user that nothing was published or connected to a data source.
+6. Report only the four absolute output paths, remind the user that nothing was published or connected to a data source, and state the next step: review the markdown files directly and ask the harness to modify anything that needs changing. Do not paste, quote, or summarize the full contents of the documents in chat.
 
 ## Handle failures
 
