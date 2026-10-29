@@ -1,0 +1,7 @@
+interface:
+  display_name: "DIA Data Model Profiler"
+  short_description: "Profile grain, filters, logic, joins, and lineage from model facts"
+  default_prompt: "Use $dia-data-model-profiler to profile one model-facts.yaml file for grain, filters, hard-coded logic, join patterns, and source lineage."
+
+policy:
+  allow_implicit_invocation: false

@@ -2,7 +2,7 @@
 name: dia-dataset-profile
 description: Profile one CSV or Excel file with a read-only DuckDB helper and draft a dataset-profile report covering fields, distributions, missingness, candidate keys, anomalies, and suggested metrics or KPIs. Use only when explicitly invoked as $dia-dataset-profile. Does not connect to databases, modify the source file, or map confirmed KPIs.
 metadata:
-  status: development
+  status: testing
 ---
 
 # Dataset Profile

@@ -2,7 +2,7 @@
 name: dia-data-model-docs
 description: Draft four analyst-facing documents from one model-facts.yaml file. Use only when explicitly invoked as $dia-data-model-docs. Require analyst confirmation before finalizing business questions, gotchas, and grain.
 metadata:
-  status: development
+  status: testing
 ---
 
 # Draft data-model documentation
@@ -63,3 +63,4 @@ After the user confirms the interpretation and the four exact output paths:
 - If a fact referenced by the draft is missing, mark the corresponding statement `Needs analyst confirmation.` rather than guessing.
 - If output creation fails after some files were written, report every file that was created and the exact error. Do not delete or rewrite the created files.
 - If the user changes a confirmed fact during review, update the affected draft, show the change, and obtain confirmation again before writing.
+

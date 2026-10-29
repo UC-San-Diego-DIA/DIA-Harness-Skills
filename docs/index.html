@@ -132,7 +132,19 @@ section[id]{scroll-margin-top:84px}
 
 .section-head h2{font-size:30px;letter-spacing:-.01em;margin:0 0 6px}
 .section-head p{color:var(--muted);font-size:15.5px;margin:0 0 40px}
-
+.lifecycle-filter{display:flex;gap:10px;flex-wrap:wrap;margin:-22px 0 36px}
+.filter-chip{
+  position:relative;display:inline-flex;align-items:center;cursor:pointer;
+  font-size:12.5px;font-weight:700;color:var(--muted);
+  background:rgba(24,43,73,.06);padding:7px 12px;border-radius:5px;
+  transition:background .15s,color .15s;
+}
+.filter-chip input{position:absolute;opacity:0;pointer-events:none}
+.filter-chip:hover{background:rgba(24,43,73,.11)}
+.filter-chip:focus-within{outline:2px solid var(--turquoise);outline-offset:2px}
+.filter-chip.checked[data-value="production"]{background:var(--green);color:#fff}
+.filter-chip.checked[data-value="testing"]{background:var(--turquoise);color:var(--navy)}
+.filter-chip.checked[data-value="development"]{background:var(--navy);color:#fff}
 .skills{padding:56px 0 24px}
 .group{margin-bottom:48px}
 .group-head{display:flex;align-items:flex-start;gap:18px;margin-bottom:16px;flex-wrap:wrap}
@@ -150,6 +162,8 @@ section[id]{scroll-margin-top:84px}
   transition:border-color .15s,transform .15s,box-shadow .15s;
 }
 .skill:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:0 6px 16px rgba(24,43,73,.08)}
+.skill-hidden{display:none}
+.group-hidden{display:none}
 .skill-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;padding-right:70px}
 .status-chip{
   position:absolute;top:10px;right:10px;
@@ -186,13 +200,15 @@ section[id]{scroll-margin-top:84px}
   background:#fff;border:1px solid var(--line);border-radius:8px;
   padding:22px;display:flex;flex-direction:column;
 }
-.pb.span2{grid-column:span 2}
-.pb-tags{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.pb-tag{
-  align-self:flex-start;display:inline-flex;align-items:center;gap:8px;
-  font-size:12.5px;font-weight:700;color:var(--navy);
-  background:rgba(24,43,73,.07);padding:5px 10px;border-radius:5px;
+.pb.spanfull{grid-column:1 / -1}
+.pb-kind{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  margin:38px 0 14px;
+  font-size:16px;font-weight:800;color:var(--navy);
 }
+.pb-kind:first-of-type{margin-top:0}
+.pb-kind .pattern-chip{font-size:10px;padding:4px 8px}
+.pb-kind span.pb-kind-note{font-size:13.5px;font-weight:500;color:var(--muted);letter-spacing:0}
 .pattern-chip{
   display:inline-flex;align-items:center;gap:6px;
   font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
@@ -228,14 +244,6 @@ section[id]{scroll-margin-top:84px}
   color:var(--blue);font-weight:650;font-size:14px;text-decoration:none;
 }
 .btn-link:hover{text-decoration:underline}
-
-.legend{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 26px}
-.legend span{
-  display:inline-flex;align-items:center;gap:7px;
-  background:#fff;border:1px solid var(--line);border-radius:6px;
-  padding:6px 12px;font-size:13px;color:var(--navy);
-}
-.legend b{font-size:11px;text-transform:uppercase;letter-spacing:.05em}
 
 .fan{
   display:grid;grid-template-columns:118px 20px 1fr;gap:0 6px;
@@ -273,7 +281,7 @@ section[id]{scroll-margin-top:84px}
   .hero-grid{grid-template-columns:1fr;gap:36px}
   .explain-grid{grid-template-columns:1fr;gap:24px}
   .pb-grid{grid-template-columns:1fr}
-  .pb.span2{grid-column:auto}
+  .pb.spanfull{grid-column:auto}
   .fan{grid-template-columns:96px 16px 1fr}
   .fan-out::before{width:13px;left:-13px}
   .fan-src::after{width:8px;right:-2px}
@@ -354,7 +362,7 @@ section[id]{scroll-margin-top:84px}
     <div class="explain-item">
       <i data-lucide="route"></i>
       <h3>What is a playbook?</h3>
-      <p>A curated sequence of skills for an end-to-end workflow. Each skill's output becomes the next skill's input.</p>
+      <p>A curated sequence of skills for an end-to-end workflow. Pipelines hand off in one direction; fan-outs branch one shared input into several outputs.</p>
     </div>
     <div class="explain-item">
       <i data-lucide="trending-up"></i>
@@ -370,23 +378,36 @@ section[id]{scroll-margin-top:84px}
       <h2>Skills</h2>
       <p>Grouped by when you reach for them. Every skill is invoked explicitly with its <code>$dia-</code> command.</p>
     </div>
+    <div class="lifecycle-filter" id="lifecycle-filter" role="group" aria-label="Filter skills by lifecycle">
+      <label class="filter-chip" data-value="production"><input type="checkbox" value="production" checked>production</label>
+      <label class="filter-chip" data-value="testing"><input type="checkbox" value="testing">testing</label>
+      <label class="filter-chip" data-value="development"><input type="checkbox" value="development">development</label>
+    </div>
 
     <div class="group" id="g1">
       <div class="group-head">
         <span class="group-num">01</span>
         <div class="group-title">
           <h3><span class="dot" style="--c:var(--blue)"></span>Connect &amp; Setup</h3>
-          <p>One-time connections. Everything else depends on this.</p>
+          <p>One-time connections and project setup. Everything else depends on this.</p>
         </div>
       </div>
       <div class="skill-grid">
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-clickup-mcp-setup" title="View dia-clickup-mcp-setup on GitHub">
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-clickup-mcp-setup" title="View dia-clickup-mcp-setup on GitHub" data-status="production">
           <span class="status-chip production">production</span>
           <div class="skill-head">
             <h4 class="skill-cmd">$dia-clickup-mcp-setup</h4>
             <i data-lucide="github"></i>
           </div>
           <p>Connect TritonAI Harness to ClickUp through official OAuth and verify Workspace access.</p>
+        </a>
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-setup-project-folder" title="View dia-setup-project-folder on GitHub" data-status="development">
+          <span class="status-chip development">development</span>
+          <div class="skill-head">
+            <h4 class="skill-cmd">$dia-setup-project-folder</h4>
+            <i data-lucide="github"></i>
+          </div>
+          <p>Create or validate a business-insights project folder connected to existing ClickUp resources.</p>
         </a>
       </div>
     </div>
@@ -400,7 +421,7 @@ section[id]{scroll-margin-top:84px}
         </div>
       </div>
       <div class="skill-grid">
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-meeting-notes" title="View dia-transcript-to-meeting-notes on GitHub">
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-meeting-notes" title="View dia-transcript-to-meeting-notes on GitHub" data-status="testing">
           <span class="status-chip testing">testing</span>
           <div class="skill-head">
             <h4 class="skill-cmd">$dia-transcript-to-meeting-notes</h4>
@@ -408,7 +429,7 @@ section[id]{scroll-margin-top:84px}
           </div>
           <p>Turn a Zoom transcript into detailed local meeting notes, with no ClickUp writes.</p>
         </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-kpis" title="View dia-transcript-to-kpis on GitHub">
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-kpis" title="View dia-transcript-to-kpis on GitHub" data-status="testing">
           <span class="status-chip testing">testing</span>
           <div class="skill-head">
             <h4 class="skill-cmd">$dia-transcript-to-kpis</h4>
@@ -416,7 +437,7 @@ section[id]{scroll-margin-top:84px}
           </div>
           <p>Extract confirmed business questions and KPIs from a requirements transcript into Markdown and kpi-facts.yaml.</p>
         </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-requirements" title="View dia-transcript-to-requirements on GitHub">
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-requirements" title="View dia-transcript-to-requirements on GitHub" data-status="testing">
           <span class="status-chip testing">testing</span>
           <div class="skill-head">
             <h4 class="skill-cmd">$dia-transcript-to-requirements</h4>
@@ -424,13 +445,21 @@ section[id]{scroll-margin-top:84px}
           </div>
           <p>Turn a business-owner requirements conversation into a structured requirements document.</p>
         </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-process-map" title="View dia-transcript-to-process-map on GitHub">
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-process-map" title="View dia-transcript-to-process-map on GitHub" data-status="testing">
           <span class="status-chip testing">testing</span>
           <div class="skill-head">
             <h4 class="skill-cmd">$dia-transcript-to-process-map</h4>
             <i data-lucide="github"></i>
           </div>
           <p>Save the transcript, outline the discussed process and its current-state timing for your confirmation, then render the approved map as a diagram.</p>
+        </a>
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-process-meeting-transcript" title="View dia-process-meeting-transcript on GitHub" data-status="development">
+          <span class="status-chip development">development</span>
+          <div class="skill-head">
+            <h4 class="skill-cmd">$dia-process-meeting-transcript</h4>
+            <i data-lucide="github"></i>
+          </div>
+          <p>Draft meeting notes and create approved ClickUp tasks from one readable transcript in a schema-1 project folder.</p>
         </a>
       </div>
     </div>
@@ -444,7 +473,7 @@ section[id]{scroll-margin-top:84px}
         </div>
       </div>
       <div class="skill-grid">
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-start-my-day" title="View dia-start-my-day on GitHub">
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-start-my-day" title="View dia-start-my-day on GitHub" data-status="testing">
           <span class="status-chip testing">testing</span>
           <div class="skill-head">
             <h4 class="skill-cmd">$dia-start-my-day</h4>
@@ -460,11 +489,19 @@ section[id]{scroll-margin-top:84px}
         <span class="group-num">04</span>
         <div class="group-title">
           <h3><span class="dot" style="--c:var(--magenta)"></span>Data Analysis</h3>
-          <p>Scaffold full analysis workspaces or answer one CSV or Excel file with read-only SQL.</p>
+          <p>Scaffold analysis workspaces, profile CSV or Excel datasets, map KPIs, and answer one file with read-only SQL.</p>
         </div>
       </div>
       <div class="skill-grid">
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-analyze-local-data" title="View dia-analyze-local-data on GitHub">
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-new-data-analysis-workspace" title="View dia-new-data-analysis-workspace on GitHub" data-status="production">
+          <span class="status-chip production">production</span>
+          <div class="skill-head">
+            <h4 class="skill-cmd">$dia-new-data-analysis-workspace</h4>
+            <i data-lucide="github"></i>
+          </div>
+          <p>Scaffold a fresh local data-analysis workspace with raw inputs, numbered pipeline scripts, dashboard-ready output, and a home for meeting transcripts.</p>
+        </a>
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-analyze-local-data" title="View dia-analyze-local-data on GitHub" data-status="testing">
           <span class="status-chip testing">testing</span>
           <div class="skill-head">
             <h4 class="skill-cmd">$dia-analyze-local-data</h4>
@@ -472,7 +509,7 @@ section[id]{scroll-margin-top:84px}
           </div>
           <p>Answer ad hoc questions about one CSV or Excel file inside a data-analysis workspace with a read-only DuckDB view under <code>scratch/analysis</code>.</p>
         </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-kpi-data-mapping" title="View dia-kpi-data-mapping on GitHub">
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-kpi-data-mapping" title="View dia-kpi-data-mapping on GitHub" data-status="testing">
           <span class="status-chip testing">testing</span>
           <div class="skill-head">
             <h4 class="skill-cmd">$dia-kpi-data-mapping</h4>
@@ -480,13 +517,60 @@ section[id]{scroll-margin-top:84px}
           </div>
           <p>Validate a confirmed KPI artifact against one named dataset and draft a declarative mapping report naming required fields, calculations to build, and data gaps.</p>
         </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-new-data-analysis-workspace" title="View dia-new-data-analysis-workspace on GitHub">
-          <span class="status-chip production">production</span>
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-dashboard-mockup" title="View dia-dashboard-mockup on GitHub" data-status="testing">
+          <span class="status-chip testing">testing</span>
           <div class="skill-head">
-            <h4 class="skill-cmd">$dia-new-data-analysis-workspace</h4>
+            <h4 class="skill-cmd">$dia-dashboard-mockup</h4>
             <i data-lucide="github"></i>
           </div>
-          <p>Scaffold a fresh local data-analysis workspace with raw inputs, numbered pipeline scripts, dashboard-ready output, and a home for meeting transcripts.</p>
+          <p>Render a UCSD-branded HTML dashboard mockup with mock data and explicit data-gap panels from one KPI data mapping report.</p>
+        </a>
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-dataset-profile" title="View dia-dataset-profile on GitHub" data-status="testing">
+          <span class="status-chip testing">testing</span>
+          <div class="skill-head">
+            <h4 class="skill-cmd">$dia-dataset-profile</h4>
+            <i data-lucide="github"></i>
+          </div>
+          <p>Profile one CSV or Excel file with fields, distributions, missingness, candidate keys, anomalies, and suggested metrics or KPIs.</p>
+        </a>
+
+
+
+      </div>
+    </div>
+
+    <div class="group" id="g5">
+      <div class="group-head">
+        <span class="group-num">05</span>
+        <div class="group-title">
+          <h3><span class="dot" style="--c:var(--yellow)"></span>Documentation</h3>
+          <p>Extract facts from Oracle BI Publisher data models, profile their structure, and produce analyst-facing documentation.</p>
+        </div>
+      </div>
+      <div class="skill-grid">
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-data-model-intake" title="View dia-data-model-intake on GitHub" data-status="testing">
+          <span class="status-chip testing">testing</span>
+          <div class="skill-head">
+            <h4 class="skill-cmd">$dia-data-model-intake</h4>
+            <i data-lucide="github"></i>
+          </div>
+          <p>Extract deterministic facts from one Oracle BI Publisher data model into model-facts.yaml.</p>
+        </a>
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-data-model-profiler" title="View dia-data-model-profiler on GitHub" data-status="testing">
+          <span class="status-chip testing">testing</span>
+          <div class="skill-head">
+            <h4 class="skill-cmd">$dia-data-model-profiler</h4>
+            <i data-lucide="github"></i>
+          </div>
+          <p>Profile one model-facts.yaml for grain, filters, hard-coded logic, join patterns, and source lineage.</p>
+        </a>
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-data-model-docs" title="View dia-data-model-docs on GitHub" data-status="testing">
+          <span class="status-chip testing">testing</span>
+          <div class="skill-head">
+            <h4 class="skill-cmd">$dia-data-model-docs</h4>
+            <i data-lucide="github"></i>
+          </div>
+          <p>Draft analyst-facing documents, including a data dictionary and business-questions catalog, from one confirmed model-facts.yaml.</p>
         </a>
       </div>
     </div>
@@ -498,18 +582,11 @@ section[id]{scroll-margin-top:84px}
   <div class="shell">
     <div class="section-head">
       <h2>Playbooks</h2>
-      <p>Reviewed skills strung into end-to-end workflows, marked as pipelines or fan-outs.</p>
+      <p>Reviewed skills strung into end-to-end workflows. One fan-out branches from a shared input; the pipelines hand off in one direction.</p>
     </div>
-    <div class="legend">
-      <span><b class="pattern-chip pipeline">Pipeline</b> linear handoffs, one direction</span>
-      <span><b class="pattern-chip fanout">Fan-out</b> one shared input, several outputs</span>
-    </div>
+    <h3 class="pb-kind">Fan-outs <span class="pattern-chip fanout">Fan-out</span> <span class="pb-kind-note">one shared input, several independent outputs</span></h3>
     <div class="pb-grid">
-      <article class="pb span2">
-        <div class="pb-tags">
-          <span class="pb-tag"><span class="dot" style="--c:var(--blue)"></span>Meetings</span>
-          <span class="pattern-chip fanout">Fan-out</span>
-        </div>
+      <article class="pb spanfull">
         <h3>One transcript, many artifacts</h3>
         <p class="pb-desc">Save one Zoom transcript, then pull whichever derived documents the meeting needs. Each branch runs on its own and asks its own confirmation.</p>
         <div class="fan">
@@ -528,11 +605,28 @@ section[id]{scroll-margin-top:84px}
           <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/one-transcript-many-artifacts.md">Open playbook<i data-lucide="arrow-right"></i></a>
         </div>
       </article>
-      <article class="pb">
-        <div class="pb-tags">
-          <span class="pb-tag"><span class="dot" style="--c:var(--blue)"></span>Meetings</span>
-          <span class="pattern-chip pipeline">Pipeline</span>
+      <article class="pb spanfull">
+        <h3>Data model to documentation</h3>
+        <p class="pb-desc">Extract facts from one Oracle BI Publisher data model, then profile its structure and draft analyst-facing documentation from the same facts file.</p>
+        <div class="fan">
+          <div class="fan-src"><span class="fan-source">one Oracle<br>data model</span></div>
+          <div class="fan-rail"></div>
+          <div class="fan-outs">
+            <div class="fan-out"><code>$dia-data-model-intake</code><em>&rarr; model-facts.yaml</em></div>
+            <div class="fan-out"><code>$dia-data-model-profiler</code><em>&rarr; profile</em></div>
+            <div class="fan-out"><code>$dia-data-model-docs</code><em>&rarr; four docs</em></div>
+          </div>
         </div>
+        <p class="fan-note"><i data-lucide="git-branch"></i>Intake produces the shared facts file; profiler and docs are independent branches that consume it.</p>
+        <div class="pb-foot">
+          <span class="pb-meta"><i data-lucide="list-ordered"></i>3 skills &middot; intake first, then run either branch</span>
+          <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/data-model-to-documentation.md">Open playbook<i data-lucide="arrow-right"></i></a>
+        </div>
+      </article>
+    </div>
+    <h3 class="pb-kind">Pipelines <span class="pattern-chip pipeline">Pipeline</span> <span class="pb-kind-note">linear handoffs, one direction</span></h3>
+    <div class="pb-grid">
+      <article class="pb">
         <h3>Requirements to process map</h3>
         <p class="pb-desc">Turn a business-owner requirements conversation into a structured requirements document and a rendered process map.</p>
         <ol class="steps">
@@ -545,27 +639,20 @@ section[id]{scroll-margin-top:84px}
         </div>
       </article>
       <article class="pb">
-        <div class="pb-tags">
-          <span class="pb-tag"><span class="dot" style="--c:var(--magenta)"></span>Data</span>
-          <span class="pattern-chip pipeline">Pipeline</span>
-        </div>
-        <h3>Business questions to data mapping</h3>
-        <p class="pb-desc">Create the analysis workspace, confirm business questions and KPIs from the transcript, and map them to the dataset.</p>
+        <h3>Business questions to dashboard mockup</h3>
+        <p class="pb-desc">Create the analysis workspace, confirm business questions and KPIs from the transcript, and map them to the dataset. Stop at the mapping, or continue to a UCSD-branded HTML mockup with mock data and data-gap panels.</p>
         <ol class="steps">
           <li><span class="step-num">1</span><code>$dia-new-data-analysis-workspace</code></li>
           <li><span class="step-num">2</span><code>$dia-transcript-to-kpis</code></li>
           <li><span class="step-num">3</span><code>$dia-kpi-data-mapping</code></li>
+          <li><span class="step-num">4</span><code>$dia-dashboard-mockup</code></li>
         </ol>
         <div class="pb-foot">
-          <span class="pb-meta"><i data-lucide="list-ordered"></i>3 skills &middot; per analysis project</span>
-          <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/business-questions-to-data-mapping.md">Open playbook<i data-lucide="arrow-right"></i></a>
+          <span class="pb-meta"><i data-lucide="list-ordered"></i>4 skills &middot; stop after mapping if that's enough</span>
+          <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/business-questions-to-dashboard-mockup.md">Open playbook<i data-lucide="arrow-right"></i></a>
         </div>
       </article>
       <article class="pb">
-        <div class="pb-tags">
-          <span class="pb-tag"><span class="dot" style="--c:var(--magenta)"></span>Data</span>
-          <span class="pattern-chip pipeline">Pipeline</span>
-        </div>
         <h3>Workspace to first answer</h3>
         <p class="pb-desc">Scaffold the workspace, drop one file in <code>data/raw/</code>, link it, and answer ad hoc questions read-only.</p>
         <ol class="steps">
@@ -647,6 +734,37 @@ document.querySelectorAll('.copy-btn').forEach(function (button) {
     }
   });
 });
+
+var lifecycleFilter = document.getElementById('lifecycle-filter');
+if (lifecycleFilter) {
+  var applyLifecycleFilter = function () {
+    var selected = [];
+    lifecycleFilter.querySelectorAll('input[type="checkbox"]').forEach(function (input) {
+      if (input.checked) {
+        selected.push(input.value);
+      }
+      input.closest('.filter-chip').classList.toggle('checked', input.checked);
+    });
+    document.querySelectorAll('#skills .group').forEach(function (group) {
+      var visible = 0;
+      group.querySelectorAll('.skill').forEach(function (skill) {
+        var show = selected.indexOf(skill.getAttribute('data-status')) !== -1;
+        skill.classList.toggle('skill-hidden', !show);
+        if (show) {
+          visible += 1;
+        }
+      });
+      group.classList.toggle('group-hidden', visible === 0);
+    });
+  };
+  lifecycleFilter.addEventListener('change', applyLifecycleFilter);
+  applyLifecycleFilter();
+}
 </script>
 </body>
 </html>
+
+
+
+
+

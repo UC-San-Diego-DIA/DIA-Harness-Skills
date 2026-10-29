@@ -102,6 +102,9 @@ try {
     $expectedStatusSkills = @(
         'dia-analyze-local-data',
         'dia-clickup-mcp-setup',
+        'dia-data-model-docs',
+        'dia-data-model-intake',
+        'dia-data-model-profiler',
         'dia-new-data-analysis-workspace',
         'dia-start-my-day',
         'dia-transcript-to-meeting-notes',
@@ -114,8 +117,6 @@ try {
     }
 
     foreach ($unexpectedSkill in @(
-        'dia-data-model-docs',
-        'dia-data-model-intake',
         'dia-process-meeting-transcript',
         'dia-setup-project-folder'
     )) {
@@ -153,3 +154,4 @@ finally {
         Remove-Item -LiteralPath $resolvedTestRoot -Recurse -Force
     }
 }
+

@@ -7,8 +7,9 @@ This repository is the reviewed source for DIA skills used in TritonAI Harness o
 | Skill | Use it for | Invocation |
 | --- | --- | --- |
 | [`dia-analyze-local-data`](skills/dia-analyze-local-data/SKILL.md) *(testing)* | Answering ad hoc questions about one CSV or Excel file inside a data-analysis workspace, via a linked DuckDB view under `scratch/analysis/` | `$dia-analyze-local-data` |
-| [`dia-dataset-profile`](skills/dia-dataset-profile/SKILL.md) *(development)* | Profiling one CSV or Excel file: fields, distributions, missingness, candidate keys, anomalies, and suggested metrics or KPIs | `$dia-dataset-profile` |
+| [`dia-dataset-profile`](skills/dia-dataset-profile/SKILL.md) *(testing)* | Profiling one CSV or Excel file: fields, distributions, missingness, candidate keys, anomalies, and suggested metrics or KPIs | `$dia-dataset-profile` |
 | [`dia-clickup-mcp-setup`](skills/dia-clickup-mcp-setup/SKILL.md) *(production)* | Connecting TritonAI Harness to ClickUp through the official OAuth MCP server | `$dia-clickup-mcp-setup` |
+| [`dia-dashboard-mockup`](skills/dia-dashboard-mockup/SKILL.md) *(testing)* | Rendering a UCSD-branded HTML dashboard mockup with mock data and explicit data-gap panels from one KPI data mapping report | `$dia-dashboard-mockup` |
 | [`dia-data-model-docs`](skills/dia-data-model-docs/SKILL.md) *(development)* | Drafting four analyst-facing documents from one extracted model-facts file | `$dia-data-model-docs` |
 | [`dia-data-model-intake`](skills/dia-data-model-intake/SKILL.md) *(development)* | Extracting deterministic facts from one Oracle BI Publisher data model | `$dia-data-model-intake` |
 | [`dia-kpi-data-mapping`](skills/dia-kpi-data-mapping/SKILL.md) *(testing)* | Mapping confirmed KPIs to one named dataset: required fields, calculations to build, and data gaps | `$dia-kpi-data-mapping` |
@@ -21,16 +22,17 @@ This repository is the reviewed source for DIA skills used in TritonAI Harness o
 | [`dia-setup-project-folder`](skills/dia-setup-project-folder/SKILL.md) *(development)* | Creating or validating a business-insights project folder connected to ClickUp | `$dia-setup-project-folder` |
 | [`dia-start-my-day`](skills/dia-start-my-day/SKILL.md) *(testing)* | Choosing today's focus from ClickUp, Outlook calendar, and Outlook mail | `$dia-start-my-day` |
 
-Each skill's `SKILL.md` frontmatter declares its lifecycle with `metadata.status: development`, `testing`, or `production`. Skills start in development, get promoted to testing, and finally to production. The landing page in `docs/index.html` catalogs production and testing skills, marks each entry with a small lifecycle indicator, and the repository validator enforces that rule.
+Each skill's `SKILL.md` frontmatter declares its lifecycle with `metadata.status: development`, `testing`, or `production`. Skills start in development, get promoted to testing, and finally to production. The landing page in `docs/index.html` catalogs every skill behind a lifecycle filter with production selected by default, marks each entry with a small lifecycle indicator, sorts entries production, testing, then development, and the repository validator enforces that every skill appears.
 
 ## Playbooks
 
 Playbooks in [playbooks/](playbooks/) chain reviewed skills into end-to-end DIA workflows:
 
 - [Requirements to process map](playbooks/requirements-to-process-map.md) - turn a requirements conversation into a structured requirements document and a rendered process map.
-- [Business questions to data mapping](playbooks/business-questions-to-data-mapping.md) - create the analysis workspace, extract confirmed business questions and KPIs from the transcript, and map them to the workspace dataset.
+- [Business questions to dashboard mockup](playbooks/business-questions-to-dashboard-mockup.md) - create the analysis workspace, extract confirmed business questions and KPIs from the transcript, map them to the workspace dataset, and stop there or continue to a UCSD-branded HTML dashboard mockup with mock data.
 - [One transcript, many artifacts](playbooks/one-transcript-many-artifacts.md) - save one transcript, then derive meeting notes, requirements, a process map, or confirmed KPIs as the meeting needs.
 - [Workspace to first answer](playbooks/workspace-to-first-answer.md) - create the analysis workspace, link one source file, and answer ad hoc questions from it with read-only SQL.
+- [Data model to documentation](playbooks/data-model-to-documentation.md) - extract facts from one Oracle BI Publisher data model, then profile its structure and draft analyst-facing documentation from the same facts file.
 
 ## Install skills
 
@@ -41,7 +43,7 @@ pwsh -File .\scripts\install-skill.ps1 -Skill dia-start-my-day
 pwsh -File .\scripts\install-skill.ps1 -Skill dia-start-my-day, dia-setup-project-folder
 ```
 
-To install every skill in the repository at once, including development skills that are not listed on the landing page, run:
+To install every skill in the repository at once, including development skills, run:
 
 ```powershell
 pwsh -File .\scripts\install-skill.ps1 -All
@@ -95,3 +97,5 @@ The validator checks skill packages, local Markdown links, invocation policy, an
 ## Security
 
 Do not commit source CSVs, DuckDB databases, analysis outputs, ClickUp tokens, OAuth credentials, copied user configuration, task exports, or personal task IDs. Shared workspace and space IDs are allowed when they identify an approved team destination.
+
+

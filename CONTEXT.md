@@ -48,6 +48,10 @@ _Avoid_: Field mapping, Data dictionary
 A reusable analytical deliverable through which stakeholders access or use data, such as a Tableau dashboard.
 _Avoid_: Dashboard file, Report
 
+**Dashboard mockup**:
+A self-contained HTML prototype of a data product, rendered from a KPI data mapping report with mock data and explicit data-gap panels. It is a review artifact, never a working dashboard.
+_Avoid_: Prototype, Wireframe
+
 **Analysis workspace**:
 The per-file working area under `scratch/analysis/` of a data-analysis workspace, holding one analysis link, recorded questions, and their SQL.
 _Avoid_: Business-analysis space, Analysis area

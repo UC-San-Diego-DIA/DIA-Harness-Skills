@@ -37,6 +37,8 @@ Only add optional directories when the skill uses them. Do not add a README or c
 
 `dia-clickup-mcp-setup` owns configuration, OAuth login, restart guidance, and read-only connection verification. It does not own ClickUp task management, workflow rules, legacy server migration, or fallback authentication.
 
+`dia-dashboard-mockup` owns rendering one confirmed KPI data mapping report into a single self-contained UCSD-branded HTML dashboard mockup with mock data and explicit data-gap panels. It does not produce mapping reports, KPI artifacts, or requirements documents, read datasets, execute calculations, publish or send anything, or replace real dashboards.
+
 dia-dataset-profile owns a one-time profile of one CSV or Excel file: field inventory, distributions, missingness, candidate keys, anomalies, and suggested metrics or KPIs, plus one-off answers to business questions the profile surfaces. It does not create workspaces, keep a question history, map confirmed KPIs, execute calculations, or produce other deliverables.
 
 `dia-data-model-intake` owns local, deterministic extraction of facts from one Oracle BI Publisher data model into `model-facts.yaml`. It does not execute the model's SQL, connect to data sources, interpret business meaning, author documentation, or change source files.

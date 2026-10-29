@@ -146,6 +146,24 @@ else {
 }
 
 $indexPagePath = Join-Path $repositoryRoot 'docs\index.html'
+$indexPageText = if (Test-Path -LiteralPath $indexPagePath -PathType Leaf) { Get-Content -Raw -LiteralPath $indexPagePath } else { '' }
+$playbooksRoot = Join-Path $repositoryRoot 'playbooks'
+$readmePath = Join-Path $repositoryRoot 'README.md'
+$readmeText = if (Test-Path -LiteralPath $readmePath -PathType Leaf) { Get-Content -Raw -LiteralPath $readmePath } else { '' }
+if (Test-Path -LiteralPath $playbooksRoot -PathType Container) {
+    $playbookFiles = @(Get-ChildItem -LiteralPath $playbooksRoot -File -Filter '*.md')
+    foreach ($playbookFile in $playbookFiles) {
+        $playbookName = $playbookFile.BaseName
+        $playbookLink = "playbooks/$($playbookName).md"
+        if ($indexPageText -and -not $indexPageText.Contains($playbookLink)) {
+            Add-ValidationError "docs/index.html: playbook '$playbookName' has no card linking to $playbookLink"
+        }
+        if ($readmeText -and -not $readmeText.Contains($playbookLink)) {
+            Add-ValidationError "README.md: playbook '$playbookName' is not listed"
+        }
+    }
+}
+
 if (Test-Path -LiteralPath $indexPagePath -PathType Leaf) {
     $indexPageText = Get-Content -Raw -LiteralPath $indexPagePath
     foreach ($catalogSkill in $catalogSkills) {
@@ -154,8 +172,8 @@ if (Test-Path -LiteralPath $indexPagePath -PathType Leaf) {
         }
     }
     foreach ($developmentSkill in $developmentSkills) {
-        if ($indexPageText.Contains('$' + $developmentSkill)) {
-            Add-ValidationError "docs/index.html: development skill '$developmentSkill' must not appear in the landing page catalog"
+        if (-not $indexPageText.Contains('$' + $developmentSkill)) {
+            Add-ValidationError "docs/index.html: development skill '$developmentSkill' must appear in the landing page catalog"
         }
     }
 }
@@ -241,3 +259,6 @@ if ($errors.Count -gt 0) {
 }
 
 Write-Host 'Repository validation passed.'
+
+
+

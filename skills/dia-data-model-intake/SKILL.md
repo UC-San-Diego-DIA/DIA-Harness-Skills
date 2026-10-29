@@ -2,7 +2,7 @@
 name: dia-data-model-intake
 description: Extract deterministic facts from one Oracle BI Publisher data model into model-facts.yaml. Use only when explicitly invoked as $dia-data-model-intake. Do not execute the model's SQL or author its documentation.
 metadata:
-  status: development
+  status: testing
 ---
 
 # Extract data-model facts
@@ -57,3 +57,4 @@ The helper uses only the Python standard library. Do not install dependencies, e
 - If the output file already exists, do not rename, move, delete, or partially edit it.
 - If Python cannot run the helper, report the exact command and error. Do not replace Python, install dependencies, or use another extraction method.
 - If a warning or extraction result looks incomplete, report that observation without changing the facts file. The user may need to supply a different model file.
+
