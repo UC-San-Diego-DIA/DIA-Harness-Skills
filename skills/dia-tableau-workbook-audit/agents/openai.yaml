@@ -1,0 +1,7 @@
+interface:
+  display_name: "DIA Tableau Workbook Audit"
+  short_description: "Audit one Tableau workbook's sheet and parameter inventory"
+  default_prompt: "Use $dia-tableau-workbook-audit to produce a factual workbook audit from one workbook-facts.yaml file."
+
+policy:
+  allow_implicit_invocation: false

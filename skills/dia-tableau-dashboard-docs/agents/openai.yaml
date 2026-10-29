@@ -1,0 +1,7 @@
+interface:
+  display_name: "DIA Tableau Dashboard Docs"
+  short_description: "Draft internal documentation for one Tableau dashboard set"
+  default_prompt: "Use $dia-tableau-dashboard-docs to draft internal dashboard-reference and sheet-specs documentation from one workbook-facts.yaml file."
+
+policy:
+  allow_implicit_invocation: false
