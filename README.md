@@ -22,9 +22,9 @@ This repository is the reviewed source for DIA skills used in TritonAI Harness o
 | [`dia-transcript-to-kpis`](skills/dia-transcript-to-kpis/SKILL.md) *(testing)* | Extracting confirmed business questions and KPIs from a requirements transcript into Markdown and `kpi-facts.yaml` | `$dia-transcript-to-kpis` |
 | [`dia-process-meeting-transcript`](skills/dia-process-meeting-transcript/SKILL.md) *(development)* | Turning a project transcript into meeting notes and DIA-owned ClickUp tasks | `$dia-process-meeting-transcript` |
 | [`dia-setup-project-folder`](skills/dia-setup-project-folder/SKILL.md) *(development)* | Creating or validating a business-insights project folder connected to ClickUp | `$dia-setup-project-folder` |
-| [`dia-tableau-dashboard-docs`](skills/dia-tableau-dashboard-docs/SKILL.md) *(development)* | Drafting internal dashboard-reference and sheet-specs documentation from one workbook-facts file | `$dia-tableau-dashboard-docs` |
-| [`dia-tableau-workbook-audit`](skills/dia-tableau-workbook-audit/SKILL.md) *(development)* | Auditing one Tableau workbook's facts: sheet usage, orphan sheets, duplicate names, calculation reuse, and parameters | `$dia-tableau-workbook-audit` |
-| [`dia-tableau-workbook-intake`](skills/dia-tableau-workbook-intake/SKILL.md) *(development)* | Extracting deterministic facts from one Tableau workbook package into workbook-facts.yaml | `$dia-tableau-workbook-intake` |
+| [`dia-tableau-dashboard-docs`](skills/dia-tableau-dashboard-docs/SKILL.md) *(testing)* | Drafting internal dashboard-reference and sheet-specs documentation from one workbook-facts file | `$dia-tableau-dashboard-docs` |
+| [`dia-tableau-workbook-audit`](skills/dia-tableau-workbook-audit/SKILL.md) *(testing)* | Auditing one Tableau workbook's facts: sheet usage, orphan sheets, duplicate names, calculation reuse, and parameters | `$dia-tableau-workbook-audit` |
+| [`dia-tableau-workbook-intake`](skills/dia-tableau-workbook-intake/SKILL.md) *(testing)* | Extracting deterministic facts from one Tableau workbook package into workbook-facts.yaml | `$dia-tableau-workbook-intake` |
 | [`dia-start-my-day`](skills/dia-start-my-day/SKILL.md) *(testing)* | Choosing today's focus from ClickUp, Outlook calendar, and Outlook mail | `$dia-start-my-day` |
 
 Each skill's `SKILL.md` frontmatter declares its lifecycle with `metadata.status: development`, `testing`, or `production`. Skills start in development, get promoted to testing, and finally to production. The landing page in `docs/index.html` catalogs every skill behind a lifecycle filter with production selected by default, marks each entry with a small lifecycle indicator, sorts entries production, testing, then development, and the repository validator enforces that every skill appears.
@@ -64,7 +64,7 @@ Use `-All` when you help test skills that are still in development. Add `-Force`
 
 The installer copies the source skill into `%USERPROFILE%\.tritonai-harness\codex\skills`. It asks before replacing an installed copy and keeps the previous copy in a timestamped backup directory.
 
-`dia-transcript-to-process-map` additionally requires the MIT-licensed `diagram-design` skill from https://github.com/cathrynlavery/diagram-design. Install it into TritonAI Harness separately, for example with the Harness skill installer, before using that skill.
+`dia-transcript-to-process-map` additionally requires the MIT-licensed `diagram-design` skill from https://github.com/cathrynlavery/diagram-design; its skill package lives at `skills/diagram-design` in that repository. When the skill starts and `diagram-design` is not installed, it offers to install it on the user's behalf through the Harness skill installer and proceeds only after explicit approval. You can also install it yourself in advance with the Harness skill installer.
 
 After installation, restart TritonAI Harness so it reloads the skill catalog. Invoke the skill explicitly:
 

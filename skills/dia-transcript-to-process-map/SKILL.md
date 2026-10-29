@@ -13,9 +13,17 @@ The ROI baseline is the measurable current state: how much touch effort and elap
 
 ## Prerequisites
 
-The `diagram-design` skill renders the process map. It is the MIT-licensed diagram skill published at https://github.com/cathrynlavery/diagram-design and must be installed into TritonAI Harness as its own skill, for example through the Harness skill installer pointing at that repository. Do not vendor or copy its files into this skill.
+The `diagram-design` skill renders the process map. It is the MIT-licensed diagram skill published at https://github.com/cathrynlavery/diagram-design, and its skill package lives at `skills/diagram-design` in that repository. It must be installed into TritonAI Harness as its own skill. Do not vendor or copy its files into this skill.
 
-If it is missing, report that and stop with the installation step rather than substituting a hand-built diagram.
+At the start of the skill, before saving the transcript, check whether it is installed by looking for a `SKILL.md` file in the `diagram-design` skill directory of the user's Harness skills directory, for example `%USERPROFILE%\.tritonai-harness\codex\skills\diagram-design`. If it is present, continue to Step 1.
+
+If it is missing, offer to install it on the user's behalf before doing any other work:
+
+- Name exactly what would be installed: the MIT-licensed `diagram-design` skill from https://github.com/cathrynlavery/diagram-design, installed through the Harness skill installer into the user's Harness skills directory.
+- Ask for explicit approval, such as "Would you like me to install it for you?" A clear yes or thumbs-up is approval; silence, a new topic, or an unrelated question is not.
+- Only after the user approves, install it through the installed Harness skill installer, pointing it at the repository path https://github.com/cathrynlavery/diagram-design/tree/main/skills/diagram-design. Never vendor the files or hand-copy them into place.
+- After a successful install, tell the user the skill becomes available on their next turn and stop there. When the user continues, repeat the presence check before proceeding.
+- If the user declines or the install fails, report that the prerequisite is missing, give the manual installation step through the Harness skill installer, and stop rather than substituting a hand-built diagram.
 
 ## Boundaries
 

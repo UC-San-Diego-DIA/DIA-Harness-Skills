@@ -2,7 +2,7 @@
 name: dia-tableau-workbook-audit
 description: Produce a factual workbook audit from one workbook-facts.yaml file. Use only when explicitly invoked as $dia-tableau-workbook-audit. Report sheet usage, orphan sheets, duplicate names, calculation reuse, and parameters without business interpretation.
 metadata:
-  status: development
+  status: testing
 ---
 
 # Audit a Tableau workbook inventory

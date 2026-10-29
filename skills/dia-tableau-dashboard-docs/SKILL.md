@@ -2,7 +2,7 @@
 name: dia-tableau-dashboard-docs
 description: Draft internal dashboard-reference and sheet-specs documentation from one workbook-facts.yaml file. Use only when explicitly invoked as $dia-tableau-dashboard-docs. Require analyst confirmation before finalizing purpose statements and sheet roles.
 metadata:
-  status: development
+  status: testing
 ---
 
 # Draft Tableau dashboard documentation

@@ -2,7 +2,7 @@
 name: dia-tableau-workbook-intake
 description: Extract deterministic facts from one Tableau workbook package or workbook XML into workbook-facts.yaml. Use only when explicitly invoked as $dia-tableau-workbook-intake. Do not open Tableau, connect to Tableau Server, or read the package's data extract.
 metadata:
-  status: development
+  status: testing
 ---
 
 # Extract Tableau workbook facts
