@@ -57,6 +57,8 @@ dia-dataset-profile owns a one-time profile of one CSV or Excel file: field inve
 
 `dia-process-meeting-transcript` owns one transcript's meeting-note synthesis, Project Hub publication, DIA-owned action-item extraction, and approved task creation. It does not own transcript capture, project-folder setup, connection setup, general ClickUp task management, or follow-through in other systems.
 
+`dia-bi-publisher-sql-optimizer` owns analyzing one BI Publisher data model's SQL Monitor report and data engine log, producing an optimization report plus a candidate rewrite that preserves output columns, column order, and row grain, and running delta analysis when the user re-runs the candidate and supplies fresh diagnostics. It does not execute SQL, connect to a database, apply rewrites in BI Publisher, extract data-model facts, or map KPIs to datasets.
+
 `dia-start-my-day` owns read-only daily prioritization from ClickUp, Outlook calendar, and Outlook mail, plus user-approved follow-through in those systems. It does not own connection setup, other evidence sources, or unapproved external changes.
 
 `dia-setup-project-folder` owns local creation and validation of the schema-1 business-insights project folder for existing ClickUp resources. It does not create or change ClickUp content, migrate conflicting folders, process project files, analyze data, or create deliverables.

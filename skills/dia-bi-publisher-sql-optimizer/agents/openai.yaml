@@ -1,0 +1,7 @@
+interface:
+  display_name: "DIA BI Publisher SQL Optimizer"
+  short_description: "Optimize a BI Publisher data model's SQL without changing outputs"
+  default_prompt: "Use $dia-bi-publisher-sql-optimizer to analyze one BI Publisher data model's SQL Monitor report and data engine log, and produce a faster candidate rewrite with identical output columns."
+
+policy:
+  allow_implicit_invocation: false

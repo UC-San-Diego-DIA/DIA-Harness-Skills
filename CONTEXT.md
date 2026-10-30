@@ -100,6 +100,14 @@ _Avoid_: Automatic update, Data sync
 A skill that configures and verifies access from TritonAI Harness to an external service. It does not define day-to-day workflows in that service.
 _Avoid_: Integration workflow, task-management skill
 
+**SQL Monitor report**:
+The export produced by the BI Publisher Generate SQL Monitor Report button (SQL Monitor.txt), containing the SQL text, the plan with predicate information, and the SQL query timeout, plus real elapsed time, actual row counts, and actual temp usage per plan line when the platform captured actual execution statistics.
+_Avoid_: Query log, Estimated plan
+
+**Data engine log**:
+The Data Processor debug log exported through the BI Publisher View Engine Log button, containing total data generation time, estimated XML data size, and session and dataset settings. The button name refers to the export location, not to template rendering.
+_Avoid_: View engine log, Template log
+
 **Team destination**:
 A shared ClickUp location approved for DIA work. Team destinations may be identified by stable workspace, space, or list IDs stored in the repository.
 _Avoid_: Personal destination
