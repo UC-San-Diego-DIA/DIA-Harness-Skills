@@ -7,7 +7,7 @@ metadata:
 
 # Extract data-model facts
 
-Turn one Oracle BI Publisher data model into a local `model-facts.yaml` file. The output is a deterministic, machine-readable inventory of the model for later documentation and review.
+Turn one Oracle BI Publisher data model into a local `model-facts.yaml` file. The output is a deterministic, machine-readable inventory of the model for later documentation and review. The helper emits `schema_version: 2` facts with a provenance block (source path, SHA-256, UTC timestamp, extractor version, container kind), stable `model_id`/`dataset_id`/`column_id` values, a per-dataset `content_hash` computed from the stored SQL text, a static `model` facet (identity, sources, parameters, datasets, output columns, lineage), an extraction `run` facet (coded warnings, tool version, parse status per dataset), a `lineage` array of `input_table`/`query`/`output_column`/`join_keys` edges, and output-column descriptors enriched with derivable nullability and parameter bindings. Every select item's alias is bound even when it appears after END without AS (code `AMBIGUOUS_ALIAS_NO_AS`, severity `info`). The output is validated against `references\model-facts.schema.json` before it is written; see `references\model-facts-contract.md` for the full contract. An existing `schema_version: 1` facts file must not be patched in place: the only sanctioned path from v1 to v2 is this skill's `scripts\migrate_model_facts_v1_to_v2.py` helper, which reads the v1 file and writes a new v2 file without modifying the input.
 
 ## Boundaries
 
@@ -46,7 +46,7 @@ The helper uses only the Python standard library. Do not install dependencies, e
 
 1. Treat the run as successful only when the helper exits with code 0 and prints a JSON summary.
 2. Report the model name, container kind, dataset count, CTE count, source-table count, output-column count, parameter count, and output path.
-3. Report every warning verbatim. A successful extraction can still contain warnings that need review.
+3. Report every warning verbatim, including its `code`, `severity`, and `message`. Info-severity notes are binding confirmations, not defects; `warning`- and `error`-severity records signal issues that need review. A successful extraction can still contain warnings.
 4. Open `model-facts.yaml` only to verify that it is present and nonempty. Do not change it.
 5. Summarize what the skill did not do: no SQL was executed, no data source was contacted, and no documentation was authored.
 
@@ -54,6 +54,7 @@ The helper uses only the Python standard library. Do not install dependencies, e
 
 - Exit code 2 means an input or output path was relative. Resolve the path and ask the user before retrying.
 - Exit code 1 means the input was missing or unreadable, was not a supported container, was malformed, or the output already existed without `--replace`. Report the helper's exact error and stop.
+- Exit code 1 with a schema-validation message means the helper produced facts that do not match `references\model-facts.schema.json`. This is an internal extractor bug, not a user error. Report the violation list and stop; do not retry, patch the output, or hand-edit the artifact.
 - If the output file already exists, do not rename, move, delete, or partially edit it.
 - If Python cannot run the helper, report the exact command and error. Do not replace Python, install dependencies, or use another extraction method.
 - If a warning or extraction result looks incomplete, report that observation without changing the facts file. The user may need to supply a different model file.

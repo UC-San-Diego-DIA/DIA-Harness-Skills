@@ -177,7 +177,15 @@ try {
 
     $twbFacts = Get-Content -Raw -LiteralPath $twbOutput
     foreach ($needle in @(
-        'schema_version: 1',
+        'schema_version: 2',
+        'provenance:',
+        'run_id:',
+        'input_sha256',
+        'extracted_at:',
+        'completeness:',
+        'anomalies:',
+        'ORPHAN_SHEET',
+        'status: complete',
         'name: Example Overview',
         'title_text: Example Overview | Sample caveat.',
         'title_text: "Total Sales | How much revenue?"',
@@ -217,6 +225,82 @@ try {
         Pop-Location
     }
     Assert-True ($relativeExit -eq 2) "Extractor did not reject relative paths (exit code $relativeExit)."
+
+    $validator = Join-Path $repositoryRoot 'skills\dia-tableau-workbook-intake\scripts\validate_facts.py'
+    $migrator = Join-Path $repositoryRoot 'skills\dia-tableau-workbook-intake\scripts\migrate_facts_v1_to_v2.py'
+
+    & $Python $validator --facts $twbOutput | Out-Null
+    Assert-True ($LASTEXITCODE -eq 0) "Validator did not accept the extracted v2 facts (exit code $LASTEXITCODE)."
+
+    $v1Facts = Join-Path $resolvedTestRoot 'workbook-facts-v1.yaml'
+    Set-Content -LiteralPath $v1Facts -Value @'
+schema_version: 1
+workbook:
+  name: Migration Test
+  tableau_version: "18.1"
+  source_build: 2025.1.7 (20251.25.0825.1650)
+  source_platform: win
+  repository_location: ""
+extraction:
+  container: twb
+  entry: ""
+  timestamp: 2026-01-01T00:00:00+00:00
+  warnings:
+    - "dashboard 'Overview' has 2 empty zones"
+datasources:
+  - name: Parameters
+    caption: null
+parameters: []
+dashboards:
+  - name: Overview
+    datasources: []
+    size: {}
+    title_text: Overview
+    sheets: []
+    layout: []
+    filters: []
+    legends: []
+    parameter_controls: []
+    actions: []
+worksheets:
+  - name: Overview
+    title_text: ""
+    datasources: []
+    rows: []
+    cols: []
+    calculations: []
+    filters: []
+    mark_types: []
+    encodings: []
+derived:
+  sheets_on_dashboards: []
+  orphan_sheets:
+    - Overview
+  duplicate_name_groups: []
+'@ -Encoding UTF8
+
+    & $Python $validator --facts $v1Facts 2>$null | Out-Null
+    Assert-True ($LASTEXITCODE -eq 2) "Validator did not reject the v1 facts file (exit code $LASTEXITCODE)."
+
+    $v2Facts = Join-Path $resolvedTestRoot 'workbook-facts-v2.yaml'
+    & $Python $migrator --input $v1Facts --output $v2Facts | Out-Null
+    Assert-True ($LASTEXITCODE -eq 0) "Migration failed with exit code $LASTEXITCODE."
+    & $Python $migrator --input $v1Facts --output $v2Facts 2>$null | Out-Null
+    Assert-True ($LASTEXITCODE -eq 1) 'Migrator did not refuse to overwrite an existing output.'
+    $v2Content = Get-Content -Raw -LiteralPath $v2Facts
+    foreach ($needle in @(
+        'schema_version: 2',
+        'input_sha256: null',
+        'input_sha256_reason: migrated_from_v1',
+        'id: migration-test__dash__overview',
+        'id: migration-test__sheet__overview',
+        'code: EMPTY_ZONE',
+        'status: observed'
+    )) {
+        Assert-True ($v2Content.Contains($needle)) "Expected '$needle' in the migrated v2 facts output."
+    }
+    & $Python $validator --facts $v2Facts | Out-Null
+    Assert-True ($LASTEXITCODE -eq 0) "Validator did not accept the migrated v2 facts (exit code $LASTEXITCODE)."
 
     Write-Host 'Workbook intake tests passed.'
 }

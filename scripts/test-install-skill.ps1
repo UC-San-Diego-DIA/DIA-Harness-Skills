@@ -47,6 +47,8 @@ try {
     $meetingNoteFormat = Join-Path $destination 'dia-process-meeting-transcript\references\meeting-note-format.md'
     $dailyBriefTemplate = Join-Path $destination 'dia-start-my-day\assets\brief-template.html'
     $dataModelFactsHelper = Join-Path $destination 'dia-data-model-intake\scripts\extract_model_facts.py'
+    $dataModelFactsSchema = Join-Path $destination 'dia-data-model-intake\references\model-facts.schema.json'
+    $dataModelFactsIntakeContract = Join-Path $destination 'dia-data-model-intake\references\model-facts-contract.md'
     $dataModelFactsContract = Join-Path $destination 'dia-data-model-docs\references\model-facts-contract.md'
     $dataModelDocumentationTemplates = Join-Path $destination 'dia-data-model-docs\references\documentation-templates.md'
     Assert-True (Test-Path -LiteralPath $duckdbHelper -PathType Leaf) 'DuckDB helper script was not installed.'
@@ -57,6 +59,8 @@ try {
     Assert-True (Test-Path -LiteralPath $meetingNoteFormat -PathType Leaf) 'Meeting-note format reference was not installed.'
     Assert-True (Test-Path -LiteralPath $dailyBriefTemplate -PathType Leaf) 'Start My Day HTML template was not installed.'
     Assert-True (Test-Path -LiteralPath $dataModelFactsHelper -PathType Leaf) 'Data-model facts helper was not installed.'
+    Assert-True (Test-Path -LiteralPath $dataModelFactsSchema -PathType Leaf) 'Model-facts JSON Schema was not installed.'
+    Assert-True (Test-Path -LiteralPath $dataModelFactsIntakeContract -PathType Leaf) 'Model-facts intake contract was not installed.'
     Assert-True (Test-Path -LiteralPath $dataModelFactsContract -PathType Leaf) 'Model-facts contract was not installed.'
     Assert-True (Test-Path -LiteralPath $dataModelDocumentationTemplates -PathType Leaf) 'Data-model documentation templates were not installed.'
 

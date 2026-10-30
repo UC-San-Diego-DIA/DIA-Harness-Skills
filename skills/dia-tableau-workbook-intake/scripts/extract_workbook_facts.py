@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import io
 import json
 import re
@@ -14,7 +15,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
-SCHEMA_VERSION = 1
+from facts_common import (
+    SCHEMA_VERSION,
+    SCHEMA_URL,
+    TOOL_VERSION,
+    IdAssigner,
+    build_provenance,
+    slugify,
+)
 
 
 class ExtractionError(Exception):
@@ -73,7 +81,7 @@ def find_formatted_title(parent):
     return child(title, "formatted-text")
 
 
-def load_workbook_document(raw: bytes, warnings: list[str]):
+def load_workbook_document(raw: bytes, warnings: list[str], notes: list[dict]):
     """Return (xml_text, container, entry_name) from .twbx bytes or .twb bytes."""
     if raw[:2] == b"PK":
         try:
@@ -95,6 +103,7 @@ def load_workbook_document(raw: bytes, warnings: list[str]):
                 f"package contains {len(entries)} .twb entries; "
                 f"extracted {entries[0].filename}"
             )
+            notes.append({"code": "MULTIPLE_TWB_ENTRIES", "count": 1})
         entry = entries[0]
         try:
             xml_text = package.read(entry).decode("utf-8-sig")
@@ -235,7 +244,7 @@ def collect_captions(root, worksheets_element) -> dict:
     return captions
 
 
-def parse_dashboard(dashboard, worksheet_names, captions, warnings) -> dict:
+def parse_dashboard(dashboard, worksheet_names, captions, warnings, notes) -> dict:
     name = dashboard.get("name", "")
     datasources = []
     for datasource in descendants(dashboard, "datasource"):
@@ -267,8 +276,22 @@ def parse_dashboard(dashboard, worksheet_names, captions, warnings) -> dict:
             f"dashboard '{name}' has {len(unknown)} unrecognized zones; "
             f"zone types: {', '.join(dedupe_in_order(unknown))}"
         )
+        notes.append(
+            {
+                "code": "UNRECOGNIZED_ZONE",
+                "dashboard": name,
+                "count": len(unknown),
+            }
+        )
     if empty_zones:
         warnings.append(f"dashboard '{name}' has {empty_zones} empty zones")
+        notes.append(
+            {
+                "code": "EMPTY_ZONE",
+                "dashboard": name,
+                "count": empty_zones,
+            }
+        )
 
     actions = []
     actions_element = child(dashboard, "actions")
@@ -387,7 +410,7 @@ def parse_worksheet(worksheet, captions) -> dict:
     }
 
 
-def parse_workbook(root, warnings: list[str]) -> dict:
+def parse_workbook(root, warnings: list[str], notes: list[dict], expected: dict) -> dict:
     datasources = []
     parameters = []
     worksheets_element = child(root, "worksheets")
@@ -433,11 +456,13 @@ def parse_workbook(root, warnings: list[str]) -> dict:
     if dashboards_element is not None:
         for dashboard in children(dashboards_element, "dashboard"):
             dashboards.append(
-                parse_dashboard(dashboard, worksheet_names, captions, warnings)
+                parse_dashboard(dashboard, worksheet_names, captions, warnings, notes)
             )
 
-    if child(root, "stories") is not None:
+    stories_element = child(root, "stories")
+    if stories_element is not None:
         warnings.append("workbook contains stories; story sheets are not inventoried")
+        notes.append({"code": "STORY_NOT_INVENTORIED", "count": 1})
 
     sheets_on_dashboards = dedupe_in_order(
         sheet for dashboard in dashboards for sheet in dashboard["sheets"]
@@ -456,6 +481,18 @@ def parse_workbook(root, warnings: list[str]) -> dict:
     ]
 
     location = child(root, "repository-location")
+    expected["dashboards"] = len(children(dashboards_element, "dashboard")) if dashboards_element is not None else 0
+    expected["worksheets"] = len(children(worksheets_element, "worksheet")) if worksheets_element is not None else 0
+    expected["datasources"] = len(children(datasources_element, "datasource")) if datasources_element is not None else 0
+    expected["parameters"] = 0
+    if datasources_element is not None:
+        for datasource in children(datasources_element, "datasource"):
+            expected["parameters"] += sum(
+                1
+                for column in children(datasource, "column")
+                if column.get("param-domain-type")
+            )
+
     return {
         "schema_version": SCHEMA_VERSION,
         "workbook": {
@@ -483,6 +520,158 @@ def parse_workbook(root, warnings: list[str]) -> dict:
             "duplicate_name_groups": duplicate_name_groups,
         },
     }
+
+
+def assign_ids(facts: dict, assigner: IdAssigner):
+    """Attach stable IDs to every entity, in facts order."""
+    workbook_id = assigner.assign(
+        slugify(facts["workbook"]["name"]), "workbook"
+    )
+    facts["workbook"]["id"] = workbook_id
+    for index, datasource in enumerate(facts["datasources"]):
+        datasource["id"] = assigner.assign(
+            f"{workbook_id}__ds__{slugify(datasource['name'])}",
+            f"datasources[{index}]",
+        )
+    for index, parameter in enumerate(facts["parameters"]):
+        parameter["id"] = assigner.assign(
+            f"{workbook_id}__param__{slugify(parameter['caption'])}",
+            f"parameters[{index}]",
+        )
+    for index, dashboard in enumerate(facts["dashboards"]):
+        dashboard["id"] = assigner.assign(
+            f"{workbook_id}__dash__{slugify(dashboard['name'])}",
+            f"dashboards[{index}]",
+        )
+    sheet_ids = {}
+    for index, worksheet in enumerate(facts["worksheets"]):
+        sheet_id = assigner.assign(
+            f"{workbook_id}__sheet__{slugify(worksheet['name'])}",
+            f"worksheets[{index}]",
+        )
+        worksheet["id"] = sheet_id
+        sheet_ids[worksheet["name"]] = sheet_id
+        for calc_index, calculation in enumerate(worksheet["calculations"]):
+            calculation["id"] = assigner.assign(
+                f"{sheet_id}__calc__{slugify(calculation['caption'])}",
+                f"worksheets[{index}].calculations[{calc_index}]",
+            )
+    dashboard_ids = {
+        dashboard["name"]: dashboard["id"] for dashboard in facts["dashboards"]
+    }
+    return workbook_id, sheet_ids, dashboard_ids
+
+
+def build_anomalies(facts: dict, notes: list[dict], sheet_ids: dict, dashboard_ids: dict, assigner: IdAssigner) -> list[dict]:
+    """Convert extraction observations and v1-style warnings into typed records."""
+    observed: list[dict] = []
+
+    def record(code, affected_ids, evidence, count, status="observed"):
+        observed.append(
+            {
+                "code": code,
+                "rule_version": TOOL_VERSION,
+                "affected_ids": affected_ids,
+                "evidence": evidence,
+                "count": count,
+                "status": status,
+            }
+        )
+
+    for note in notes:
+        if note["code"] == "EMPTY_ZONE":
+            dashboard_index = next(
+                index
+                for index, dashboard in enumerate(facts["dashboards"])
+                if dashboard["id"] == dashboard_ids[note["dashboard"]]
+            )
+            record(
+                "EMPTY_ZONE",
+                [dashboard_ids[note["dashboard"]]],
+                [f"dashboards[{dashboard_index}].layout"],
+                note["count"],
+            )
+        elif note["code"] == "UNRECOGNIZED_ZONE":
+            dashboard_index = next(
+                index
+                for index, dashboard in enumerate(facts["dashboards"])
+                if dashboard["id"] == dashboard_ids[note["dashboard"]]
+            )
+            record(
+                "UNRECOGNIZED_ZONE",
+                [dashboard_ids[note["dashboard"]]],
+                [f"dashboards[{dashboard_index}].layout"],
+                note["count"],
+            )
+
+    duplicate_records = []
+    for group in facts["derived"]["duplicate_name_groups"]:
+        affected = [sheet_ids[name] for name in group["sheets"]]
+        duplicate_records.append(
+            {
+                "code": "DUPLICATE_SHEET_NAME",
+                "rule_version": TOOL_VERSION,
+                "affected_ids": affected,
+                "evidence": ["derived.duplicate_name_groups"],
+                "count": len(group["sheets"]),
+                "status": "observed",
+            }
+        )
+    observed.extend(duplicate_records)
+
+    orphan_ids = [sheet_ids[name] for name in facts["derived"]["orphan_sheets"]]
+    if orphan_ids:
+        record(
+            "ORPHAN_SHEET",
+            orphan_ids,
+            ["derived.orphan_sheets"],
+            len(orphan_ids),
+        )
+
+    for collision in assigner.collisions:
+        record(
+            "ID_COLLISION",
+            [collision["final"]],
+            [collision["evidence"]],
+            1,
+        )
+
+    for note in notes:
+        if note["code"] == "MULTIPLE_TWB_ENTRIES":
+            record("MULTIPLE_TWB_ENTRIES", [], ["extraction.warnings"], note["count"])
+        elif note["code"] == "STORY_NOT_INVENTORIED":
+            record(
+                "STORY_NOT_INVENTORIED",
+                [],
+                ["extraction.warnings"],
+                note["count"],
+                status="out_of_scope",
+            )
+
+    for code in ("EMPTY_ZONE", "UNRECOGNIZED_ZONE", "DUPLICATE_SHEET_NAME", "ORPHAN_SHEET"):
+        if not any(entry["code"] == code for entry in observed):
+            record(code, [], [], 0, status="not_found")
+
+    return observed
+
+
+def build_completeness(facts: dict, expected: dict) -> list[dict]:
+    records = []
+    for section in ("dashboards", "worksheets", "parameters", "datasources"):
+        found = len(facts[section])
+        skipped = max(0, expected[section] - found)
+        entry = {
+            "section": section,
+            "expected": expected[section],
+            "found": found,
+            "skipped": skipped,
+            "out_of_scope": 0,
+            "status": "complete" if skipped == 0 else "partial",
+        }
+        if entry["status"] == "partial":
+            entry["reason_code"] = "section_parse_skipped"
+        records.append(entry)
+    return records
 
 
 # ---------------------------------------------------------------------------
@@ -614,7 +803,9 @@ def render_yaml(value: dict) -> str:
 
 def build_summary(facts: dict, output_path: Path):
     return {
+        "schema_version": facts["schema_version"],
         "workbook": facts["workbook"]["name"],
+        "workbook_id": facts["workbook"]["id"],
         "container": facts["extraction"]["container"],
         "dashboards": len(facts["dashboards"]),
         "worksheets": len(facts["worksheets"]),
@@ -627,6 +818,13 @@ def build_summary(facts: dict, output_path: Path):
         ),
         "output": str(output_path),
         "warnings": facts["extraction"]["warnings"],
+        "anomalies_by_code": {
+            code: sum(1 for record in facts["anomalies"] if record["code"] == code)
+            for code in sorted({record["code"] for record in facts["anomalies"]})
+        },
+        "completeness": {
+            record["section"]: record["status"] for record in facts["completeness"]
+        },
     }
 
 
@@ -667,22 +865,53 @@ def main(argv=None):
         return 1
 
     warnings: list[str] = []
+    notes: list[dict] = []
+    expected: dict = {}
     try:
         raw = source.read_bytes()
-        xml_text, container, entry = load_workbook_document(raw, warnings)
+        xml_text, container, entry = load_workbook_document(raw, warnings, notes)
         try:
             root = ET.fromstring(xml_text)
         except ET.ParseError as exc:
             raise ExtractionError(f"workbook XML is malformed: {exc}") from exc
         if local_name(root.tag) != "workbook":
             raise ExtractionError("input XML root element is not <workbook>")
-        facts = parse_workbook(root, warnings)
+        facts = parse_workbook(root, warnings, notes, expected)
         facts["workbook"]["name"] = source.stem
         facts["extraction"]["container"] = container
         facts["extraction"]["entry"] = entry
-        facts["extraction"]["timestamp"] = datetime.now(timezone.utc).isoformat(
+        extracted_at = datetime.now(timezone.utc).isoformat(
             timespec="seconds"
         )
+        facts["extraction"]["timestamp"] = extracted_at
+        input_sha256 = hashlib.sha256(raw).hexdigest()
+        facts["provenance"] = build_provenance(
+            input_sha256, extracted_at, container, entry, str(source)
+        )
+        assigner = IdAssigner()
+        _, sheet_ids, dashboard_ids = assign_ids(facts, assigner)
+        facts["anomalies"] = build_anomalies(
+            facts, notes, sheet_ids, dashboard_ids, assigner
+        )
+        facts["completeness"] = build_completeness(facts, expected)
+        facts["interpretation_inputs"] = {"dashboard_purposes": [], "sheet_roles": []}
+        facts = {
+            key: facts[key]
+            for key in (
+                "schema_version",
+                "provenance",
+                "workbook",
+                "extraction",
+                "datasources",
+                "parameters",
+                "dashboards",
+                "worksheets",
+                "derived",
+                "completeness",
+                "anomalies",
+                "interpretation_inputs",
+            )
+        }
     except ExtractionError as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return 1

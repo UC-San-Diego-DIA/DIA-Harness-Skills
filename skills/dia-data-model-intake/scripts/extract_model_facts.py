@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
-"""Extract deterministic facts from an Oracle BI Publisher data model export."""
+"""Extract deterministic facts from an Oracle BI Publisher data model export.
+
+Emits schema-version-2 model-facts.yaml with a provenance block, a static
+``model`` facet, and an extraction ``run`` facet. The output is validated
+against references/model-facts.schema.json before it is written.
+"""
 
 from __future__ import annotations
 
 import argparse
+import copy
+import hashlib
 import json
 import re
 import sys
@@ -14,7 +21,35 @@ from urllib.parse import unquote
 import xml.etree.ElementTree as ET
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
+MODEL_FACET_VERSION = 1
+RUN_FACET_VERSION = 1
+EXTRACTOR_VERSION = "dia-data-model-intake 2.0.0"
+
+WARNING_SEVERITIES = ("info", "warning", "error")
+
+WARNING_CODES = (
+    "AMBIGUOUS_ALIAS_NO_AS",
+    "CTE_PARSE_FALLBACK",
+    "DATASET_NO_SQL",
+    "NO_DATA_SETS",
+    "NO_TOP_LEVEL_SELECT",
+    "SELECT_ITEM_NO_ALIAS",
+    "SOURCE_FILE_UNAVAILABLE",
+)
+
+
+def add_warning(warnings, code, severity, message, dataset=None, query=None,
+                item_index=None):
+    """Append one coded warning object with a stable field order."""
+    warnings.append({
+        "code": code,
+        "dataset": dataset,
+        "query": query,
+        "item_index": item_index,
+        "severity": severity,
+        "message": message,
+    })
 
 
 class ExtractionError(Exception):
@@ -300,13 +335,20 @@ def split_top_level(text: str, separator: str = ","):
 
 AS_ALIAS_RE = re.compile(r"\s*\bAS\s+([A-Za-z_][\w$#]*)\s*$", re.I)
 IMPLICIT_ALIAS_RE = re.compile(r"^(?:[A-Za-z_][\w$#]*\s*\.\s*)?([A-Za-z_][\w$#]*)$")
+END_TRAILING_ALIAS_RE = re.compile(r"^(.*\bEND)\s+([A-Za-z_][\w$#]*)$", re.I | re.S)
 
 
-def extract_select_aliases(masked_body: str, code_body: str, warnings: list[str], context: str):
+def extract_select_aliases(
+    masked_body: str, code_body: str, warnings, dataset_name: str, body_name: str,
+    confirmed_columns=None,
+):
     """List the outer SELECT items with their output names and expressions."""
     select_pos = find_top_level(masked_body, re.compile(r"SELECT\b", re.I))
     if select_pos == -1:
-        warnings.append(f"{context}: no top-level SELECT clause found")
+        add_warning(
+            warnings, "NO_TOP_LEVEL_SELECT", "warning",
+            "no top-level SELECT clause found", dataset=dataset_name, query=body_name,
+        )
         return []
     keyword_match = re.compile(
         r"SELECT\s+(DISTINCT\s+|ALL\s+)?", re.I
@@ -317,7 +359,7 @@ def extract_select_aliases(masked_body: str, code_body: str, warnings: list[str]
     select_masked = masked_body[select_start:select_end]
     select_code = code_body[select_start:select_end]
     aliases = []
-    for start, end in split_top_level(select_masked):
+    for item_index, (start, end) in enumerate(split_top_level(select_masked)):
         item_masked = select_masked[start:end].strip()
         item_code = select_code[start:end].strip()
         if not item_masked:
@@ -336,8 +378,29 @@ def extract_select_aliases(masked_body: str, code_body: str, warnings: list[str]
         if implicit_match:
             aliases.append({"name": implicit_match.group(1).lower(), "expression": item_code})
             continue
+        end_match = END_TRAILING_ALIAS_RE.search(item_masked)
+        if end_match:
+            candidate = end_match.group(2)
+            if candidate.upper() not in RESERVED_ALIAS_WORDS:
+                confirmed = bool(confirmed_columns) and candidate.lower() in confirmed_columns
+                if confirmed:
+                    aliases.append({
+                        "name": candidate.lower(),
+                        "expression": item_code[: end_match.end(1)].strip(),
+                    })
+                    add_warning(
+                        warnings, "AMBIGUOUS_ALIAS_NO_AS", "info",
+                        f"select item alias '{candidate}' appears after END without AS; "
+                        "bound from the output structure",
+                        dataset=dataset_name, query=body_name, item_index=item_index,
+                    )
+                    continue
         aliases.append({"name": None, "expression": item_code})
-        warnings.append(f"{context}: select item has no derivable column name")
+        add_warning(
+            warnings, "SELECT_ITEM_NO_ALIAS", "warning",
+            "select item has no derivable column name",
+            dataset=dataset_name, query=body_name, item_index=item_index,
+        )
     return aliases
 
 
@@ -522,26 +585,40 @@ def parse_ctes(masked: str):
     return bodies, with_pos
 
 
-def analyze_body(masked_body, code_body, context, warnings):
+def analyze_body(masked_body, code_body, dataset_name, body_name, warnings,
+                 confirmed_columns=None):
     scan = _neutralize_extract_from(masked_body)
     return {
         "source_tables": extract_source_tables(scan),
         "joins": extract_joins(scan),
-        "select_aliases": extract_select_aliases(masked_body, code_body, warnings, context),
+        "select_aliases": extract_select_aliases(
+            masked_body, code_body, warnings, dataset_name, body_name, confirmed_columns,
+        ),
         "case_mappings": extract_case_mappings(masked_body, code_body),
         "features": detect_features(masked_body),
         "clauses": extract_clauses(masked_body, code_body),
     }
 
 
-def analyze_dataset_sql(sql: str, dataset_name: str, warnings: list[str]):
+def analyze_dataset_sql(sql: str, dataset_name: str, warnings,
+                        declared_parameters=None, confirmed_columns=None):
     """Extract the full fact structure for one dataset SQL statement."""
     code, comments = split_comments(sql)
     masked = mask_strings(code)
+    sql_parameters = []
+    if declared_parameters:
+        for match in re.finditer(r":([A-Za-z_][\w$#]*)", masked):
+            token = match.group(1).lower()
+            original = declared_parameters.get(token)
+            if original and original not in sql_parameters:
+                sql_parameters.append(original)
     try:
         bodies, with_pos = parse_ctes(masked)
     except ExtractionError as exc:
-        warnings.append(f"dataset '{dataset_name}': {exc}; treating the SQL as one query")
+        add_warning(
+            warnings, "CTE_PARSE_FALLBACK", "warning",
+            f"{exc}; treating the SQL as one query", dataset=dataset_name,
+        )
         bodies = [{
             "name": "main", "kind": "main", "def_start": 0,
             "body_start": 0, "body_end": len(masked),
@@ -573,12 +650,16 @@ def analyze_dataset_sql(sql: str, dataset_name: str, warnings: list[str]):
     for body in bodies:
         start, end = body["body_start"], body["body_end"]
         analysis = analyze_body(
-            masked[start:end], code[start:end],
-            f"dataset '{dataset_name}' body '{body['name']}'", warnings,
+            masked[start:end], code[start:end], dataset_name, body["name"], warnings,
+            confirmed_columns,
         )
         analysis["name"] = body["name"]
         analysis["sql"] = sql[start:end].strip()
         analysis["comments"] = assigned[body["name"]]
+        analysis["cte_table_refs"] = [
+            table for table in analysis["source_tables"]
+            if table["table"].lower() in cte_names
+        ]
         analysis["cte_references"] = sorted({
             table["table"] for table in analysis["source_tables"]
             if table["table"].lower() in cte_names
@@ -612,6 +693,7 @@ def analyze_dataset_sql(sql: str, dataset_name: str, warnings: list[str]):
         "ctes": ctes,
         "main_query": main,
         "source_tables": list(table_index.values()),
+        "sql_parameters": sql_parameters,
         "sql_summary": {
             "cte_count": len(ctes),
             "source_table_count": len(table_index),
@@ -619,6 +701,405 @@ def analyze_dataset_sql(sql: str, dataset_name: str, warnings: list[str]):
             "case_mapping_count": sum(len(a["case_mappings"]) for a in analyzed),
         },
     }
+
+
+# ---------------------------------------------------------------------------
+# Stable identity, lineage, and artifact assembly
+# ---------------------------------------------------------------------------
+
+
+def stable_hash(*parts):
+    return hashlib.sha256(
+        "\x1f".join(str(part) for part in parts).encode("utf-8")
+    ).hexdigest()
+
+
+def catalog_model_path(catalog_items):
+    for item in catalog_items:
+        item_name = str(item.get("ItemName", ""))
+        if str(item.get("ItemType")) == "1" and item_name.lower().endswith(".xdm"):
+            return item.get("OriginalPath")
+    return None
+
+
+def derive_model_id(catalog_path, model_name):
+    identity = catalog_path if catalog_path else model_name
+    normalized = " ".join(str(identity).split()).strip().lower()
+    return "mdl_" + stable_hash(normalized)[:16]
+
+
+def derive_dataset_id(model_id, dataset_name):
+    return "ds_" + stable_hash(model_id, str(dataset_name).strip().lower())[:16]
+
+
+def assign_column_ids(model_id, columns):
+    used = {}
+    identifiers = []
+    for column in columns:
+        proposed = "col_" + stable_hash(
+            model_id,
+            column.get("group") or "",
+            column.get("name") or "",
+            column.get("field_order"),
+        )[:16]
+        count = used.get(proposed, 0) + 1
+        used[proposed] = count
+        identifiers.append(proposed if count == 1 else f"{proposed}_{count}")
+    return identifiers
+
+
+def _top_level_case_span(masked_expression):
+    """Return the (start, end) span of the single outermost CASE, or None."""
+    spans = find_case_spans(masked_expression)
+    if not spans:
+        return None
+    top = [
+        (start, end)
+        for start, end in spans
+        if not any(other[0] < start and other[1] > end for other in spans)
+    ]
+    if len(top) != 1:
+        return None
+    return top[0]
+
+
+def _case_else_branch(masked_expression):
+    """Return the top-level ELSE branch text of the outermost CASE.
+
+    Returns None when there is no single outermost CASE, and the empty string
+    when the CASE has no ELSE branch.
+    """
+    span = _top_level_case_span(masked_expression)
+    if span is None:
+        return None
+    start, end = span
+    nested = [s for s in find_case_spans(masked_expression) if s[0] > start and s[1] < end]
+    elses = []
+    for match in re.finditer(r"\bELSE\b", masked_expression[start:end], re.I):
+        position = start + match.start()
+        if any(ns <= position <= ne for ns, ne in nested):
+            continue
+        elses.append((position, start + match.end()))
+    if not elses:
+        return ""
+    return masked_expression[elses[0][1] : end].strip()
+
+
+def derive_nullability(expression):
+    """Return 'not_null' or 'nullable' when derivable from a CASE expression.
+
+    A CASE with an ELSE branch that never yields NULL is not null; a CASE
+    without ELSE yields NULL when no WHEN matches. Anything else stays unknown.
+    """
+    if not expression:
+        return None
+    masked_expression = mask_strings(expression)
+    branch = _case_else_branch(masked_expression)
+    if branch is None:
+        return None
+    if not branch:
+        return "nullable"
+    if re.search(r"\bNULL\b", branch, re.I) or find_case_spans(branch):
+        return None
+    return "not_null"
+
+
+JOIN_PAIR_RE = re.compile(
+    r"\b([A-Za-z_][\w$#]*)\s*\.\s*([A-Za-z_][\w$#]*)\s*=\s*"
+    r"([A-Za-z_][\w$#]*)\s*\.\s*([A-Za-z_][\w$#]*)"
+)
+
+
+def collect_join_keys(body, qualifier):
+    keys = []
+    for join in body.get("joins") or []:
+        condition = join.get("condition")
+        if not condition:
+            continue
+        target = (join.get("alias") or join.get("table") or "").lower()
+        if condition.upper().startswith("USING"):
+            if target == qualifier:
+                for match in re.finditer(r"\(([A-Za-z_][\w$#]*)\)", condition):
+                    key = f"{qualifier}.{match.group(1)}"
+                    if key not in keys:
+                        keys.append(key)
+            continue
+        for match in JOIN_PAIR_RE.finditer(condition):
+            if match.group(1).lower() == qualifier:
+                key = f"{match.group(1)}.{match.group(2)}"
+            elif match.group(3).lower() == qualifier:
+                key = f"{match.group(3)}.{match.group(4)}"
+            else:
+                continue
+            if key not in keys:
+                keys.append(key)
+    return keys
+
+
+def build_body_edges(dataset_name, dataset_id, body):
+    alias_map = {}
+    for entry in (body.get("source_tables") or []) + (body.get("cte_table_refs") or []):
+        table = entry["table"]
+        alias_map.setdefault(table.lower(), table)
+        if entry.get("alias"):
+            alias_map.setdefault(entry["alias"].lower(), table)
+    edges = []
+    for alias_entry in body.get("select_aliases") or []:
+        name = alias_entry.get("name")
+        expression = alias_entry.get("expression") or ""
+        if not name or name == "*" or not expression or expression.strip() == "*":
+            continue
+        masked_expression = mask_strings(expression)
+        referenced = []
+        for match in re.finditer(
+            r"\b([A-Za-z_][\w$#]*)\s*\.\s*([A-Za-z_][\w$#]*)", masked_expression
+        ):
+            qualifier = match.group(1).lower()
+            table = alias_map.get(qualifier)
+            if table and all(qualifier != seen[0] for seen in referenced):
+                referenced.append((qualifier, table))
+        if not referenced:
+            distinct_tables = sorted(set(alias_map.values()))
+            if len(distinct_tables) == 1:
+                qualifier = next(
+                    key for key, value in alias_map.items() if value == distinct_tables[0]
+                )
+                referenced.append((qualifier, distinct_tables[0]))
+        for qualifier, table in referenced:
+            edges.append({
+                "dataset": dataset_name,
+                "dataset_id": dataset_id,
+                "input_table": table,
+                "query": body.get("name"),
+                "output_column": name,
+                "join_keys": collect_join_keys(body, qualifier),
+            })
+    return edges
+
+
+def analyze_datasets(datasets, output_columns, parameters, warnings):
+    """Attach SQL analysis to every dataset, using shared coded warnings."""
+    declared = {}
+    for parameter in parameters:
+        name = parameter.get("name")
+        if name:
+            declared.setdefault(str(name).lower(), str(name))
+    for dataset in datasets:
+        name = dataset.get("name") or "unnamed"
+        sql = dataset.get("sql") or ""
+        if not sql:
+            add_warning(warnings, "DATASET_NO_SQL", "warning", "dataset has no SQL", dataset=name)
+            dataset.update({
+                "author_comments": [], "ctes": [], "main_query": None,
+                "source_tables": [], "sql_parameters": [], "sql_summary": {},
+            })
+            continue
+        confirmed_columns = {
+            str(column["name"]).lower()
+            for column in output_columns
+            if column.get("group_source") == name and column.get("name")
+        }
+        dataset.update(analyze_dataset_sql(
+            sql, name, warnings, declared_parameters=declared,
+            confirmed_columns=confirmed_columns,
+        ))
+    return datasets
+
+
+def enrich_output_columns(output_columns, parameters, datasets, model_id):
+    """Add IDs, derivable nullability, and parameter bindings in field order."""
+    parameter_names = {
+        str(parameter.get("name")).lower(): str(parameter.get("name"))
+        for parameter in parameters
+        if parameter.get("name")
+    }
+    dataset_bindings = {}
+    alias_expressions = {}
+    for dataset in datasets:
+        name = dataset.get("name")
+        bindings = [
+            {"parameter": parameter, "via": "sql"}
+            for parameter in dataset.get("sql_parameters") or []
+        ]
+        if bindings:
+            dataset_bindings[name] = bindings
+        main_query = dataset.get("main_query")
+        if main_query:
+            for alias_entry in main_query.get("select_aliases") or []:
+                alias_name = alias_entry.get("name")
+                if alias_name and alias_name != "*":
+                    alias_expressions.setdefault(
+                        (name, alias_name.lower()), alias_entry.get("expression")
+                    )
+    identifiers = assign_column_ids(model_id, output_columns)
+    enriched = []
+    for column, column_id in zip(output_columns, identifiers):
+        group_source = column.get("group_source")
+        nullability = None
+        declared_attribute = column.pop("nullable_attribute", None)
+        if declared_attribute is not None:
+            text = str(declared_attribute).strip().lower()
+            if text in ("true", "1", "yes"):
+                nullability = "nullable"
+            elif text in ("false", "0", "no"):
+                nullability = "not_null"
+        if nullability is None:
+            expression = alias_expressions.get(
+                (group_source, str(column.get("name") or "").lower())
+            )
+            if expression:
+                nullability = derive_nullability(expression)
+        bindings = []
+        value = column.get("value")
+        if value and str(value).lower() in parameter_names:
+            bindings.append({
+                "parameter": parameter_names[str(value).lower()],
+                "via": "element_value",
+            })
+        for binding in dataset_bindings.get(group_source) or []:
+            entry = {"parameter": binding["parameter"], "via": "group_sql"}
+            if entry not in bindings:
+                bindings.append(entry)
+        rebuilt = {"name": column.get("name"), "id": column_id}
+        for key, item in column.items():
+            if key not in ("name", "nullable_attribute"):
+                rebuilt[key] = item
+        if nullability:
+            rebuilt["nullability"] = nullability
+        if bindings:
+            rebuilt["parameter_bindings"] = bindings
+        enriched.append(rebuilt)
+    return enriched
+
+
+def build_v2_artifact(*, model_name, description, xdm_version, default_data_source,
+                      bi_publisher_build, author, modified_at, catalog_items,
+                      data_properties, data_sources, parameters, value_sets,
+                      datasets, output_columns, bursting, warnings, provenance,
+                      migration=None):
+    model_id = derive_model_id(catalog_model_path(catalog_items), model_name)
+    datasets_out = []
+    parse_status = []
+    lineage = []
+    for dataset in datasets:
+        name = dataset.get("name") or "unnamed"
+        dataset_id = derive_dataset_id(model_id, name)
+        entry = {
+            "id": dataset_id,
+            "name": name,
+            "type": dataset.get("type"),
+            "data_source": dataset.get("data_source"),
+        }
+        if dataset.get("sql"):
+            entry["content_hash"] = hashlib.sha256(
+                dataset["sql"].encode("utf-8")
+            ).hexdigest()
+        entry["sql"] = dataset.get("sql") or ""
+        for key in ("author_comments", "ctes", "main_query", "source_tables", "sql_summary"):
+            if key in ("ctes", "main_query"):
+                entry[key] = copy.deepcopy(dataset.get(key))
+                bodies = entry[key] if isinstance(entry[key], list) else (
+                    [entry[key]] if entry[key] else []
+                )
+                for body in bodies:
+                    body.pop("cte_table_refs", None)
+            else:
+                entry[key] = dataset.get(key)
+        sql_parameters = dataset.get("sql_parameters") or []
+        if sql_parameters:
+            entry["parameter_bindings"] = [
+                {"parameter": parameter, "via": "sql"} for parameter in sql_parameters
+            ]
+        datasets_out.append(entry)
+        warning_count = sum(
+            1 for warning in warnings
+            if warning.get("dataset") == name
+            and warning.get("severity") in ("warning", "error")
+        )
+        note_count = sum(
+            1 for warning in warnings
+            if warning.get("dataset") == name and warning.get("severity") == "info"
+        )
+        if not dataset.get("sql"):
+            status = "no_sql"
+        elif warning_count:
+            status = "parsed_with_warnings"
+        else:
+            status = "parsed"
+        parse_status.append({
+            "dataset": name,
+            "dataset_id": dataset_id,
+            "status": status,
+            "warning_count": warning_count,
+            "note_count": note_count,
+        })
+        bodies = list(dataset.get("ctes") or [])
+        if dataset.get("main_query"):
+            bodies.append(dataset["main_query"])
+        for body in bodies:
+            lineage.extend(build_body_edges(name, dataset_id, body))
+    columns_out = enrich_output_columns(
+        [dict(column) for column in output_columns], parameters, datasets, model_id,
+    )
+    model = {
+        "facet_version": MODEL_FACET_VERSION,
+        "model_id": model_id,
+        "name": model_name,
+        "description": description,
+        "xdm_version": xdm_version,
+        "default_data_source": default_data_source,
+        "bi_publisher_build": bi_publisher_build,
+        "author": author,
+        "modified_at": modified_at,
+        "catalog_items": catalog_items,
+        "data_properties": data_properties,
+        "data_sources": data_sources,
+        "parameters": parameters,
+        "value_sets": value_sets,
+        "datasets": datasets_out,
+        "output_columns": columns_out,
+        "lineage": lineage,
+        "bursting": bursting,
+    }
+    run = {
+        "facet_version": RUN_FACET_VERSION,
+        "extractor_version": EXTRACTOR_VERSION,
+        "warnings": warnings,
+        "parse_status": parse_status,
+    }
+    if migration is not None:
+        run["migration"] = migration
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "provenance": provenance,
+        "model": model,
+        "run": run,
+    }
+
+
+def load_schema():
+    schema_path = (
+        Path(__file__).resolve().parent.parent / "references" / "model-facts.schema.json"
+    )
+    if not schema_path.is_file():
+        raise ExtractionError(f"the model-facts JSON Schema is missing: {schema_path}")
+    try:
+        return json.loads(schema_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ExtractionError(f"the model-facts JSON Schema could not be read: {exc}")
+
+
+def validate_artifact(facts):
+    try:
+        import schema_check
+    except ImportError as exc:
+        raise ExtractionError(f"the schema_check helper module is missing: {exc}")
+    violations = schema_check.validate(facts, load_schema())
+    if violations:
+        details = "; ".join(
+            f"{violation['path']}: {violation['message']}" for violation in violations
+        )
+        raise ExtractionError(f"the generated artifact failed schema validation: {details}")
 
 
 # ---------------------------------------------------------------------------
@@ -754,11 +1235,14 @@ def parse_output_columns(root):
                     "break_order": attributes.get("breakOrder"),
                     "format_mask": attributes.get("formatMask"),
                     "field_order": field_order,
+                    "nullable_attribute": attributes.get("nullable")
+                    or attributes.get("nullAllowed"),
                 })
     return columns
 
 
-def parse_data_model(xml_text, source_path, container, container_data, warnings):
+def parse_data_model(xml_text, source_path, container, container_data, warnings,
+                     source_sha256, extracted_at):
     try:
         root = ET.fromstring(xml_text)
     except ET.ParseError as exc:
@@ -798,10 +1282,13 @@ def parse_data_model(xml_text, source_path, container, container_data, warnings)
     if default_data_source:
         data_sources.append(default_data_source)
 
+    output_columns = parse_output_columns(root)
     datasets = []
     data_sets_element = find_first(root, "dataSets")
     if data_sets_element is None:
-        warnings.append("the data model has no dataSets element")
+        add_warning(
+            warnings, "NO_DATA_SETS", "warning", "the data model has no dataSets element",
+        )
     else:
         for data_set in find_children(data_sets_element, "dataSet"):
             name = data_set.get("name") or "unnamed"
@@ -818,15 +1305,8 @@ def parse_data_model(xml_text, source_path, container, container_data, warnings)
                 "data_source": data_source,
                 "sql": sql,
             }
-            if sql:
-                dataset.update(analyze_dataset_sql(sql, name, warnings))
-            else:
-                warnings.append(f"dataset '{name}' has no SQL")
-                dataset.update({
-                    "author_comments": [], "ctes": [], "main_query": None,
-                    "source_tables": [], "sql_summary": {},
-                })
             datasets.append(dataset)
+    analyze_datasets(datasets, output_columns, parameters, warnings)
 
     bursts = []
     bursting_element = find_first(root, "bursting")
@@ -862,32 +1342,32 @@ def parse_data_model(xml_text, source_path, container, container_data, warnings)
             except (ValueError, OverflowError, OSError):
                 pass
 
-    return {
-        "schema_version": SCHEMA_VERSION,
-        "model": {
-            "name": model_name,
-            "description": description,
-            "xdm_version": root.get("version"),
-            "default_data_source": default_data_source,
-            "bi_publisher_build": build,
-            "author": author,
-            "modified_at": modified_at,
-        },
-        "extraction": {
-            "source_file": str(source_path),
-            "container": container,
-            "extracted_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        },
-        "catalog_items": catalog["catalog_items"],
-        "data_properties": properties,
-        "data_sources": data_sources,
-        "parameters": parameters,
-        "value_sets": value_sets,
-        "datasets": datasets,
-        "bursting": bursts,
-        "output_columns": parse_output_columns(root),
-        "warnings": warnings,
+    provenance = {
+        "source_file": str(source_path),
+        "source_sha256": source_sha256,
+        "extracted_at": extracted_at,
+        "extractor_version": EXTRACTOR_VERSION,
+        "container": container,
     }
+    return build_v2_artifact(
+        model_name=model_name,
+        description=description,
+        xdm_version=root.get("version"),
+        default_data_source=default_data_source,
+        bi_publisher_build=build,
+        author=author,
+        modified_at=modified_at,
+        catalog_items=catalog["catalog_items"],
+        data_properties=properties,
+        data_sources=data_sources,
+        parameters=parameters,
+        value_sets=value_sets,
+        datasets=datasets,
+        output_columns=output_columns,
+        bursting=bursts,
+        warnings=warnings,
+        provenance=provenance,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -1006,7 +1486,7 @@ def render_yaml(value: dict) -> str:
     model_name = value.get("model", {}).get("name", "unknown model")
     header = [
         f"# model-facts for {model_name}",
-        "# Generated by dia-data-model-intake. Deterministic extraction; do not hand-edit.",
+        f"# Generated by {EXTRACTOR_VERSION}. Deterministic extraction; do not hand-edit.",
     ]
     return "\n".join(header + render_dict(value, 0)) + "\n"
 
@@ -1017,17 +1497,20 @@ def render_yaml(value: dict) -> str:
 
 
 def build_summary(facts: dict, output_path: Path):
-    datasets = facts["datasets"]
+    datasets = facts["model"]["datasets"]
     return {
+        "schema_version": facts["schema_version"],
         "model": facts["model"]["name"],
-        "container": facts["extraction"]["container"],
+        "model_id": facts["model"]["model_id"],
+        "container": facts["provenance"]["container"],
         "output": str(output_path),
         "datasets": len(datasets),
         "ctes": sum(len(d.get("ctes", [])) for d in datasets),
         "source_tables": sum(len(d.get("source_tables", [])) for d in datasets),
-        "output_columns": len(facts["output_columns"]),
-        "parameters": len(facts["parameters"]),
-        "warnings": facts["warnings"],
+        "output_columns": len(facts["model"]["output_columns"]),
+        "parameters": len(facts["model"]["parameters"]),
+        "lineage_edges": len(facts["model"]["lineage"]),
+        "warnings": facts["run"]["warnings"],
     }
 
 
@@ -1058,11 +1541,17 @@ def main(argv=None):
         )
         return 1
 
-    warnings: list[str] = []
+    warnings = []
     try:
         raw = source.read_bytes()
+        source_sha256 = hashlib.sha256(raw).hexdigest()
         xml_text, container, container_data = load_model_document(raw)
-        facts = parse_data_model(xml_text, source, container, container_data, warnings)
+        extracted_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+        facts = parse_data_model(
+            xml_text, source, container, container_data, warnings,
+            source_sha256, extracted_at,
+        )
+        validate_artifact(facts)
     except ExtractionError as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return 1

@@ -103,7 +103,8 @@ SELECT
     supplier_name,
     payment_year,
     payment_total,
-    small_business_flag
+    small_business_flag,
+    CASE WHEN payment_total > 100 THEN 'high' ELSE 'low' END flag_bound
 FROM classification
 WHERE payment_year = :PAYMENT_YEAR
 ORDER BY payment_total DESC]]></sql>
@@ -114,6 +115,7 @@ ORDER BY payment_total DESC]]></sql>
       <element name="SUPPLIER_ID" value="SUPPLIER_ID" label="Supplier ID" dataType="xsd:string" breakOrder="1" fieldOrder="1" />
       <element name="SUPPLIER_NAME" value="SUPPLIER_NAME" label="Supplier Name" dataType="xsd:string" fieldOrder="2" />
       <element name="PAYMENT_YEAR" value="PAYMENT_YEAR" label="Payment Year" dataType="xsd:integer" fieldOrder="3" />
+      <element name="FLAG_BOUND" value="FLAG_BOUND" label="Flag Bound" dataType="xsd:string" fieldOrder="4" />
     </group>
   </dataStructure>
 </dataModel>
@@ -135,12 +137,27 @@ ORDER BY payment_total DESC]]></sql>
     Assert-True ($summary.container -eq 'xml-document') 'The XML model was not detected as an XML document.'
     Assert-True ($summary.ctes -eq 3) 'The synthetic model did not produce three CTEs.'
     Assert-True ($summary.source_tables -eq 1) 'The synthetic model did not produce one source table.'
-    Assert-True ($summary.output_columns -eq 3) 'The synthetic model did not produce three output columns.'
+    Assert-True ($summary.output_columns -eq 4) 'The synthetic model did not produce four output columns.'
     Assert-True ($summary.parameters -eq 1) 'The synthetic model did not produce one parameter.'
-    Assert-True ($summary.warnings.Count -eq 0) 'The synthetic XML extraction produced warnings.'
+    Assert-True ($summary.warnings.Count -eq 1) 'The synthetic XML extraction did not produce the AMBIGUOUS_ALIAS_NO_AS note.'
+    Assert-True ($summary.warnings[0].code -eq 'AMBIGUOUS_ALIAS_NO_AS') 'The warning code was not AMBIGUOUS_ALIAS_NO_AS.'
+    Assert-True ($summary.warnings[0].severity -eq 'info') 'The AMBIGUOUS_ALIAS_NO_AS severity was not info.'
 
     $facts = Get-Content -Raw -LiteralPath $factsPath
-    Assert-True ($facts.Contains('schema_version: 1')) 'The facts schema version is missing.'
+    Assert-True ($facts.Contains('schema_version: 2')) 'The facts schema version is not 2.'
+    Assert-True ($facts.Contains('provenance:')) 'The provenance block is missing.'
+    Assert-True ($facts.Contains('source_sha256:')) 'The provenance source SHA-256 is missing.'
+    Assert-True ($facts.Contains('extracted_at:')) 'The provenance extraction timestamp is missing.'
+    Assert-True ($facts.Contains('extractor_version:')) 'The provenance extractor version is missing.'
+    Assert-True ($facts.Contains('container: xml-document')) 'The provenance container kind is missing.'
+    Assert-True ($facts.Contains('model:')) 'The model facet is missing.'
+    Assert-True ($facts.Contains('facet_version: 1')) 'A facet version is missing.'
+    Assert-True ($facts.Contains('model_id: mdl_')) 'The model stable ID is missing.'
+    Assert-True ($facts.Contains('content_hash:')) 'A dataset content hash is missing.'
+    Assert-True ($facts.Contains('run:')) 'The run facet is missing.'
+    Assert-True ($facts.Contains('lineage:')) 'The lineage array is missing.'
+    Assert-True ($facts.Contains('nullability: not_null')) 'The CASE-nullability descriptor is missing.'
+    Assert-True ($facts.Contains('parameter_bindings:')) 'The parameter-binding descriptor is missing.'
     Assert-True ($facts.Contains('name: classification')) 'The classification CTE is missing.'
     Assert-True ($facts.Contains("operand: supplier_name")) 'The CASE operand was not extracted.'
     Assert-True ($facts.Contains('when: "''Small Supplier''"')) 'The CASE WHEN value was not extracted.'
@@ -153,7 +170,7 @@ ORDER BY payment_total DESC]]></sql>
         '--output', $factsPath
     ) -ExpectedExitCode 1
     Assert-True ($existingFailure.Contains('output already exists')) 'An existing output file was accepted without --replace.'
-    Assert-True ((Get-Content -Raw -LiteralPath $factsPath).Contains('schema_version: 1')) 'The refusal overwrote the existing facts file.'
+    Assert-True ((Get-Content -Raw -LiteralPath $factsPath).Contains('schema_version: 2')) 'The refusal overwrote the existing facts file.'
 
     $replacedSummaryText = Invoke-Extractor -Arguments @(
         '--input', $modelPath,
@@ -184,12 +201,93 @@ ORDER BY payment_total DESC]]></sql>
     Assert-True ($containerSummary.model -eq 'Example Data Model') 'Catalog metadata did not supply the model name.'
     Assert-True ($containerSummary.container -eq 'zlib-archive') 'The zlib container was not detected.'
     Assert-True ($containerSummary.ctes -eq 3) 'The zlib extraction produced a different CTE count.'
-    Assert-True ($containerSummary.warnings.Count -eq 0) 'The zlib extraction produced warnings.'
+    Assert-True ($containerSummary.warnings.Count -eq 1) 'The zlib extraction did not produce the AMBIGUOUS_ALIAS_NO_AS note.'
+    Assert-True ($containerSummary.warnings[0].code -eq 'AMBIGUOUS_ALIAS_NO_AS') 'The zlib warning code was not AMBIGUOUS_ALIAS_NO_AS.'
 
     $containerFacts = Get-Content -Raw -LiteralPath $containerFactsPath
     Assert-True ($containerFacts.Contains('bi_publisher_build: Test Build 2026.1')) 'The catalog build was not extracted.'
     Assert-True ($containerFacts.Contains('author: example@example.invalid')) 'The catalog author was not extracted.'
     Assert-True ($containerFacts.Contains('modified_at: "2025-01-01T00:00:00+00:00"')) 'The catalog modification time was not converted.'
+
+    $migrationHelper = Join-Path $repositoryRoot 'skills\dia-data-model-intake\scripts\migrate_model_facts_v1_to_v2.py'
+    $v1FactsPath = Join-Path $resolvedTestRoot 'model-facts-v1.yaml'
+    $v2FactsPath = Join-Path $resolvedTestRoot 'model-facts-migrated.yaml'
+    $v1Yaml = @'
+schema_version: 1
+extraction:
+  source_file: "NONEXISTENT_SOURCE_PATH"
+  container: xml-document
+  extracted_at: "2025-01-01T00:00:00+00:00"
+model:
+  name: Migration Test Model
+  description: A synthetic v1 model for migration testing.
+  xdm_version: "2.1"
+  default_data_source: MigrationDB
+  bi_publisher_build: null
+  author: null
+  modified_at: null
+catalog_items: []
+data_properties: {}
+data_sources:
+  - MigrationDB
+parameters:
+  - name: TEST_YEAR
+    dataType: xsd:integer
+    defaultValue: "2025"
+    label: Test year
+value_sets: []
+datasets:
+  - name: migration_test
+    type: SQL
+    data_source: MigrationDB
+    sql: |-
+      SELECT
+          region_code,
+          CASE region_code
+              WHEN 'WEST' THEN 'Y'
+              ELSE 'N'
+          END is_west
+      FROM sales_regions
+      WHERE region_code = :TEST_YEAR
+bursting: []
+output_columns:
+  - name: REGION_CODE
+    value: REGION_CODE
+    label: Region Code
+    data_type: xsd:string
+    group: G_1
+    group_source: migration_test
+    break_order: null
+    format_mask: null
+    field_order: 1
+  - name: IS_WEST
+    value: IS_WEST
+    label: Is West
+    data_type: xsd:string
+    group: G_1
+    group_source: migration_test
+    break_order: null
+    format_mask: null
+    field_order: 2
+warnings:
+  - select item has no derivable column name
+'@
+    Set-Content -LiteralPath $v1FactsPath -Value $v1Yaml -NoNewline -Encoding utf8NoBOM
+
+    $migrationOutput = & $Python $migrationHelper --input $v1FactsPath --output $v2FactsPath 2>&1
+    $migrationExit = $LASTEXITCODE
+    $migrationText = $migrationOutput -join [Environment]::NewLine
+    if ($migrationExit -ne 0) {
+        throw "Migration helper exited $migrationExit. Output: $migrationText"
+    }
+    $v2Facts = Get-Content -Raw -LiteralPath $v2FactsPath
+    Assert-True ($v2Facts.Contains('schema_version: 2')) 'The migrated facts schema version is not 2.'
+    Assert-True ($v2Facts.Contains('migration:')) 'The migration block is missing from the migrated output.'
+    Assert-True ($v2Facts.Contains('SOURCE_FILE_UNAVAILABLE')) 'The SOURCE_FILE_UNAVAILABLE warning is missing from the migrated output.'
+    Assert-True ($v2Facts.Contains('source_sha256: null')) 'The migrated provenance SHA-256 was not null for an unavailable source file.'
+    Assert-True ($v2Facts.Contains('model_id: mdl_')) 'The migrated model stable ID is missing.'
+    Assert-True ($v2Facts.Contains('name: Migration Test Model')) 'The migrated model name is missing.'
+    Assert-True ($v2Facts.Contains('lineage:')) 'The migrated lineage array is missing.'
 
     Write-Host 'Data-model intake tests passed.'
 }

@@ -139,9 +139,9 @@ section[id]{scroll-margin-top:84px}
   background:rgba(24,43,73,.06);padding:7px 12px;border-radius:5px;
   transition:background .15s,color .15s;
 }
-.filter-chip input{position:absolute;opacity:0;pointer-events:none}
+.filter-chip{border:0;font-family:inherit}
 .filter-chip:hover{background:rgba(24,43,73,.11)}
-.filter-chip:focus-within{outline:2px solid var(--turquoise);outline-offset:2px}
+.filter-chip:focus{outline:2px solid var(--turquoise);outline-offset:2px}
 .filter-chip.checked[data-value="production"]{background:var(--green);color:#fff}
 .filter-chip.checked[data-value="testing"]{background:var(--turquoise);color:var(--navy)}
 .filter-chip.checked[data-value="development"]{background:var(--navy);color:#fff}
@@ -328,9 +328,9 @@ section[id]{scroll-margin-top:84px}
         <a class="btn btn-ghost" href="#playbooks">See playbooks<i data-lucide="arrow-right"></i></a>
       </div>
       <div class="stats">
-      <div><strong>9</strong><span>skills</span></div>
-      <div><strong>4</strong><span>playbooks</span></div>
-      <div><strong>4</strong><span>skill groups</span></div>
+      <div><strong data-stat="skills">20</strong><span>Total number of skills</span></div>
+      <div><strong data-stat="playbooks">4</strong><span>Total number of playbooks</span></div>
+      <div><strong data-stat="groups">5</strong><span>Total number of skill groups</span></div>
       </div>
     </div>
     <div class="term">
@@ -379,9 +379,9 @@ section[id]{scroll-margin-top:84px}
       <p>Grouped by when you reach for them. Every skill is invoked explicitly with its <code>$dia-</code> command.</p>
     </div>
     <div class="lifecycle-filter" id="lifecycle-filter" role="group" aria-label="Filter skills by lifecycle">
-      <label class="filter-chip" data-value="production"><input type="checkbox" value="production" checked>production</label>
-      <label class="filter-chip" data-value="testing"><input type="checkbox" value="testing">testing</label>
-      <label class="filter-chip" data-value="development"><input type="checkbox" value="development">development</label>
+      <button type="button" class="filter-chip" data-value="production" aria-pressed="true">production</button>
+      <button type="button" class="filter-chip" data-value="testing" aria-pressed="false">testing</button>
+      <button type="button" class="filter-chip" data-value="development" aria-pressed="false">development</button>
     </div>
 
     <div class="group" id="g1">
@@ -578,7 +578,7 @@ section[id]{scroll-margin-top:84px}
             <h4 class="skill-cmd">$dia-data-model-docs</h4>
             <i data-lucide="github"></i>
           </div>
-          <p>Draft analyst-facing documents, including a data dictionary and a KPI and business-questions catalog, from one confirmed model-facts.yaml.</p>
+          <p>Draft analyst-facing documents, including a data dictionary and a KPI and business-questions catalog, from one model-facts.yaml and its structural profile.</p>
         </a>
         <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-tableau-workbook-intake" title="View dia-tableau-workbook-intake on GitHub" data-status="testing">
           <span class="status-chip testing">testing</span>
@@ -765,17 +765,18 @@ document.querySelectorAll('.copy-btn').forEach(function (button) {
 var lifecycleFilter = document.getElementById('lifecycle-filter');
 if (lifecycleFilter) {
   var applyLifecycleFilter = function () {
-    var selected = [];
-    lifecycleFilter.querySelectorAll('input[type="checkbox"]').forEach(function (input) {
-      if (input.checked) {
-        selected.push(input.value);
+    var selected = null;
+    lifecycleFilter.querySelectorAll('.filter-chip').forEach(function (chip) {
+      var pressed = chip.getAttribute('aria-pressed') === 'true';
+      if (pressed) {
+        selected = chip.getAttribute('data-value');
       }
-      input.closest('.filter-chip').classList.toggle('checked', input.checked);
+      chip.classList.toggle('checked', pressed);
     });
     document.querySelectorAll('#skills .group').forEach(function (group) {
       var visible = 0;
       group.querySelectorAll('.skill').forEach(function (skill) {
-        var show = selected.indexOf(skill.getAttribute('data-status')) !== -1;
+        var show = selected === null || selected === skill.getAttribute('data-status');
         skill.classList.toggle('skill-hidden', !show);
         if (show) {
           visible += 1;
@@ -784,9 +785,29 @@ if (lifecycleFilter) {
       group.classList.toggle('group-hidden', visible === 0);
     });
   };
-  lifecycleFilter.addEventListener('change', applyLifecycleFilter);
+  lifecycleFilter.querySelectorAll('.filter-chip').forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      var activate = chip.getAttribute('aria-pressed') !== 'true';
+      lifecycleFilter.querySelectorAll('.filter-chip').forEach(function (other) {
+        other.setAttribute('aria-pressed', other === chip && activate ? 'true' : 'false');
+      });
+      applyLifecycleFilter();
+    });
+  });
   applyLifecycleFilter();
 }
+
+var stats = {
+  skills: document.querySelectorAll('#skills .skill').length,
+  playbooks: document.querySelectorAll('#playbooks .pb').length,
+  groups: document.querySelectorAll('#skills .group').length
+};
+Object.keys(stats).forEach(function (key) {
+  var node = document.querySelector('[data-stat="' + key + '"]');
+  if (node) {
+    node.textContent = stats[key];
+  }
+});
 </script>
 </body>
 </html>

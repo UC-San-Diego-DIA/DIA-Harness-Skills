@@ -1,0 +1,336 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/docs/shared/workbook-facts.schema.json",
+  "title": "workbook-facts.yaml (schema version 2)",
+  "description": "Deterministic facts extracted from one Tableau workbook package or workbook XML document.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "provenance",
+    "workbook",
+    "extraction",
+    "completeness",
+    "anomalies",
+    "interpretation_inputs",
+    "datasources",
+    "parameters",
+    "dashboards",
+    "worksheets",
+    "derived"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 2
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "run_id",
+        "tool_version",
+        "input_file",
+        "input_sha256",
+        "container",
+        "entry",
+        "extracted_at",
+        "schema_url"
+      ],
+      "properties": {
+        "run_id": { "type": "string", "minLength": 1 },
+        "tool_version": { "type": "string", "minLength": 1 },
+        "input_file": { "type": "string", "minLength": 1 },
+        "input_sha256": {
+          "anyOf": [
+            { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" },
+            { "type": "null" }
+          ]
+        },
+        "input_sha256_reason": { "type": "string" },
+        "container": { "type": "string", "enum": ["twbx", "twb"] },
+        "entry": { "type": "string" },
+        "extracted_at": { "type": "string", "minLength": 1 },
+        "schema_url": { "type": "string", "minLength": 1 }
+      }
+    },
+    "workbook": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "tableau_version", "source_build", "source_platform", "repository_location"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string" },
+        "tableau_version": { "type": "string" },
+        "source_build": { "type": "string" },
+        "source_platform": { "type": "string" },
+        "repository_location": { "type": "string" }
+      }
+    },
+    "extraction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["container", "entry", "timestamp", "warnings"],
+      "properties": {
+        "container": { "type": "string", "enum": ["twbx", "twb"] },
+        "entry": { "type": "string" },
+        "timestamp": { "type": "string", "minLength": 1 },
+        "warnings": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "datasources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "caption"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "caption": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "parameters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "datasource", "name", "caption", "members"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "datasource": { "type": "string" },
+          "name": { "type": "string" },
+          "caption": { "type": "string" },
+          "members": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "dashboards": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "datasources", "size", "title_text", "sheets", "layout", "filters", "legends", "parameter_controls", "actions"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "datasources": { "type": "array", "items": { "type": "string" } },
+          "size": {
+            "type": "object",
+            "additionalProperties": { "type": ["string", "number", "boolean"] }
+          },
+          "title_text": { "type": "string" },
+          "sheets": { "type": "array", "items": { "type": "string" } },
+          "layout": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["kind"],
+              "properties": {
+                "kind": { "type": "string", "enum": ["sheet", "filter", "legend", "parameter", "title", "text", "image", "web", "other"] }
+              }
+            }
+          },
+          "filters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["kind", "source_sheet", "field"],
+              "properties": {
+                "kind": { "const": "filter" }
+              }
+            }
+          },
+          "legends": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["kind", "legend_kind", "source_sheet", "field"],
+              "properties": {
+                "kind": { "const": "legend" },
+                "legend_kind": { "type": "string", "enum": ["color", "size", "shape"] }
+              }
+            }
+          },
+          "parameter_controls": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["kind", "parameter", "caption"],
+              "properties": {
+                "kind": { "const": "parameter" }
+              }
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["title", "source_sheet"],
+              "properties": {
+                "title": { "type": "string" },
+                "source_sheet": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "worksheets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "title_text", "datasources", "rows", "cols", "calculations", "filters", "mark_types", "encodings"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "title_text": { "type": "string" },
+          "datasources": { "type": "array", "items": { "type": "string" } },
+          "rows": { "type": "array", "items": { "type": "string" } },
+          "cols": { "type": "array", "items": { "type": "string" } },
+          "calculations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["id", "caption", "kind", "formula"],
+              "properties": {
+                "id": { "type": "string", "minLength": 1 },
+                "caption": { "type": "string" },
+                "kind": { "type": "string" },
+                "formula": { "type": "string" }
+              }
+            }
+          },
+          "filters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["column", "class"],
+              "properties": {
+                "column": { "type": "string" },
+                "class": { "type": "string" },
+                "column_caption": { "type": "string" }
+              }
+            }
+          },
+          "mark_types": { "type": "array", "items": { "type": "string" } },
+          "encodings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["attr", "field"],
+              "properties": {
+                "attr": { "type": "string" },
+                "field": { "type": "string" },
+                "field_caption": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "derived": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sheets_on_dashboards", "orphan_sheets", "duplicate_name_groups"],
+      "properties": {
+        "sheets_on_dashboards": { "type": "array", "items": { "type": "string" } },
+        "orphan_sheets": { "type": "array", "items": { "type": "string" } },
+        "duplicate_name_groups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["base", "sheets"],
+            "properties": {
+              "base": { "type": "string" },
+              "sheets": { "type": "array", "items": { "type": "string" }, "minItems": 2 }
+            }
+          }
+        }
+      }
+    },
+    "completeness": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": { "$ref": "#/$defs/completeness_record" }
+    },
+    "anomalies": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/anomaly_record" }
+    },
+    "interpretation_inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dashboard_purposes", "sheet_roles"],
+      "properties": {
+        "dashboard_purposes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/dashboard_purpose_record" }
+        },
+        "sheet_roles": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/sheet_role_record" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "nonempty_string": { "type": "string", "minLength": 1 },
+    "completeness_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["section", "expected", "found", "skipped", "out_of_scope", "status"],
+      "properties": {
+        "section": { "type": "string", "enum": ["dashboards", "worksheets", "parameters", "datasources"] },
+        "expected": { "type": "integer", "minimum": 0 },
+        "found": { "type": "integer", "minimum": 0 },
+        "skipped": { "type": "integer", "minimum": 0 },
+        "out_of_scope": { "type": "integer", "minimum": 0 },
+        "status": { "type": "string", "enum": ["complete", "partial", "out_of_scope"] },
+        "reason_code": { "type": "string" }
+      }
+    },
+    "anomaly_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "rule_version", "affected_ids", "evidence", "count", "status"],
+      "properties": {
+        "code": { "type": "string", "enum": ["EMPTY_ZONE", "DUPLICATE_SHEET_NAME", "ORPHAN_SHEET", "ID_COLLISION", "UNRECOGNIZED_ZONE", "MULTIPLE_TWB_ENTRIES", "STORY_NOT_INVENTORIED", "UNCLASSIFIED_WARNING"] },
+        "rule_version": { "type": "string", "minLength": 1 },
+        "affected_ids": { "type": "array", "items": { "type": "string" } },
+        "evidence": { "type": "array", "items": { "type": "string" } },
+        "count": { "type": "integer", "minimum": 0 },
+        "status": { "type": "string", "enum": ["observed", "not_found", "out_of_scope"] }
+      }
+    },
+    "dashboard_purpose_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dashboard_id", "purpose", "confirmed_at", "supporting_fact_id"],
+      "properties": {
+        "dashboard_id": { "type": "string", "minLength": 1 },
+        "purpose": { "type": "string", "minLength": 1 },
+        "confirmed_at": { "type": "string", "minLength": 1 },
+        "supporting_fact_id": { "type": "string", "minLength": 1 }
+      }
+    },
+    "sheet_role_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sheet_id", "role", "confirmed_at", "supporting_fact_id"],
+      "properties": {
+        "sheet_id": { "type": "string", "minLength": 1 },
+        "role": { "type": "string", "enum": ["kpi_card", "trend_chart", "breakdown_chart", "distribution_chart", "table", "text_annotation", "data_date_stamp", "map", "filter_panel", "other"] },
+        "confirmed_at": { "type": "string", "minLength": 1 },
+        "supporting_fact_id": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

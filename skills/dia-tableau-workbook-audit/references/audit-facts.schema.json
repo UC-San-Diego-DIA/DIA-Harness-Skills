@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/skills/dia-tableau-workbook-audit/references/audit-facts.schema.json",
+  "title": "audit-facts.yaml (sidecar schema version 1)",
+  "description": "Machine-readable sidecar produced by dia-tableau-workbook-audit.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "audit", "headline", "anomalies", "completeness", "cross_references"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "audit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_facts_path", "source_facts_sha256", "generated_at", "tool"],
+      "properties": {
+        "source_facts_path": { "type": "string", "minLength": 1 },
+        "source_facts_sha256": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" },
+        "generated_at": { "type": "string", "minLength": 1 },
+        "tool": { "const": "dia-tableau-workbook-audit" }
+      }
+    },
+    "headline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dashboards", "worksheets", "sheets_on_dashboards", "orphan_sheets", "duplicate_name_groups", "parameters"],
+      "properties": {
+        "dashboards": { "type": "integer", "minimum": 0 },
+        "worksheets": { "type": "integer", "minimum": 0 },
+        "sheets_on_dashboards": { "type": "integer", "minimum": 0 },
+        "orphan_sheets": { "type": "integer", "minimum": 0 },
+        "duplicate_name_groups": { "type": "integer", "minimum": 0 },
+        "parameters": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "anomalies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "rule_version", "affected_ids", "evidence", "count", "status"],
+        "properties": {
+          "code": { "type": "string", "minLength": 1 },
+          "rule_version": { "type": "string", "minLength": 1 },
+          "affected_ids": { "type": "array", "items": { "type": "string" } },
+          "evidence": { "type": "array", "items": { "type": "string" } },
+          "count": { "type": "integer", "minimum": 0 },
+          "status": { "type": "string", "enum": ["observed", "not_found", "out_of_scope"] }
+        }
+      }
+    },
+    "completeness": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["section", "expected", "found", "skipped", "out_of_scope", "status"],
+        "properties": {
+          "section": { "type": "string" },
+          "expected": { "type": "integer", "minimum": 0 },
+          "found": { "type": "integer", "minimum": 0 },
+          "skipped": { "type": "integer", "minimum": 0 },
+          "out_of_scope": { "type": "integer", "minimum": 0 },
+          "status": { "type": "string", "enum": ["complete", "partial", "out_of_scope"] },
+          "reason_code": { "type": "string" }
+        }
+      }
+    },
+    "cross_references": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dashboard_reference", "sheet_specs"],
+      "properties": {
+        "dashboard_reference": { "type": ["string", "null"] },
+        "sheet_specs": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

@@ -1,6 +1,6 @@
 ---
 name: dia-tableau-workbook-intake
-description: Extract deterministic facts from one Tableau workbook package or workbook XML into workbook-facts.yaml. Use only when explicitly invoked as $dia-tableau-workbook-intake. Do not open Tableau, connect to Tableau Server, or read the package's data extract.
+description: Extract deterministic facts from one Tableau workbook package or workbook XML into a schema-version-2 workbook-facts.yaml. Use only when explicitly invoked as $dia-tableau-workbook-intake. Do not open Tableau, connect to Tableau Server, or read the package's data extract.
 metadata:
   status: testing
 ---
@@ -42,13 +42,19 @@ Add `--replace` only when the user has confirmed replacement of an existing outp
 
 The helper uses only the Python standard library. Do not install dependencies, launch Tableau, or pass workbook content through a shell. Pass paths as command arguments.
 
+The helper emits `schema_version: 2` facts with provenance, stable entity IDs, typed anomaly records, completeness records, and empty `interpretation_inputs`. An existing `schema_version: 1` facts file must not be patched in place: the only sanctioned path from v1 to v2 is this skill's `scripts\migrate_facts_v1_to_v2.py` helper, which reads the v1 file and writes a new v2 file without modifying the input. If the user asks to validate a facts file, run `scripts\validate_facts.py --facts <absolute-facts-file>` and report the machine-readable result; it exits 0 when valid and 2 with a violation list.
+
 ## Review the result
 
 1. Treat the run as successful only when the helper exits with code 0 and prints a JSON summary.
-2. Report the workbook name, container kind, dashboard count, worksheet count, sheets on dashboards, orphan-sheet count, parameter count, calculation count, and output path.
-3. Report every warning verbatim. A successful extraction can still contain warnings that need review, such as unrecognized zones or stories that were not inventoried.
+2. Report the workbook name, dashboard count, worksheet count, orphan-sheet count, anomaly records by code, completeness status, and output path.
+3. Report every warning verbatim. A successful extraction can still contain warnings that need review, such as unrecognized zones or stories that were not inventoried. Every warning also exists as a typed anomaly record in the facts file.
 4. Open `workbook-facts.yaml` only to verify that it is present and nonempty. Do not change it.
 5. Summarize what the skill did not do: Tableau was not opened, Tableau Server was not contacted, the data extract was not read, and no documentation was authored.
+
+## Validate generated documents
+
+When the user asks to check generated `workbook-audit.md`, `dashboard-reference.md`, or `sheet-specs.md` files against the facts, run this skill's `scripts\lint_workbook_docs.py` helper with the absolute facts path (and absolute document paths when they are not beside the facts file). It exits 0 when the documents are clean and 2 with a machine-readable violation list covering schema validity, unknown IDs, orphan-sheet leakage, stale placeholders, unconfirmed-confirmation markers, and document-ownership violations.
 
 ## Handle failures
 

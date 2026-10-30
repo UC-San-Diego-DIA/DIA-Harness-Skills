@@ -1,12 +1,12 @@
 # Model-facts contract
 
-This contract describes `model-facts.yaml` schema version 1, produced by `$dia-data-model-intake`. Documentation must rely only on the fields described here.
+This contract describes `model-facts.yaml` schema version 1, produced by `$dia-data-model-intake`. Documentation must rely only on the fields described here. Schema version 2 adds optional fields described at the end of this contract; documentation accepts both versions and treats every version-2 field as optional.
 
 ## Top-level object
 
 | Field | Type | Meaning |
 | --- | --- | --- |
-| `schema_version` | integer | Contract version. Documentation supports only `1`. |
+| `schema_version` | integer | Contract version. Documentation supports `1` and `2`. |
 | `model` | object | Model identity and BI Publisher metadata. |
 | `extraction` | object | Input file, container kind, and extraction timestamp. |
 | `catalog_items` | array | JSON objects copied from a `.xdm.catalog` container. Empty for an XML-only input. |
@@ -65,6 +65,15 @@ A CTE and the `main_query` use the same shape:
 | `clauses` | object | Captured `where`, `group_by`, `having`, and `order_by` text. Absent clauses are null. |
 
 The `clauses` values are extracted SQL fragments, not prose. Documentation must not restate them as business rules without tracing the exact path and preserving their meaning.
+
+## Schema version 2 additions
+
+When `schema_version: 2`, the intake contract may add the following optional fields. Use them when present; never require them, because older facts files remain valid.
+
+- `provenance` block: source file identity, content hash, extraction timestamp, extractor version, and container kind. Cite it once in the overview model card.
+- Stable IDs such as `model_id`, per-dataset IDs, and per-column IDs, alongside content hashes. Cite them once in the overview model card.
+- A `run` facet holding coded warnings as objects with stable codes, plus tool version and parse status. Treat each coded warning the same way schema-1 prose warnings are treated: report once per run, never edit.
+- A `lineage` array of typed edges. The dictionary and profile own column and table interpretation; cite lineage paths as evidence, not as new claims.
 
 ## Output column object
 

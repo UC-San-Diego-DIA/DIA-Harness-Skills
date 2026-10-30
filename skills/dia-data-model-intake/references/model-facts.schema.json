@@ -1,0 +1,280 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/skills/dia-data-model-intake/references/model-facts.schema.json",
+  "title": "model-facts.yaml schema version 2",
+  "description": "Contract for the deterministic BI Publisher data-model inventory emitted by dia-data-model-intake.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "provenance", "model", "run"],
+  "properties": {
+    "schema_version": { "const": 2 },
+    "provenance": { "$ref": "#/$defs/provenance" },
+    "model": { "$ref": "#/$defs/modelFacet" },
+    "run": { "$ref": "#/$defs/runFacet" }
+  },
+  "$defs": {
+    "hex64": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "stableId": { "type": "string", "pattern": "^[a-z]+_[0-9a-f]{16}(_[0-9]+)?$" },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_file", "source_sha256", "extracted_at", "extractor_version", "container"],
+      "properties": {
+        "source_file": { "type": "string", "minLength": 1 },
+        "source_sha256": { "anyOf": [{ "$ref": "#/$defs/hex64" }, { "type": "null" }] },
+        "extracted_at": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "extractor_version": { "type": "string", "minLength": 1 },
+        "container": { "enum": ["xml-document", "zlib-archive"] }
+      }
+    },
+    "modelFacet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "facet_version", "model_id", "name", "description", "xdm_version",
+        "default_data_source", "bi_publisher_build", "author", "modified_at",
+        "catalog_items", "data_properties", "data_sources", "parameters",
+        "value_sets", "datasets", "output_columns", "lineage", "bursting"
+      ],
+      "properties": {
+        "facet_version": { "const": 1 },
+        "model_id": { "$ref": "#/$defs/stableId" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "xdm_version": { "type": ["string", "null"] },
+        "default_data_source": { "type": ["string", "null"] },
+        "bi_publisher_build": { "type": ["string", "null"] },
+        "author": { "type": ["string", "null"] },
+        "modified_at": { "type": ["string", "null"] },
+        "catalog_items": { "type": "array", "items": { "type": "object" } },
+        "data_properties": { "type": "object" },
+        "data_sources": { "type": "array", "items": { "type": "string" } },
+        "parameters": { "type": "array", "items": { "type": "object" } },
+        "value_sets": { "type": "array", "items": { "type": "object" } },
+        "datasets": { "type": "array", "items": { "$ref": "#/$defs/dataset" } },
+        "output_columns": { "type": "array", "items": { "$ref": "#/$defs/outputColumn" } },
+        "lineage": { "type": "array", "items": { "$ref": "#/$defs/lineageEdge" } },
+        "bursting": { "type": "array", "items": { "type": "object" } }
+      }
+    },
+    "runFacet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["facet_version", "extractor_version", "warnings", "parse_status"],
+      "properties": {
+        "facet_version": { "const": 1 },
+        "extractor_version": { "type": "string", "minLength": 1 },
+        "warnings": { "type": "array", "items": { "$ref": "#/$defs/warning" } },
+        "parse_status": { "type": "array", "items": { "$ref": "#/$defs/parseStatus" } },
+        "migration": { "$ref": "#/$defs/migration" }
+      }
+    },
+    "migration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_facts_file", "source_facts_sha256"],
+      "properties": {
+        "source_facts_file": { "type": "string", "minLength": 1 },
+        "source_facts_sha256": { "anyOf": [{ "$ref": "#/$defs/hex64" }, { "type": "null" }] }
+      }
+    },
+    "dataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "name", "type", "data_source", "sql", "author_comments",
+        "ctes", "main_query", "source_tables", "sql_summary"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "name": { "type": "string" },
+        "type": { "type": ["string", "null"] },
+        "data_source": { "type": ["string", "null"] },
+        "content_hash": { "$ref": "#/$defs/hex64" },
+        "sql": { "type": "string" },
+        "author_comments": { "type": "array", "items": { "type": "string" } },
+        "ctes": { "type": "array", "items": { "$ref": "#/$defs/query" } },
+        "main_query": { "anyOf": [{ "$ref": "#/$defs/query" }, { "type": "null" }] },
+        "source_tables": { "type": "array", "items": { "$ref": "#/$defs/datasetSourceTable" } },
+        "sql_summary": { "type": "object" },
+        "parameter_bindings": { "type": "array", "items": { "$ref": "#/$defs/parameterBinding" } }
+      }
+    },
+    "query": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name", "sql", "comments", "cte_references", "source_tables", "joins",
+        "select_aliases", "case_mappings", "features", "clauses"
+      ],
+      "properties": {
+        "name": { "type": "string" },
+        "sql": { "type": "string" },
+        "comments": { "type": "array", "items": { "type": "string" } },
+        "cte_references": { "type": "array", "items": { "type": "string" } },
+        "source_tables": { "type": "array", "items": { "$ref": "#/$defs/sourceTable" } },
+        "joins": { "type": "array", "items": { "$ref": "#/$defs/join" } },
+        "select_aliases": { "type": "array", "items": { "$ref": "#/$defs/selectAlias" } },
+        "case_mappings": { "type": "array", "items": { "$ref": "#/$defs/caseMapping" } },
+        "features": { "type": "array", "items": { "type": "string" } },
+        "clauses": { "$ref": "#/$defs/clauses" }
+      }
+    },
+    "sourceTable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["table", "alias"],
+      "properties": {
+        "table": { "type": "string" },
+        "alias": { "type": ["string", "null"] }
+      }
+    },
+    "datasetSourceTable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["table", "aliases", "referenced_in"],
+      "properties": {
+        "table": { "type": "string" },
+        "aliases": {
+          "type": "array",
+          "items": { "type": ["string", "null"] }
+        },
+        "referenced_in": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "join": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "table", "alias", "condition"],
+      "properties": {
+        "type": { "type": "string" },
+        "table": { "type": "string" },
+        "alias": { "type": ["string", "null"] },
+        "condition": { "type": ["string", "null"] }
+      }
+    },
+    "selectAlias": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "expression"],
+      "properties": {
+        "name": { "type": ["string", "null"] },
+        "expression": { "type": "string" }
+      }
+    },
+    "caseMapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operand", "whens", "else"],
+      "properties": {
+        "operand": { "type": ["string", "null"] },
+        "whens": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["when", "then"],
+            "properties": {
+              "when": { "type": "string" },
+              "then": { "type": "string" }
+            }
+          }
+        },
+        "else": { "type": ["string", "null"] }
+      }
+    },
+    "clauses": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["where", "group_by", "having", "order_by"],
+      "properties": {
+        "where": { "type": ["string", "null"] },
+        "group_by": { "type": ["string", "null"] },
+        "having": { "type": ["string", "null"] },
+        "order_by": { "type": ["string", "null"] }
+      }
+    },
+    "outputColumn": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name", "id", "value", "label", "data_type", "group", "group_source",
+        "break_order", "format_mask", "field_order"
+      ],
+      "properties": {
+        "name": { "type": ["string", "null"] },
+        "id": { "$ref": "#/$defs/stableId" },
+        "value": { "type": ["string", "null"] },
+        "label": { "type": ["string", "null"] },
+        "data_type": { "type": ["string", "null"] },
+        "group": { "type": ["string", "null"] },
+        "group_source": { "type": ["string", "null"] },
+        "break_order": { "type": ["string", "null"] },
+        "format_mask": { "type": ["string", "null"] },
+        "field_order": { "type": ["integer", "string", "null"] },
+        "nullability": { "enum": ["nullable", "not_null"] },
+        "parameter_bindings": { "type": "array", "items": { "$ref": "#/$defs/parameterBinding" } }
+      }
+    },
+    "parameterBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["parameter", "via"],
+      "properties": {
+        "parameter": { "type": "string", "minLength": 1 },
+        "via": { "enum": ["sql", "group_sql", "element_value"] }
+      }
+    },
+    "lineageEdge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dataset", "dataset_id", "input_table", "query", "output_column", "join_keys"],
+      "properties": {
+        "dataset": { "type": "string" },
+        "dataset_id": { "$ref": "#/$defs/stableId" },
+        "input_table": { "type": "string" },
+        "query": { "type": ["string", "null"] },
+        "output_column": { "type": "string" },
+        "join_keys": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "warning": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "dataset", "query", "item_index", "severity", "message"],
+      "properties": {
+        "code": {
+          "enum": [
+            "AMBIGUOUS_ALIAS_NO_AS",
+            "CTE_PARSE_FALLBACK",
+            "DATASET_NO_SQL",
+            "NO_DATA_SETS",
+            "NO_TOP_LEVEL_SELECT",
+            "SELECT_ITEM_NO_ALIAS",
+            "SOURCE_FILE_UNAVAILABLE"
+          ]
+        },
+        "dataset": { "type": ["string", "null"] },
+        "query": { "type": ["string", "null"] },
+        "item_index": { "type": ["integer", "null"] },
+        "severity": { "enum": ["info", "warning", "error"] },
+        "message": { "type": "string", "minLength": 1 }
+      }
+    },
+    "parseStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dataset", "dataset_id", "status", "warning_count", "note_count"],
+      "properties": {
+        "dataset": { "type": "string" },
+        "dataset_id": { "$ref": "#/$defs/stableId" },
+        "status": { "enum": ["parsed", "parsed_with_warnings", "no_sql"] },
+        "warning_count": { "type": "integer", "minimum": 0 },
+        "note_count": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}
