@@ -66,6 +66,12 @@ Each output-column descriptor preserves its declared field order and may carry:
 - `nullability`: `not_null` when a CASE expression's ELSE branch contains no NULL token and no nested CASE, or when an XML `nullable`/`nullAllowed` attribute declares it. Omitted when not derivable.
 - `parameter_bindings`: an array of `{parameter, via}` objects. `via` is `sql` when a `:NAME` token appears in the dataset SQL, `group_sql` when the column inherits its group-source dataset's bindings, or `element_value` when the column value equals the parameter name.
 
-## Backward compatibility
+## Compatibility policy
+
+`schema_version` changes only when the contract breaks:
+
+- Additive optional fields do not bump `schema_version`. Consumers must tolerate unknown or extra fields and must not stop on them.
+- Renames, removals, or semantic changes to existing fields require a `schema_version` bump.
+- `facet_version` allows per-facet evolution: the `model` and `run` facets can evolve independently through their own `facet_version` values without a top-level `schema_version` bump.
 
 The extractor emits only schema version 2. An existing schema-version-1 file is migrated exclusively by `scripts\migrate_model_facts_v1_to_v2.py`, which reads the v1 YAML, re-runs the SQL analysis against the recorded SQL text, and writes a new v2 file with the original source file's provenance when the file is readable and a `SOURCE_FILE_UNAVAILABLE` warning when it is not.

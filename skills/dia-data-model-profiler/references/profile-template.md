@@ -2,14 +2,16 @@
 
 Use this structure for the single `data-model-profile.md` output. Replace bracketed placeholders with facts or with a link to an open-questions register entry. Never leave a template placeholder in the written document. Cite a fact path once per section when every claim in that section shares the same path, and per item when they differ. Keep tables narrow: if a cell would hold more than about one line of text, shorten it and move the detail to a bullet.
 
+The concrete paths in this template are the fact-path map in the profiler skill: current schema-version-2 paths. Update them only when a breaking contract change occurs; unknown or extra fields in the facts file are tolerated and never profile content.
+
 Unresolved interpretations never appear as inline `Needs analyst confirmation` text. They live only in the open-questions register, and the body links to them by ID, like `(see OQ-01)`.
 
 ```markdown
 # Data model profile: [model.name]
 
-Derived only from [extraction.source_file]. Extracted [extraction.extracted_at]. Container: [extraction.container].
+Derived only from [provenance.source_file]. Extracted [provenance.extracted_at]. Container: [provenance.container].
 
-Extraction warnings (reported verbatim, unedited): [each warning string, or "None declared."] Evidence: `warnings`.
+Extraction warnings (reported verbatim, unedited): [each coded warning object from `run.warnings`, including its `code`, `severity`, and `message`, or "None declared."] Evidence: `run.warnings`.
 
 ## Quick take
 
@@ -31,7 +33,7 @@ In practice:
 
 ## 2. Filters, exclusions, and windows
 
-Fact paths: `datasets[*].main_query.clauses.where`, `datasets[*].ctes[*].clauses.where`.
+Fact paths: `model.datasets[*].main_query.clauses.where`, `model.datasets[*].ctes[*].clauses.where`.
 
 | Filter | Excludes | Effect on interpretation |
 | --- | --- | --- |
@@ -65,7 +67,7 @@ One value table per CASE rule, ordered by how much each can change an answer.
 
 ### Joins
 
-Fact paths: `datasets[*].main_query.joins`.
+Fact paths: `model.datasets[*].main_query.joins`.
 
 **Joins that change row counts**
 
@@ -79,7 +81,7 @@ Fact paths: `datasets[*].main_query.joins`.
 
 ## 5. Row-count risk
 
-Fact paths: `datasets[*].main_query.joins`, `datasets[*].ctes[*]`.
+Fact paths: `model.datasets[*].main_query.joins`, `model.datasets[*].ctes[*]`.
 
 | ID | Expected count (derived from structure) | Observed count | Delta | Cause |
 | --- | --- | --- | --- | --- |
@@ -123,4 +125,5 @@ The body links to register entries by ID instead of restating them. Every interp
 - Every CASE mapping must be a value table with source value, target value, affected output column, and an unmapped marker that includes the ELSE branch or the absent-ELSE null.
 - Every unresolved interpretation lives in the open-questions register with an evidence path, owner, and status; the body links to it by ID and does not restate the question.
 - Prefer bullets over wide tables when a cell would hold a full sentence or more.
+- Cite fact paths from the profiler skill's fact-path map. Do not invent paths; if a needed fact is absent from the file, record an open-questions entry instead of guessing a path.
 - Do not include institutional email addresses or catalog paths in the profile unless the user confirms they are appropriate.
