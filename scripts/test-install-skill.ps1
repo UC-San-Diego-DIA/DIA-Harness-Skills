@@ -28,7 +28,7 @@ $destination = Join-Path $resolvedTestRoot 'installed-skills'
 $whatIfDestination = Join-Path $resolvedTestRoot 'what-if-skills'
 
 try {
-    $skillsToInstall = @('dia-analyze-local-data', 'dia-clickup-mcp-setup', 'dia-data-model-docs', 'dia-data-model-intake', 'dia-new-data-analysis-workspace', 'dia-process-meeting-transcript', 'dia-setup-project-folder', 'dia-start-my-day', 'dia-transcript-to-process-map', 'dia-transcript-to-project-request-draft')
+    $skillsToInstall = @('dia-analyze-local-data', 'dia-clickup-mcp-setup', 'dia-data-model-docs', 'dia-data-model-intake', 'dia-new-data-analysis-workspace', 'dia-process-meeting-transcript', 'dia-setup-business-insights-folder', 'dia-start-my-day', 'dia-transcript-to-process-map', 'dia-transcript-to-project-request-draft')
     foreach ($skillName in $skillsToInstall) {
         & $installer -Skill $skillName -Destination $destination -Force
 
@@ -40,8 +40,8 @@ try {
     $installedSkill = Join-Path $destination 'dia-clickup-mcp-setup'
     $installedEntry = Join-Path $installedSkill 'SKILL.md'
     $duckdbHelper = Join-Path $destination 'dia-analyze-local-data\scripts\duckdb_analysis.py'
-    $projectFolderHelper = Join-Path $destination 'dia-setup-project-folder\scripts\setup_project_folder.ps1'
-    $projectAgentsTemplate = Join-Path $destination 'dia-setup-project-folder\assets\project-AGENTS.md'
+    $projectFolderHelper = Join-Path $destination 'dia-setup-business-insights-folder\scripts\setup_business_insights_folder.ps1'
+    $projectAgentsTemplate = Join-Path $destination 'dia-setup-business-insights-folder\assets\project-AGENTS.md'
     $workspaceHelper = Join-Path $destination 'dia-new-data-analysis-workspace\scripts\create_workspace.ps1'
     $workspaceAgentsTemplate = Join-Path $destination 'dia-new-data-analysis-workspace\assets\workspace-AGENTS.md'
     $meetingNoteFormat = Join-Path $destination 'dia-process-meeting-transcript\references\meeting-note-format.md'
@@ -123,7 +123,7 @@ try {
 
     foreach ($unexpectedSkill in @(
         'dia-process-meeting-transcript',
-        'dia-setup-project-folder'
+        'dia-setup-business-insights-folder'
     )) {
         $unexpectedPath = Join-Path $statusDestination $unexpectedSkill
         Assert-True (-not (Test-Path -LiteralPath $unexpectedPath)) "$unexpectedSkill must not be installed by -Status production,testing."

@@ -1,6 +1,0 @@
-interface:
-  display_name: "Set Up Project Folder"
-  short_description: "Create or validate a DIA local project folder"
-  default_prompt: "Use $dia-setup-project-folder to create or validate a DIA business-insights project folder connected to ClickUp."
-policy:
-  allow_implicit_invocation: false

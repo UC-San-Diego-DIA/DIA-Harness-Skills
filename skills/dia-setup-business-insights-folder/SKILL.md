@@ -1,17 +1,17 @@
 ---
-name: dia-setup-project-folder
-description: Create or validate a DIA business-insights local project folder connected to existing ClickUp resources. Use only when explicitly invoked as $dia-setup-project-folder. Do not create ClickUp content or perform project work.
+name: dia-setup-business-insights-folder
+description: Create or validate a DIA business-insights local project folder connected to existing ClickUp resources. Use only when explicitly invoked as $dia-setup-business-insights-folder. Do not create ClickUp content or perform project work.
 metadata:
   status: development
 ---
 
-# Set up a project folder
+# Set up a business insights folder
 
 Create or validate the standard local folder for one DIA business-insights project. Connect it to an existing ClickUp Folder, task List, and Project Hub through stable IDs.
 
 ## Boundaries
 
-- Run only when the user explicitly invokes `$dia-setup-project-folder`.
+- Run only when the user explicitly invokes `$dia-setup-business-insights-folder`.
 - Support the `business-insights` project type and schema version 1.
 - Use read-only ClickUp operations to resolve and verify existing resources.
 - Do not configure ClickUp. If ClickUp tools are unavailable, tell the user to invoke `$dia-clickup-mcp-setup` and stop.
@@ -37,10 +37,10 @@ Create or validate the standard local folder for one DIA business-insights proje
 
 ## Plan the local changes
 
-Read [references/project-folder-v1.md](references/project-folder-v1.md). Locate this installed skill's `scripts\setup_project_folder.ps1`, then run it without `-Apply`. Pass the absolute target and the verified values:
+Read [references/project-folder-v1.md](references/project-folder-v1.md). Locate this installed skill's `scripts\setup_business_insights_folder.ps1`, then run it without `-Apply`. Pass the absolute target and the verified values:
 
 ```powershell
-pwsh -NoProfile -File <skill-folder>\scripts\setup_project_folder.ps1 `
+  pwsh -NoProfile -File <skill-folder>\scripts\setup_business_insights_folder.ps1 `
   -Root <absolute-project-folder> `
   -ProjectName <clickup-folder-name> `
   -Description <one-sentence-description> `

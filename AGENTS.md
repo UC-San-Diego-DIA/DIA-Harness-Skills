@@ -61,7 +61,11 @@ dia-dataset-profile owns a one-time profile of one CSV or Excel file: field inve
 
 `dia-start-my-day` owns read-only daily prioritization from ClickUp, Outlook calendar, and Outlook mail, plus user-approved follow-through in those systems. It does not own connection setup, other evidence sources, or unapproved external changes.
 
-`dia-setup-project-folder` owns local creation and validation of the schema-1 business-insights project folder for existing ClickUp resources. It does not create or change ClickUp content, migrate conflicting folders, process project files, analyze data, or create deliverables.
+`dia-setup-business-insights-folder` owns local creation and validation of the schema-1 business-insights project folder for existing ClickUp resources. It does not create or change ClickUp content, migrate conflicting folders, process project files, analyze data, or create deliverables.
+
+`dia-new-simple-workspace` owns local creation of one simple workspace with fixed `Scripts`, `Inputs`, and `Outputs` directories plus README and AGENTS files. It does not connect to ClickUp, create a project manifest, validate or migrate other folder structures, or process project content.
+
+`dia-plan-my-project` owns interviewing the user about one existing workspace's project goal and writing a confirmed, human-readable `plan.md` at the workspace root. It does not create workspaces, create ClickUp content, process project files, or execute the steps of the plan it writes.
 
 `dia-tableau-workbook-intake` owns local, deterministic extraction of facts from one Tableau workbook package or workbook XML document into `workbook-facts.yaml`. It does not open Tableau, connect to Tableau Server, read the package's data extract, interpret business meaning, author documentation, or change source files.
 

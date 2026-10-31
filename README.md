@@ -21,12 +21,15 @@ This repository is the reviewed source for DIA skills used in TritonAI Harness o
 | [`dia-transcript-to-requirements`](skills/dia-transcript-to-requirements/SKILL.md) *(testing)* | Converting a business-owner requirements Zoom transcript into a decision-driven requirements document | `$dia-transcript-to-requirements` |
 | [`dia-transcript-to-kpis`](skills/dia-transcript-to-kpis/SKILL.md) *(testing)* | Extracting confirmed business questions and KPIs from a requirements transcript into Markdown and `kpi-facts.yaml` | `$dia-transcript-to-kpis` |
 | [`dia-process-meeting-transcript`](skills/dia-process-meeting-transcript/SKILL.md) *(development)* | Turning a project transcript into meeting notes and DIA-owned ClickUp tasks | `$dia-process-meeting-transcript` |
-| [`dia-setup-project-folder`](skills/dia-setup-project-folder/SKILL.md) *(development)* | Creating or validating a business-insights project folder connected to ClickUp | `$dia-setup-project-folder` |
+| [`dia-setup-business-insights-folder`](skills/dia-setup-business-insights-folder/SKILL.md) *(development)* | Creating or validating a business-insights project folder connected to ClickUp | `$dia-setup-business-insights-folder` |
+| [`dia-new-simple-workspace`](skills/dia-new-simple-workspace/SKILL.md) *(development)* | Creating a simple local workspace with Scripts, Inputs, and Outputs plus AI working instructions | `$dia-new-simple-workspace` |
+| [`dia-plan-my-project`](skills/dia-plan-my-project/SKILL.md) *(development)* | Interviewing the user about a workspace project and writing a confirmed, human-readable `plan.md` | `$dia-plan-my-project` |
 | [`dia-bi-publisher-sql-optimizer`](skills/dia-bi-publisher-sql-optimizer/SKILL.md) *(testing)* | Analyzing one BI Publisher data model's SQL Monitor report and data engine log, and producing a faster candidate rewrite with identical output columns | `$dia-bi-publisher-sql-optimizer` |
 | [`dia-tableau-dashboard-docs`](skills/dia-tableau-dashboard-docs/SKILL.md) *(testing)* | Drafting internal dashboard-reference and sheet-specs documentation from one workbook-facts file | `$dia-tableau-dashboard-docs` |
 | [`dia-tableau-workbook-audit`](skills/dia-tableau-workbook-audit/SKILL.md) *(testing)* | Auditing one Tableau workbook's facts: sheet usage, orphan sheets, duplicate names, calculation reuse, and parameters | `$dia-tableau-workbook-audit` |
 | [`dia-tableau-workbook-intake`](skills/dia-tableau-workbook-intake/SKILL.md) *(testing)* | Extracting deterministic facts from one Tableau workbook package into workbook-facts.yaml | `$dia-tableau-workbook-intake` |
 | [`dia-start-my-day`](skills/dia-start-my-day/SKILL.md) *(testing)* | Choosing today's focus from ClickUp, Outlook calendar, and Outlook mail | `$dia-start-my-day` |
+| [`dia-harness-utilization-review`](skills/dia-harness-utilization-review/SKILL.md) *(development)* | Reviewing the previous day's Harness threads and conversations for interaction improvements and new usage ideas, then recording confirmed recommendations in a local review log; designed for a scheduled ~9 AM run | `$dia-harness-utilization-review` |
 
 Each skill's `SKILL.md` frontmatter declares its lifecycle with `metadata.status: development`, `testing`, or `production`. Skills start in development, get promoted to testing, and finally to production. The landing page in `docs/index.html` catalogs every skill behind a lifecycle filter with production selected by default, marks each entry with a small lifecycle indicator, sorts entries production, testing, then development, and the repository validator enforces that every skill appears.
 
@@ -46,7 +49,7 @@ Clone the repository, open PowerShell in its root, and run the installer with on
 
 ```powershell
 pwsh -File .\scripts\install-skill.ps1 -Skill dia-start-my-day
-pwsh -File .\scripts\install-skill.ps1 -Skill dia-start-my-day, dia-setup-project-folder
+pwsh -File .\scripts\install-skill.ps1 -Skill dia-start-my-day, dia-setup-business-insights-folder
 ```
 
 To install every skill in the repository at once, including development skills, run:

@@ -22,9 +22,13 @@ jobs:
         shell: pwsh
         run: .\scripts\test-install-skill.ps1
 
-      - name: Test project-folder helper
+      - name: Test business-insights folder helper
         shell: pwsh
-        run: .\scripts\test-setup-project-folder.ps1
+        run: .\scripts\test-setup-business-insights-folder.ps1
+
+      - name: Test simple-workspace helper
+        shell: pwsh
+        run: .\scripts\test-create-simple-workspace.ps1
 
       - name: Test workspace helper
         shell: pwsh

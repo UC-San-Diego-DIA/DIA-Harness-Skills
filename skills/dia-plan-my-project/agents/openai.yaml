@@ -1,0 +1,6 @@
+interface:
+  display_name: "Plan My Project"
+  short_description: "Interview you about a project and write plan.md"
+  default_prompt: "Use $dia-plan-my-project to interview me about this workspace project and produce its plan.md."
+policy:
+  allow_implicit_invocation: false

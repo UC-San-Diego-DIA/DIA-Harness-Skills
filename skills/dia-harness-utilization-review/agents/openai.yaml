@@ -1,0 +1,6 @@
+interface:
+  display_name: "Harness Utilization Review"
+  short_description: "End-of-session feedback on using TritonAI Harness better"
+  default_prompt: "Use $dia-harness-utilization-review to review this session and record confirmed recommendations."
+policy:
+  allow_implicit_invocation: false

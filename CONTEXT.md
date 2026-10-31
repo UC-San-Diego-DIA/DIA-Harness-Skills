@@ -28,6 +28,10 @@ _Avoid_: Workspace configuration, Project settings file
 A DIA project that produces stakeholder insight through analysis and may result in data products, presentations, or both.
 _Avoid_: Reporting project, Dashboard project
 
+**Simple workspace**:
+A lightweight local workspace for one piece of DIA work with fixed `Scripts`, `Inputs`, and `Outputs` directories plus README and AGENTS files.
+_Avoid_: Working folder, Lightweight workspace
+
 **Deliverable**:
 A stakeholder-facing outcome produced by a DIA project.
 _Avoid_: Output, Artifact
@@ -119,3 +123,15 @@ _Avoid_: DIA list, Personal List
 **My Tasks**:
 The authenticated staff member's ClickUp view of work assigned to them across the Workspace. It is not a List or a team destination and has no shared destination ID.
 _Avoid_: Personal List, Personal destination
+
+**Utilization review**:
+An assessment of one person's prior-day TritonAI Harness threads and conversations, producing two to four recommendations for improving existing interactions and one to three ideas for new ways to use the Harness, each validated by the user before its verdict is final.
+_Avoid_: Usage audit, Performance review
+
+**Utilization review log**:
+The append-only `harness-utilization-reviews.md` file that records one review entry per run, including recommendations, their verdicts, coverage notes, and progression notes used to avoid repeating declined advice.
+_Avoid_: Feedback file, Session history
+
+**Project plan**:
+The human-readable `plan.md` file at a workspace root, confirmed by the user after an interview, stating the project goal, success criteria, current state, ordered approach, out-of-scope items, and assumptions.
+_Avoid_: Work plan, Roadmap

@@ -24,14 +24,14 @@ function Invoke-ProjectFolderHelper {
     $exitCode = $LASTEXITCODE
     $outputText = $output -join [Environment]::NewLine
     if ($exitCode -ne $ExpectedExitCode) {
-        throw "Project-folder helper exited $exitCode instead of $ExpectedExitCode. Output: $outputText"
+        throw "Business-insights folder helper exited $exitCode instead of $ExpectedExitCode. Output: $outputText"
     }
 
     return $outputText | ConvertFrom-Json
 }
 
 $repositoryRoot = Split-Path -Parent $PSScriptRoot
-$helper = Join-Path $repositoryRoot 'skills\dia-setup-project-folder\scripts\setup_project_folder.ps1'
+$helper = Join-Path $repositoryRoot 'skills\dia-setup-business-insights-folder\scripts\setup_business_insights_folder.ps1'
 $pwsh = Join-Path $PSHOME 'pwsh.exe'
 $temporaryBase = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
 $testRoot = Join-Path $temporaryBase "dia-project-folder-$([System.Guid]::NewGuid().ToString('N'))"
@@ -177,7 +177,7 @@ try {
     Assert-True ($mismatch.action -eq 'conflict') 'A local and ClickUp folder-name mismatch was not rejected.'
     Assert-True (-not (Test-Path -LiteralPath $mismatchRoot)) 'Name-mismatch handling created a project folder.'
 
-    Write-Host 'Project-folder helper tests passed.'
+    Write-Host 'Business-insights folder helper tests passed.'
 }
 finally {
     if (Test-Path -LiteralPath $resolvedTestRoot) {

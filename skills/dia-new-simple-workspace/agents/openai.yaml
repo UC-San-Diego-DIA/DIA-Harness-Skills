@@ -1,0 +1,6 @@
+interface:
+  display_name: "New Simple Workspace"
+  short_description: "Create a simple local workspace with Scripts, Inputs, and Outputs"
+  default_prompt: "Use $dia-new-simple-workspace to create a simple local workspace with Scripts, Inputs, and Outputs."
+policy:
+  allow_implicit_invocation: false
