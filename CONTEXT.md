@@ -29,7 +29,7 @@ A DIA project that produces stakeholder insight through analysis and may result 
 _Avoid_: Reporting project, Dashboard project
 
 **Simple workspace**:
-A lightweight local workspace for one piece of DIA work with fixed `Scripts`, `Inputs`, and `Outputs` directories plus README and AGENTS files.
+A lightweight local workspace for one piece of DIA work with fixed `Scripts`, `Inputs`, and `Outputs` directories plus project-context README and AGENTS files, selected through `$dia-new-workspace`.
 _Avoid_: Working folder, Lightweight workspace
 
 **Deliverable**:
@@ -133,5 +133,5 @@ The append-only `harness-utilization-reviews.md` file that records one review en
 _Avoid_: Feedback file, Session history
 
 **Project plan**:
-The human-readable `plan.md` file at a workspace root, confirmed by the user after an interview, stating the project goal, success criteria, current state, ordered approach, out-of-scope items, and assumptions.
+The user-confirmed `plan.md` at a workspace root describing the starting point, task or project goal, completion criteria, and minimum sequence of work needed to reach the goal, with relevant constraints, exclusions, assumptions, and unresolved dependencies.
 _Avoid_: Work plan, Roadmap

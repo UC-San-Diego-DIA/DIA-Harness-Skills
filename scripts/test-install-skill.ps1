@@ -28,7 +28,7 @@ $destination = Join-Path $resolvedTestRoot 'installed-skills'
 $whatIfDestination = Join-Path $resolvedTestRoot 'what-if-skills'
 
 try {
-    $skillsToInstall = @('dia-analyze-local-data', 'dia-clickup-mcp-setup', 'dia-data-model-docs', 'dia-data-model-intake', 'dia-new-data-analysis-workspace', 'dia-process-meeting-transcript', 'dia-setup-business-insights-folder', 'dia-start-my-day', 'dia-transcript-to-process-map', 'dia-transcript-to-project-request-draft')
+    $skillsToInstall = @('dia-analyze-local-data', 'dia-clickup-mcp-setup', 'dia-data-model-docs', 'dia-data-model-intake', 'dia-new-workspace', 'dia-setup-business-insights-folder', 'dia-start-my-day', 'dia-transcript-to-process-map', 'dia-transcript-to-project-request-draft')
     foreach ($skillName in $skillsToInstall) {
         & $installer -Skill $skillName -Destination $destination -Force
 
@@ -42,9 +42,8 @@ try {
     $duckdbHelper = Join-Path $destination 'dia-analyze-local-data\scripts\duckdb_analysis.py'
     $projectFolderHelper = Join-Path $destination 'dia-setup-business-insights-folder\scripts\setup_business_insights_folder.ps1'
     $projectAgentsTemplate = Join-Path $destination 'dia-setup-business-insights-folder\assets\project-AGENTS.md'
-    $workspaceHelper = Join-Path $destination 'dia-new-data-analysis-workspace\scripts\create_workspace.ps1'
-    $workspaceAgentsTemplate = Join-Path $destination 'dia-new-data-analysis-workspace\assets\workspace-AGENTS.md'
-    $meetingNoteFormat = Join-Path $destination 'dia-process-meeting-transcript\references\meeting-note-format.md'
+    $workspaceHelper = Join-Path $destination 'dia-new-workspace\scripts\create_workspace.ps1'
+    $workspaceAgentsTemplate = Join-Path $destination 'dia-new-workspace\assets\analysis-workspace-AGENTS.md'
     $dailyBriefTemplate = Join-Path $destination 'dia-start-my-day\assets\brief-template.html'
     $dataModelFactsHelper = Join-Path $destination 'dia-data-model-intake\scripts\extract_model_facts.py'
     $dataModelFactsSchema = Join-Path $destination 'dia-data-model-intake\references\model-facts.schema.json'
@@ -56,7 +55,6 @@ try {
     Assert-True (Test-Path -LiteralPath $projectAgentsTemplate -PathType Leaf) 'Project AGENTS template was not installed.'
     Assert-True (Test-Path -LiteralPath $workspaceHelper -PathType Leaf) 'Workspace helper script was not installed.'
     Assert-True (Test-Path -LiteralPath $workspaceAgentsTemplate -PathType Leaf) 'Workspace AGENTS template was not installed.'
-    Assert-True (Test-Path -LiteralPath $meetingNoteFormat -PathType Leaf) 'Meeting-note format reference was not installed.'
     Assert-True (Test-Path -LiteralPath $dailyBriefTemplate -PathType Leaf) 'Start My Day HTML template was not installed.'
     Assert-True (Test-Path -LiteralPath $dataModelFactsHelper -PathType Leaf) 'Data-model facts helper was not installed.'
     Assert-True (Test-Path -LiteralPath $dataModelFactsSchema -PathType Leaf) 'Model-facts JSON Schema was not installed.'
@@ -88,6 +86,10 @@ try {
     Assert-True ($sourceSkillDirectories.Count -gt 0) 'No source skill directories found for the -All test.'
     foreach ($sourceSkillDirectory in $sourceSkillDirectories) {
         $installedAllEntry = Join-Path $allDestination "$($sourceSkillDirectory.Name)\SKILL.md"
+        if ($sourceSkillDirectory.Name -eq 'dia-setup-business-insights-folder') {
+            Assert-True (-not (Test-Path -LiteralPath $installedAllEntry)) 'Archived skill was installed by -All.'
+            continue
+        }
         Assert-True (Test-Path -LiteralPath $installedAllEntry -PathType Leaf) "$($sourceSkillDirectory.Name) was not installed by -All."
     }
 
@@ -104,13 +106,15 @@ try {
     & $installer -Status production,testing -Destination $statusDestination -Force
 
     $expectedStatusSkills = @(
+        'dia-new-workspace',
         'dia-analyze-local-data',
         'dia-clickup-mcp-setup',
-        'dia-data-model-docs',
-        'dia-data-model-intake',
+        'dia-dashboard-mockup',
         'dia-data-model-profiler',
-        'dia-new-data-analysis-workspace',
+        'dia-dataset-profile',
+        'dia-plan-my-project',
         'dia-start-my-day',
+        'dia-tableau-workbook-intake',
         'dia-transcript-to-meeting-notes',
         'dia-transcript-to-process-map',
         'dia-transcript-to-project-request-draft',
@@ -122,7 +126,14 @@ try {
     }
 
     foreach ($unexpectedSkill in @(
-        'dia-process-meeting-transcript',
+        'dia-bi-publisher-sql-optimizer',
+        'dia-data-model-docs',
+        'dia-data-model-intake',
+        'dia-harness-utilization-review',
+        'dia-kpi-data-mapping',
+        'dia-tableau-dashboard-docs',
+        'dia-tableau-workbook-audit',
+        'dia-transcript-to-kpis',
         'dia-setup-business-insights-folder'
     )) {
         $unexpectedPath = Join-Path $statusDestination $unexpectedSkill

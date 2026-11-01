@@ -13,7 +13,7 @@ into a DuckDB view under `scratch/analysis/<file-name>/` and every question is
 run read-only against that view. No copies of the data are made.
 
 This skill requires a data-analysis workspace created by
-`$dia-new-data-analysis-workspace`. It does not work standalone.
+`$dia-new-workspace` with the data-analysis layout. It does not work standalone.
 
 ## Boundaries
 
@@ -47,7 +47,7 @@ This skill requires a data-analysis workspace created by
    `data/raw/`, `data/output/`, `scripts/`, and `scripts/README.md`.
 2. If the current folder is not a data-analysis workspace, ask the user for the
    workspace path and verify its markers before continuing. If the user does
-   not have one, tell them to invoke `$dia-new-data-analysis-workspace` first
+   not have one, tell them to invoke `$dia-new-workspace` with the data-analysis layout first
    and stop.
 3. List candidate files under the workspace's `data/raw/` and `data/output/`,
    including subfolders, filtered to `.csv` and `.xlsx` files. Show the list

@@ -7,31 +7,36 @@ This repository is the reviewed source for DIA skills used in TritonAI Harness o
 | Skill | Use it for | Invocation |
 | --- | --- | --- |
 | [`dia-analyze-local-data`](skills/dia-analyze-local-data/SKILL.md) *(testing)* | Answering ad hoc questions about one CSV or Excel file inside a data-analysis workspace, via a linked DuckDB view under `scratch/analysis/` | `$dia-analyze-local-data` |
-| [`dia-dataset-profile`](skills/dia-dataset-profile/SKILL.md) *(testing)* | Profiling one CSV or Excel file: fields, distributions, missingness, candidate keys, anomalies, and suggested metrics or KPIs | `$dia-dataset-profile` |
+| [`dia-dataset-profile`](skills/dia-dataset-profile/SKILL.md) *(production)* | Understanding one new CSV file or selected XLSX sheet: how to read it, possible uses, data issues, and questions for its owner | `$dia-dataset-profile` |
 | [`dia-clickup-mcp-setup`](skills/dia-clickup-mcp-setup/SKILL.md) *(production)* | Connecting TritonAI Harness to ClickUp through the official OAuth MCP server | `$dia-clickup-mcp-setup` |
 | [`dia-dashboard-mockup`](skills/dia-dashboard-mockup/SKILL.md) *(testing)* | Rendering a UCSD-branded HTML dashboard mockup with mock data and explicit data-gap panels from one KPI data mapping report | `$dia-dashboard-mockup` |
-| [`dia-data-model-docs`](skills/dia-data-model-docs/SKILL.md) *(testing)* | Drafting four analyst-facing documents, including a KPI and business-questions catalog, from one extracted model-facts file and its structural profile | `$dia-data-model-docs` |
-| [`dia-data-model-intake`](skills/dia-data-model-intake/SKILL.md) *(testing)* | Extracting deterministic facts from one Oracle BI Publisher data model | `$dia-data-model-intake` |
+| [`dia-data-model-docs`](skills/dia-data-model-docs/SKILL.md) *(development)* | Drafting four analyst-facing documents, including a KPI and business-questions catalog, from one extracted model-facts file and its structural profile | `$dia-data-model-docs` |
+| [`dia-data-model-intake`](skills/dia-data-model-intake/SKILL.md) *(development)* | Extracting deterministic facts from one Oracle BI Publisher data model | `$dia-data-model-intake` |
 | [`dia-data-model-profiler`](skills/dia-data-model-profiler/SKILL.md) *(testing)* | Profiling one model-facts file: grain, filters, hard-coded logic, dedup and join patterns, and source lineage | `$dia-data-model-profiler` |
-| [`dia-kpi-data-mapping`](skills/dia-kpi-data-mapping/SKILL.md) *(testing)* | Mapping confirmed KPIs to one named dataset: required fields, calculations to build, and data gaps | `$dia-kpi-data-mapping` |
-| [`dia-new-data-analysis-workspace`](skills/dia-new-data-analysis-workspace/SKILL.md) *(production)* | Creating a fresh local data-analysis workspace with raw inputs, numbered pipeline scripts, dashboard-ready output, and a home for meeting transcripts | `$dia-new-data-analysis-workspace` |
-| [`dia-transcript-to-meeting-notes`](skills/dia-transcript-to-meeting-notes/SKILL.md) *(testing)* | Converting a Zoom transcript into a detailed local project meeting-note Markdown file | `$dia-transcript-to-meeting-notes` |
+| [`dia-kpi-data-mapping`](skills/dia-kpi-data-mapping/SKILL.md) *(development)* | Mapping confirmed KPIs to one named dataset: required fields, calculations to build, and data gaps | `$dia-kpi-data-mapping` |
+| [`dia-transcript-to-meeting-notes`](skills/dia-transcript-to-meeting-notes/SKILL.md) *(production)* | Converting a Zoom transcript into a detailed local project meeting-note Markdown file | `$dia-transcript-to-meeting-notes` |
 | [`dia-transcript-to-process-map`](skills/dia-transcript-to-process-map/SKILL.md) *(testing)* | Saving a Zoom transcript locally, inventorying possible processes, building confirmable ROI-based outlines for the confirmed ones, and rendering the confirmed process maps | `$dia-transcript-to-process-map` |
 | [`dia-transcript-to-project-request-draft`](skills/dia-transcript-to-project-request-draft/SKILL.md) *(testing)* | Drafting a first-pass, field-by-field fill-in for the VCFA DIA Project Request Form from a project-request transcript, with data gaps named for review | `$dia-transcript-to-project-request-draft` |
-| [`dia-transcript-to-requirements`](skills/dia-transcript-to-requirements/SKILL.md) *(testing)* | Converting a business-owner requirements Zoom transcript into a decision-driven requirements document | `$dia-transcript-to-requirements` |
-| [`dia-transcript-to-kpis`](skills/dia-transcript-to-kpis/SKILL.md) *(testing)* | Extracting confirmed business questions and KPIs from a requirements transcript into Markdown and `kpi-facts.yaml` | `$dia-transcript-to-kpis` |
-| [`dia-process-meeting-transcript`](skills/dia-process-meeting-transcript/SKILL.md) *(development)* | Turning a project transcript into meeting notes and DIA-owned ClickUp tasks | `$dia-process-meeting-transcript` |
-| [`dia-setup-business-insights-folder`](skills/dia-setup-business-insights-folder/SKILL.md) *(development)* | Creating or validating a business-insights project folder connected to ClickUp | `$dia-setup-business-insights-folder` |
-| [`dia-new-simple-workspace`](skills/dia-new-simple-workspace/SKILL.md) *(development)* | Creating a simple local workspace with Scripts, Inputs, and Outputs plus AI working instructions | `$dia-new-simple-workspace` |
-| [`dia-plan-my-project`](skills/dia-plan-my-project/SKILL.md) *(development)* | Interviewing the user about a workspace project and writing a confirmed, human-readable `plan.md` | `$dia-plan-my-project` |
-| [`dia-bi-publisher-sql-optimizer`](skills/dia-bi-publisher-sql-optimizer/SKILL.md) *(testing)* | Analyzing one BI Publisher data model's SQL Monitor report and data engine log, and producing a faster candidate rewrite with identical output columns | `$dia-bi-publisher-sql-optimizer` |
-| [`dia-tableau-dashboard-docs`](skills/dia-tableau-dashboard-docs/SKILL.md) *(testing)* | Drafting internal dashboard-reference and sheet-specs documentation from one workbook-facts file | `$dia-tableau-dashboard-docs` |
-| [`dia-tableau-workbook-audit`](skills/dia-tableau-workbook-audit/SKILL.md) *(testing)* | Auditing one Tableau workbook's facts: sheet usage, orphan sheets, duplicate names, calculation reuse, and parameters | `$dia-tableau-workbook-audit` |
+| [`dia-transcript-to-requirements`](skills/dia-transcript-to-requirements/SKILL.md) *(production)* | Converting a business-owner requirements Zoom transcript into a decision-driven requirements document | `$dia-transcript-to-requirements` |
+| [`dia-transcript-to-kpis`](skills/dia-transcript-to-kpis/SKILL.md) *(development)* | Extracting confirmed business questions and KPIs from a requirements transcript into Markdown and `kpi-facts.yaml` | `$dia-transcript-to-kpis` |
+| [`dia-new-workspace`](skills/dia-new-workspace/SKILL.md) *(testing)* | Choosing and creating a simple or data-analysis workspace, moving confirmed starting files, and handing off to planning | `$dia-new-workspace` |
+| [`dia-plan-my-project`](skills/dia-plan-my-project/SKILL.md) *(production)* | Refining a task or project goal and creating or revising a confirmed `plan.md` with the minimum steps needed to achieve it | `$dia-plan-my-project` |
+| [`dia-bi-publisher-sql-optimizer`](skills/dia-bi-publisher-sql-optimizer/SKILL.md) *(development)* | Analyzing one BI Publisher data model's SQL Monitor report and data engine log, and producing a faster candidate rewrite with identical output columns | `$dia-bi-publisher-sql-optimizer` |
+| [`dia-tableau-dashboard-docs`](skills/dia-tableau-dashboard-docs/SKILL.md) *(development)* | Drafting internal dashboard-reference and sheet-specs documentation from one workbook-facts file | `$dia-tableau-dashboard-docs` |
+| [`dia-tableau-workbook-audit`](skills/dia-tableau-workbook-audit/SKILL.md) *(development)* | Auditing one Tableau workbook's facts: sheet usage, orphan sheets, duplicate names, calculation reuse, and parameters | `$dia-tableau-workbook-audit` |
 | [`dia-tableau-workbook-intake`](skills/dia-tableau-workbook-intake/SKILL.md) *(testing)* | Extracting deterministic facts from one Tableau workbook package into workbook-facts.yaml | `$dia-tableau-workbook-intake` |
-| [`dia-start-my-day`](skills/dia-start-my-day/SKILL.md) *(testing)* | Choosing today's focus from ClickUp, Outlook calendar, and Outlook mail | `$dia-start-my-day` |
+| [`dia-start-my-day`](skills/dia-start-my-day/SKILL.md) *(production)* | Choosing today's focus in chat from open assigned ClickUp tasks, today's and the next two days' Outlook calendar, and the last 72 hours of mail; HTML on request | `$dia-start-my-day` |
 | [`dia-harness-utilization-review`](skills/dia-harness-utilization-review/SKILL.md) *(development)* | Reviewing the previous day's Harness threads and conversations for interaction improvements and new usage ideas, then recording confirmed recommendations in a local review log; designed for a scheduled ~9 AM run | `$dia-harness-utilization-review` |
 
-Each skill's `SKILL.md` frontmatter declares its lifecycle with `metadata.status: development`, `testing`, or `production`. Skills start in development, get promoted to testing, and finally to production. The landing page in `docs/index.html` catalogs every skill behind a lifecycle filter with production selected by default, marks each entry with a small lifecycle indicator, sorts entries production, testing, then development, and the repository validator enforces that every skill appears.
+Each skill's `SKILL.md` frontmatter declares its lifecycle with `metadata.status: development`, `testing`, `production`, or `archived`. Skills start in development, get promoted to testing, and finally to production. The landing page in `docs/index.html` catalogs every active skill behind a lifecycle filter with production selected by default, marks each entry with a small lifecycle indicator, sorts entries production, testing, then development, and the repository validator enforces that every active skill appears. Archived skills are retained outside the active catalog and excluded from bulk installation.
+
+`dia-new-workspace` replaces the separate simple and data-analysis workspace creators while preserving both layouts. It is in testing for a live Harness pilot of the combined interview, file moves, and planning handoff. Existing installations are not changed by this repository update.
+
+Workspace setup uses one preview for generated files and incoming file moves. A supplied data dictionary can replace the planned placeholder after confirmation. The project context carries known goals and explicit unknowns into the shorter planning interview.
+
+## Archived skills
+
+- [`dia-setup-business-insights-folder`](skills/dia-setup-business-insights-folder/SKILL.md) is retained for future use. It is excluded from active catalogs and `-All`; explicit `-Skill` installation remains available for deliberate recovery. Archiving does not remove already installed copies.
 
 ## Playbooks
 
@@ -49,10 +54,10 @@ Clone the repository, open PowerShell in its root, and run the installer with on
 
 ```powershell
 pwsh -File .\scripts\install-skill.ps1 -Skill dia-start-my-day
-pwsh -File .\scripts\install-skill.ps1 -Skill dia-start-my-day, dia-setup-business-insights-folder
+pwsh -File .\scripts\install-skill.ps1 -Skill dia-start-my-day, dia-new-workspace
 ```
 
-To install every skill in the repository at once, including development skills, run:
+To install every active skill in the repository at once, including development skills, run:
 
 ```powershell
 pwsh -File .\scripts\install-skill.ps1 -All

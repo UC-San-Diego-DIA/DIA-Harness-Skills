@@ -31,7 +31,7 @@ function Invoke-WorkspaceHelper {
 }
 
 $repositoryRoot = Split-Path -Parent $PSScriptRoot
-$helper = Join-Path $repositoryRoot 'skills\dia-new-data-analysis-workspace\scripts\create_workspace.ps1'
+$helper = Join-Path $repositoryRoot 'skills\dia-new-workspace\scripts\create_workspace.ps1'
 $pwsh = Join-Path $PSHOME 'pwsh.exe'
 $temporaryBase = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
 $testRoot = Join-Path $temporaryBase "dia-new-workspace-$([System.Guid]::NewGuid().ToString('N'))"
@@ -52,7 +52,8 @@ try {
         '-Root', $parent,
         '-WorkspaceName', 'Example Analysis',
         '-Description', 'A temporary workspace used to test the DIA data-analysis standard.',
-        '-DataSources', 'Excel exports from the example system.'
+        '-DataSources', 'Excel exports from the example system.',
+        '-ProjectContext', "`n`n## Project context`nGoal: prepare a monthly dashboard."
     )
 
     $plan = Invoke-WorkspaceHelper -Arguments $commonArguments
@@ -84,6 +85,13 @@ try {
     Assert-True (-not $readme.Contains('{{')) 'README contains an unreplaced template token.'
     Assert-True ($readme.Contains('Example Analysis')) 'README workspace name is missing.'
     Assert-True ($readme.Contains('Excel exports from the example system.')) 'README data sources are missing.'
+    $agents = Get-Content -Raw -LiteralPath (Join-Path $workspaceRoot 'AGENTS.md')
+    Assert-True ($agents.Contains('prepare a monthly dashboard') -and $readme.Contains('prepare a monthly dashboard')) 'Confirmed context did not reach both documents.'
+
+    $mixedRoot = Join-Path $parent 'Mixed'
+    New-Item -ItemType Directory -Path (Join-Path $mixedRoot 'Inputs') -Force | Out-Null
+    $null = Invoke-WorkspaceHelper -Arguments @('-Root', $parent, '-WorkspaceName', 'Mixed', '-Description', 'Mixed layout', '-Apply') -ExpectedExitCode 2
+    Assert-True (-not (Test-Path (Join-Path $mixedRoot 'data'))) 'Another layout was modified.'
 
     $valid = Invoke-WorkspaceHelper -Arguments $commonArguments
     Assert-True ($valid.action -eq 'valid') 'A second run did not report a valid workspace.'

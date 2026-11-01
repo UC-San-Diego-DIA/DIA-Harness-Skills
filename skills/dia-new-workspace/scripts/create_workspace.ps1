@@ -11,6 +11,10 @@ param(
 
     [string]$DataSources = 'To be described.',
 
+    [string]$ProjectContext = "",
+
+    [switch]$UseSuppliedDictionary,
+
     [switch]$Apply
 )
 
@@ -103,11 +107,12 @@ if (Test-Path -LiteralPath $resolvedRoot -PathType Leaf) {
 
 $skillRoot = Split-Path -Parent $PSScriptRoot
 $templateFiles = [ordered]@{
-    'README.md'            = 'assets\workspace-README.md'
-    'AGENTS.md'            = 'assets\workspace-AGENTS.md'
+    'README.md'            = 'assets\analysis-workspace-README.md'
+    'AGENTS.md'            = 'assets\analysis-workspace-AGENTS.md'
     'scripts\README.md'    = 'assets\scripts-README.md'
     'docs\data-dictionary.md' = 'assets\data-dictionary.md'
 }
+if ($UseSuppliedDictionary) { $templateFiles.Remove('docs\data-dictionary.md') }
 foreach ($entry in $templateFiles.GetEnumerator()) {
     $templatePath = Join-Path $skillRoot $entry.Value
     if (-not (Test-Path -LiteralPath $templatePath -PathType Leaf)) {
@@ -126,6 +131,12 @@ $requiredDirectories = @(
     'docs\transcripts',
     'scratch'
 )
+
+foreach ($otherLayoutMarker in @('project.yaml', 'Inputs', 'Outputs', 'source-data', 'deliverables')) {
+    if (Test-Path -LiteralPath (Join-Path $resolvedRoot $otherLayoutMarker)) {
+        $conflicts.Add("Target contains another layout marker: $otherLayoutMarker. Choose a separate workspace.")
+    }
+}
 
 foreach ($relativeDirectory in $requiredDirectories) {
     $directoryPath = Join-Path $resolvedRoot $relativeDirectory
@@ -174,12 +185,12 @@ foreach ($relativeDirectory in $requiredDirectories) {
     }
 }
 
-$plainTemplateEntries = @('AGENTS.md', 'scripts\README.md', 'docs\data-dictionary.md')
+$plainTemplateEntries = @($templateFiles.Keys | Where-Object { $_ -ne 'README.md' })
 foreach ($relativeFile in $plainTemplateEntries) {
     $targetPath = Join-Path $resolvedRoot $relativeFile
     if (-not (Test-Path -LiteralPath $targetPath)) {
         $templateText = Get-Content -Raw -LiteralPath (Join-Path $skillRoot $templateFiles[$relativeFile])
-        [System.IO.File]::WriteAllText($targetPath, (ConvertTo-NormalizedText $templateText) + [Environment]::NewLine, $utf8WithoutBom)
+        [System.IO.File]::WriteAllText($targetPath, (ConvertTo-NormalizedText ($templateText + $(if ($relativeFile -eq "AGENTS.md") { $ProjectContext } else { "" }))) + [Environment]::NewLine, $utf8WithoutBom)
     }
 }
 
@@ -187,7 +198,7 @@ $readmePath = Join-Path $resolvedRoot 'README.md'
 if (-not (Test-Path -LiteralPath $readmePath)) {
     $readmeText = Get-Content -Raw -LiteralPath (Join-Path $skillRoot $templateFiles['README.md'])
     $readmeText = $readmeText.Replace('{{PROJECT_NAME}}', $WorkspaceName).Replace('{{PROJECT_DESCRIPTION}}', $Description).Replace('{{DATA_SOURCES}}', $DataSources)
-    [System.IO.File]::WriteAllText($readmePath, (ConvertTo-NormalizedText $readmeText) + [Environment]::NewLine, $utf8WithoutBom)
+    [System.IO.File]::WriteAllText($readmePath, (ConvertTo-NormalizedText ($readmeText + $ProjectContext)) + [Environment]::NewLine, $utf8WithoutBom)
 }
 
 $postApplyConflicts = [System.Collections.Generic.List[string]]::new()

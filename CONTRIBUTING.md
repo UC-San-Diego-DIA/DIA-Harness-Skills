@@ -18,6 +18,8 @@ Keep changes small enough to review as one coherent decision.
 - Keep `agents/openai.yaml` consistent with the skill name and invocation policy.
 - Follow the naming convention: the slug is `dia-` plus the lowercase hyphenated display name, and the invocation is `$dia-<name>`. A rename must update the folder, `SKILL.md`, `agents/openai.yaml`, both catalogs, and every script or workflow reference together.
 
+Archived skills retain their packages with `metadata.status: archived`. Exclude them from active catalogs and bulk installation; explicit named installation is available for deliberate recovery.
+
 ## Playbook changes
 
 - Playbook frontmatter declares `name`, `description`, and `pattern`. Use `pipeline` for linear handoffs and `fan-out` for one shared input with independent branches.

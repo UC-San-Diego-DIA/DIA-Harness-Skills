@@ -1,27 +1,24 @@
 ---
 name: dia-dataset-profile
-description: Profile one CSV or Excel file with a read-only DuckDB helper and draft a dataset-profile report covering fields, distributions, missingness, candidate keys, anomalies, and suggested metrics or KPIs. Use only when explicitly invoked as $dia-dataset-profile. Does not connect to databases, modify the source file, or map confirmed KPIs.
+description: Help someone understand one newly received CSV file or selected XLSX sheet through a dataset-profile report covering its contents, how to read it, possible uses, and questions to resolve before use. Use only when explicitly invoked as $dia-dataset-profile. Does not calculate business answers, define KPIs, or modify the source file.
 metadata:
-  status: testing
+  status: production
 ---
 
 # Dataset Profile
 
-Profile one data file so the user understands what is in it before any
-analysis work starts. The skill reads the file directly through an in-memory
-DuckDB connection, drafts a profile report, and can answer one-off business
-questions surfaced by the profile. It does not create a workspace, keep a
-question history, or stand up recurring analysis.
+Help the user get up to speed with a newly received dataset: how to read it,
+what it appears to support, and what needs clarification before use. Read
+one CSV file or one selected XLSX sheet through an in-memory DuckDB connection
+and produce one confirmed Markdown report. No workspace is required.
 
 Boundary map:
 
-- `$dia-new-data-analysis-workspace` owns workspace creation.
-- `$dia-analyze-local-data` owns standing, workspace-based question answering
-  with a recorded question history. Route recurring questions there.
-- `$dia-kpi-data-mapping` owns mapping a confirmed KPI artifact to a dataset.
-  Suggested KPIs in a profile report are candidates only, never confirmed.
-- `$dia-transcript-to-kpis` owns confirmed business questions and KPIs from a
-  transcript.
+- `$dia-new-workspace` with the data-analysis layout owns workspace creation.
+- `$dia-analyze-local-data` owns new business calculations and ad hoc answers
+  with saved SQL and question history. It requires a data-analysis workspace.
+- `$dia-transcript-to-kpis` owns confirmed stakeholder questions and KPIs.
+- `$dia-kpi-data-mapping` owns mapping those confirmed KPIs to dataset fields.
 
 ## Boundaries
 
@@ -37,47 +34,48 @@ Boundary map:
   remote sources, or install extensions without showing the exact change and
   receiving confirmation. The only expected extension install is DuckDB's
   official `excel` extension for `.xlsx` files.
-- For each ad hoc question, run exactly one `SELECT` statement through the
-  helper's `query` mode. Never run `DELETE`, `UPDATE`, `INSERT`, `ALTER`,
-  `DROP`, `COPY`, `EXPORT`, `INSTALL`, `LOAD`, `ATTACH`, or any other
-  non-`SELECT` statement.
-- Do not produce KPI artifacts, meeting notes, requirements documents, or
-  dataset modifications. Do not invoke other skills or call other skills'
-  helper scripts.
-- Suggested metrics and KPIs are hypotheses drawn from field names and data
-  shapes. State them as candidates and mark every business definition as
-  needing confirmation.
+- Use the helper's fixed profiling operations only. Do not write ad hoc SQL,
+  calculate new business answers, define KPI formulas or targets, or produce
+  other deliverables. Explanations of existing profile findings stay in scope.
+- Do not invoke other skills or call their helper scripts. Do not create
+  workspaces, update data dictionaries, or modify project documentation.
+- Possible uses are brief exploration possibilities tied to actual fields,
+  with prerequisites stated. They are not confirmed stakeholder requirements.
 - Obtain explicit user confirmation before writing the final report. Never
   overwrite an existing file and never create new folders.
 
 ## Resolve the dataset
 
-1. Ask which dataset to profile.
+1. Use the file path the user supplies, or ask which dataset to profile.
 2. If the current folder is inside a schema-1 data-analysis workspace,
-   confirmed by the markers `AGENTS.md`, `data/raw/`, `data/output/`,
+   identified by walking upward for the markers `AGENTS.md`, `data/raw/`, `data/output/`,
    `scripts/`, and `scripts/README.md`, list candidate `.csv` and `.xlsx`
    files under `data/raw/` and `data/output/`, including subfolders. Show the
    list grouped by `raw` and `output` and ask the user to choose. Never pick a
-   file without confirmation.
-3. Outside a workspace, ask for the dataset file path and confirm it exists.
+   file without confirmation when the user has not supplied one.
+3. Outside a workspace, ask for the file path if needed and confirm it exists.
 4. Confirm the file is a regular local file. Reject directories, globs, URLs,
    `.xls`, and anything that is not a real file.
-5. For an `.xlsx` file with more than one sheet, run
-   `python <skill-folder>\scripts\duckdb_profile.py inspect --source <file>`,
-   show the sheet names, and ask the user which sheet to profile. Record the
-   choice; setup needs it as `--sheet`.
 
-## Check the Python dependency
+## Check dependencies before inspection
 
 Use Python 3.9 or newer that can run `import duckdb, pytz`. Record the Python
 command used so later calls use the same environment. If no suitable
 environment exists, report what is missing, propose the exact install command
-for `duckdb` and `pytz`, and wait for confirmation. Do not install Python.
+for `duckdb` and `pytz` in an isolated environment, and wait for confirmation.
+After an approved install, verify the imports. Do not install Python.
+
+After the dependency check, inspect an XLSX source with
+`python <skill-folder>\scripts\duckdb_profile.py inspect --source <absolute-path>`.
+Show the sheet names and obtain a selection when there is more than one.
+For a single sheet, report its name. Always pass the selected name as `--sheet`
+when profiling.
 
 For an `.xlsx` source, the DuckDB `excel` extension is also required. If it is
 missing, the helper reports the failure and the retry command includes
 `--install-excel-extension`. Show that exact install (a one-time local DuckDB
-extension download) and ask the user to confirm before retrying.
+extension download) and ask the user to confirm before retrying. If unavailable
+or declined, offer to profile a CSV the user exports instead.
 
 ## Run the profile
 
@@ -94,17 +92,33 @@ overrides; ask the user when the default parse fails.
 
 The helper runs read-only against the source file and returns JSON:
 
+- source SHA-256, selected sheet, parsing settings, runtime versions and profile time;
 - row and column counts and DuckDB-inferred types;
 - null counts and null rates per field;
 - distinct counts and top values per field;
 - numeric summaries (min, max, mean, standard deviation, quartiles);
 - date ranges for temporal fields;
 - candidate keys (fields that are fully populated and unique across rows);
-- total duplicate-row count; and
+- extra identical parsed rows beyond the first, reported as duplicate-row count; and
 - interquartile-range outlier counts for numeric fields.
 
-Read the JSON carefully before interpreting anything. Never invent a field's
-business meaning; report what the data shows.
+Read the JSON before interpreting anything. Distinct counts and top values
+exclude nulls; state the denominator when reporting percentages. Surface any
+per-field `stats_error` as an unavailable statistic, never as zero.
+
+Distinguish observations from interpretations:
+
+- Inferred types describe parsing, not business meaning. Parsing can obscure
+  leading zeros or ambiguous dates; flag uncertainty rather than guessing.
+- Mark inferred grain, field meanings, units, code definitions and population
+  coverage as `Needs confirmation.` unless established by the source or user.
+  Attribute user-supplied definitions explicitly.
+- Candidate keys are populated and unique within this file only. They do not
+  prove business identifiers, grain, composite keys or join relationships.
+- Identical rows may be legitimate. IQR outliers are statistically unusual
+  values, not proven errors. Do not recommend removal from these facts alone.
+- Null counts reflect parsed nulls, not every possible missing-value code.
+  Do not invent reasons for missingness or assume a sentinel such as zero is null.
 
 ## Draft the report
 
@@ -114,59 +128,44 @@ and draft `Dataset-Profile-YYYY-MM-DD-<Topic>.md`, where `YYYY-MM-DD` is
 today's date and `<Topic>` is a short PascalCase label derived from the file
 name. The draft must cover:
 
-1. A short summary of the dataset: source, row and column counts, apparent
-   grain, and file hash if useful.
-2. A field inventory: name, apparent type, distinct count, null rate, and a
-   plain-language reading of what the field seems to hold.
-3. Distributions: numeric summaries and top values, written in business
-   language.
-4. Missingness: fields with material null rates, called out explicitly.
-5. Candidate keys and duplicate-row findings.
-6. Anomalies and outliers: report what the data shows, never what the data
-   should show. Flag values that look wrong only when the evidence is in the
-   data itself.
-7. Suggested metrics and KPIs: candidates with a plain-language formula
-   sketch, each marked as needing confirmation.
-8. Open questions the user should resolve with the data owner.
+1. What the dataset contains: a short summary, apparent row grain, file and
+   selected sheet, profile time, source fingerprint, parsing settings, runtime,
+   row and field counts, and date coverage.
+2. How to read its fields: a complete inventory of exact names, inferred
+   types, distinct counts, null counts and rates, and supported or tentative meanings.
+3. How records are organized: candidate single-column identifiers and extra
+   identical rows beyond the first, with interpretation limits.
+4. Distributions and things to watch: compact numeric summaries, selected
+   categorical distributions, important missingness, unusual values and limitations.
+5. Possible uses, when useful: a few exploration possibilities supported by
+   actual fields. No KPI formulas, targets, recommendations or business results.
+6. Questions for the data owner: one list of unresolved definitions and prerequisites.
+
+For example, department and date fields may support exploring activity by
+department over time once row grain and date meaning are confirmed. Describe
+that possibility without calculating which department has the most activity.
+Keep the summary short; do not repeat every statistic in prose or dump top
+values for every field. The report does not replace the project's confirmed
+data dictionary. Do not update it automatically.
 
 Present the draft and obtain explicit confirmation before writing. Write the
 final file in the current working directory, or under `<workspace>\docs\` when
-working inside a workspace whose `docs/` folder exists. Never create new
-folders and never overwrite an existing file; propose a distinguishing name
+working inside a data-analysis workspace. If its `docs/` folder is missing,
+ask where to save. Never create new folders and never overwrite an existing file; propose a distinguishing name
 and confirm it instead.
 
-## Answer a surfaced business question
+Re-read the saved report and verify its figures against the helper JSON,
+that interpretations are labeled, and that no template placeholders remain.
+Report its path, the most important finding and an unresolved clarification.
 
-When the user says they are looking for something specific, restate it as a
-business question, name the fields that would answer it, and offer to answer
-it from the dataset. If they accept:
+## Explain findings and hand off analysis
 
-1. Write exactly one `SELECT` statement against the `dataset` view to a
-   uniquely named `.sql` file under the Windows temporary directory. Track
-   that exact path.
-2. Run it through the helper:
-
-   ```powershell
-   python <skill-folder>\scripts\duckdb_profile.py query `
-     --source <absolute-path-to-dataset> `
-     --sql-file <temporary-query.sql> `
-     [--sheet <sheet-name>] `
-     [--max-rows <count>]
-   ```
-
-3. The helper runs the query read-only against the same source file, accepts
-   exactly one `SELECT`, limits returned rows, and returns JSON. Check the
-   result before making a claim; refine the temporary SQL and retry on
-   failure.
-4. Answer in plain business language. State material filters, formulas,
-   assumptions, and whether the result was truncated. Do not name a currency
-   or unit unless the data or the user defines it.
-5. Delete only the temporary SQL file when the attempt is finished. Never run
-   a broad temporary-file cleanup.
-
-If the user wants recurring questions, a recorded question history, or a
-workspace-based analysis, tell them to invoke `$dia-new-data-analysis-workspace`
-and then `$dia-analyze-local-data` instead of continuing here.
+Explain findings already present in the profile, such as why a field is not a
+candidate identifier or what a missing-value rate means. Do not run new
+business calculations. For those requests, tell the user to invoke
+`$dia-analyze-local-data`. If they lack its required data-analysis workspace,
+explain that `$dia-new-workspace` with the data-analysis layout creates one.
+Do not invoke either skill here.
 
 ## Failure handling
 
@@ -175,6 +174,8 @@ and then `$dia-analyze-local-data` instead of continuing here.
   explain why and stop.
 - Parse failure: show the error and offer CSV overrides only as explicit
   user-confirmed options.
+- Source changes during profiling: discard the result, explain that the file
+  changed and ask the user to make it stable before retrying.
 - Write conflict: propose a distinguishing filename and wait for
   confirmation.
 - If the user changes the draft during review, update the affected section,

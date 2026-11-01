@@ -2,7 +2,7 @@
 name: dia-transcript-to-kpis
 description: Turn one supplied Zoom transcript of a business-owner requirements or discovery conversation into a confirmed list of business questions and the KPIs the analysis must build, saved as a readable Markdown file and a machine-readable kpi-facts.yaml. Use only when explicitly invoked as $dia-transcript-to-kpis. Do not use for meeting notes, requirements documents, diagram rendering, ClickUp tasks, Project Hub publication, or dataset mapping.
 metadata:
-  status: testing
+  status: development
 ---
 
 # DIA Transcript to KPIs

@@ -1,75 +1,72 @@
-# Dataset Profile Report Template
+# Dataset profile report template
 
-Use this structure for `Dataset-Profile-YYYY-MM-DD-<Topic>.md`. Keep every
-claim traceable to the profile JSON or the source schema. Where the data does
-not establish something, write `Needs confirmation.` instead of guessing.
-
-## Sections
+Use this structure for `Dataset-Profile-YYYY-MM-DD-<Topic>.md`. Trace numbers
+to the helper JSON and distinguish inferred meanings from source facts or
+attributed user definitions. Replace placeholders before saving.
 
 ```markdown
 # Dataset Profile: <Topic>
 
-- Source: `<path or file name>`
-- Profiled: YYYY-MM-DD
+## What the dataset contains
+
+<Two or three sentences describing what the file appears to contain, what
+one row appears to represent, and its most important limitation. Mark
+inferred grain as Needs confirmation.>
+
+- Source: <filename>
+- Sheet: <selected sheet; omit for CSV>
+- Profiled: <generated_at>
+- Source SHA-256: <source_sha256>
 - Rows: <count>
 - Fields: <count>
-- Grain: <plain-language reading of what one row represents, Needs confirmation if inferred>
+- Date coverage: <range for each relevant temporal field, or Not established>
+- Parsing: <settings from the helper, including overrides and auto-detection>
+- Runtime: <Python and DuckDB versions>
 
-## Summary
+## How to read the fields
 
-<Three to five sentences: what the dataset appears to hold, its apparent grain,
-and the most important caveats from the profile.>
+| Field | Inferred type | Distinct, excluding nulls | Null count | Null rate | Reading |
+| --- | --- | ---: | ---: | ---: | --- |
+| <exact name> | <type> | <count> | <count> | <percent, or undefined for no rows> | <supported meaning with attribution, or tentative reading marked Needs confirmation> |
 
-## Fields
+## How records are organized
 
-| Field | Apparent type | Distinct | Null rate | Reading |
-| --- | --- | ---: | ---: | --- |
-| <name> | <duckdb type> | <count> | <percent> | <plain-language meaning, or Needs confirmation> |
+- Candidate single-column identifiers: <populated and unique fields, or None found>
+- Extra identical rows beyond the first: <duplicate_row_count>
 
-## Distributions
+<Explain material implications without asserting a business key or grain.
+Uniqueness applies only to this file. Duplicates are based on parsed values
+across all columns and are not necessarily errors.>
 
-<Numeric fields: min, max, mean, standard deviation, and quartiles in plain
-language. Categorical fields: the most common values and their share. Date
-fields: the covered range.>
+## Distributions and things to watch
 
-## Missingness
+<Compact numeric table with min, Q1, median, Q3, max, mean and standard
+deviation. Explain quartiles briefly if needed. Omit date ranges already
+shown above. For selected categorical fields, show common values and counts;
+if using shares, state whether the denominator is all or non-null rows.
+Avoid listing identifying values or free text when they add no useful context.>
 
-<List fields with material null rates, in descending order, with the count of
-affected rows and what a missing value may mean. Say plainly when the reason
-cannot be known from the data.>
+<Call out important missingness, statistically unusual values with IQR counts,
+parsing limitations and unavailable statistics. Reference the field inventory
+instead of repeating every null count. Never treat outliers as proven errors.
+Say plainly if there are no additional findings.>
 
-## Keys and Duplicates
+## Possible uses
 
-- Candidate keys: <fields that are fully populated and unique>
-- Duplicate rows: <count, and what that suggests about the grain>
-- Notes: <near-key fields, composite-key possibilities, Needs confirmation flags>
+<Optional: a few exploration possibilities tied to exact fields. Reference
+the prerequisite questions below. No KPI formulas, targets, recommendations
+or calculated business answers. Omit this section when no useful possibility
+is supported.>
 
-## Anomalies and Outliers
+## Questions for the data owner
 
-<Report interquartile-range outliers and other data-evident irregularities.
-Describe what the data shows, not what it should show. Include example values
-when they help.>
-
-## Suggested Metrics and KPIs
-
-| Candidate metric | Fields involved | Formula sketch | Status |
-| --- | --- | --- | --- |
-| <metric> | <fields> | <plain-language formula> | Candidate; needs confirmation |
-
-<Candidates come from field names and data shapes only. Mark each one as
-needing confirmation and note what business definition is missing.>
-
-## Open Questions
-
-<Numbered list of questions for the data owner or the user, including
-unresolved grain, units, filters, and business definitions.>
+<One numbered list of unresolved grain, definitions, units, codes, population
+coverage and prerequisites. Keep each question here once. If none remain,
+say None recorded.>
 ```
 
-## Rules
-
-- Never state a currency, unit, or business definition the data does not
-  establish.
-- Keep the report descriptive: this is a profile, not a recommendation to
-  change the dataset or a confirmed KPI mapping.
-- Reference the helper's numbers exactly; do not round beyond readability.
-- If a section has nothing to report, say so plainly instead of dropping it.
+Keep the summary short, the field inventory complete and the other tables
+compact. Do not repeat tables in prose. Round only for readability, retaining
+the helper's meaning. Do not infer currency, units or reasons for missingness.
+This report is a first look at one file, not a confirmed business dictionary
+or evidence that the file is fit for a particular decision.

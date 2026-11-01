@@ -2,7 +2,7 @@
 name: dia-bi-publisher-sql-optimizer
 description: Analyze one BI Publisher data model's SQL Monitor report and data engine log and produce an optimization report plus a candidate rewrite whose output columns, column order, and row grain are unchanged. Use only when explicitly invoked as $dia-bi-publisher-sql-optimizer.
 metadata:
-  status: testing
+  status: development
 ---
 
 # Optimize BI Publisher data model SQL

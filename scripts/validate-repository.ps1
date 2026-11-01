@@ -8,6 +8,7 @@ $skillsRoot = Join-Path $repositoryRoot 'skills'
 $errors = [System.Collections.Generic.List[string]]::new()
 $testingSkills = [System.Collections.Generic.List[string]]::new()
 $developmentSkills = [System.Collections.Generic.List[string]]::new()
+$archivedSkills = [System.Collections.Generic.List[string]]::new()
 $catalogSkills = [System.Collections.Generic.List[string]]::new()
 
 function Add-ValidationError {
@@ -100,8 +101,11 @@ else {
         if ($statusText -eq '') {
             Add-ValidationError "$(Get-RelativePath $entryPath): frontmatter metadata.status is missing"
         }
-        elseif ($statusText -notin @('development', 'testing', 'production')) {
-            Add-ValidationError "$(Get-RelativePath $entryPath): frontmatter metadata.status must be 'development', 'testing', or 'production', found '$statusText'"
+        elseif ($statusText -notin @('development', 'testing', 'production', 'archived')) {
+            Add-ValidationError "$(Get-RelativePath $entryPath): frontmatter metadata.status must be 'development', 'testing', 'production', or 'archived', found '$statusText'"
+        }
+        elseif ($statusText -eq 'archived') {
+            $archivedSkills.Add($skillName)
         }
         elseif ($statusText -eq 'testing') {
             $testingSkills.Add($skillName)
@@ -109,7 +113,7 @@ else {
         elseif ($statusText -eq 'development') {
             $developmentSkills.Add($skillName)
         }
-        else {
+        elseif ($statusText -eq 'production') {
             $catalogSkills.Add($skillName)
         }
         if (-not $descriptionMatch.Success -or [string]::IsNullOrWhiteSpace($descriptionMatch.Groups['value'].Value)) {
@@ -166,6 +170,14 @@ if (Test-Path -LiteralPath $playbooksRoot -PathType Container) {
 
 if (Test-Path -LiteralPath $indexPagePath -PathType Leaf) {
     $indexPageText = Get-Content -Raw -LiteralPath $indexPagePath
+    foreach ($archivedSkill in $archivedSkills) {
+        if ($indexPageText.Contains('$' + $archivedSkill)) {
+            Add-ValidationError "docs/index.html: archived skill '$archivedSkill' must stay outside the active catalog"
+        }
+        if (-not $readmeText.Contains("skills/$archivedSkill/SKILL.md")) {
+            Add-ValidationError "README.md: archived skill '$archivedSkill' must have a recovery link"
+        }
+    }
     foreach ($catalogSkill in $catalogSkills) {
         if (-not $indexPageText.Contains('$' + $catalogSkill)) {
             Add-ValidationError "docs/index.html: cataloged skill '$catalogSkill' must appear in the landing page catalog"
@@ -178,7 +190,7 @@ if (Test-Path -LiteralPath $indexPagePath -PathType Leaf) {
     }
 }
 
-$explicitOnlySkills = @('dia-analyze-local-data', 'dia-bi-publisher-sql-optimizer', 'dia-clickup-mcp-setup', 'dia-data-model-docs', 'dia-data-model-intake', 'dia-new-data-analysis-workspace', 'dia-new-simple-workspace', 'dia-process-meeting-transcript', 'dia-setup-business-insights-folder', 'dia-start-my-day', 'dia-transcript-to-process-map', 'dia-transcript-to-project-request-draft', 'dia-transcript-to-requirements')
+$explicitOnlySkills = @('dia-analyze-local-data', 'dia-bi-publisher-sql-optimizer', 'dia-clickup-mcp-setup', 'dia-data-model-docs', 'dia-data-model-intake', 'dia-new-workspace', 'dia-plan-my-project', 'dia-setup-business-insights-folder', 'dia-start-my-day', 'dia-transcript-to-process-map', 'dia-transcript-to-project-request-draft', 'dia-transcript-to-requirements')
 foreach ($explicitOnlySkill in $explicitOnlySkills) {
     $explicitMetadata = Join-Path $skillsRoot "$explicitOnlySkill\agents\openai.yaml"
     if (-not (Test-Path -LiteralPath $explicitMetadata -PathType Leaf)) {

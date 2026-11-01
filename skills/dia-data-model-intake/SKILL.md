@@ -2,7 +2,7 @@
 name: dia-data-model-intake
 description: Extract deterministic facts from one Oracle BI Publisher data model into model-facts.yaml. Use only when explicitly invoked as $dia-data-model-intake. Do not execute the model's SQL or author its documentation.
 metadata:
-  status: testing
+  status: development
 ---
 
 # Extract data-model facts

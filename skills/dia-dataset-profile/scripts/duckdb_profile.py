@@ -6,6 +6,8 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import decimal
+import hashlib
+import platform
 import json
 import sys
 import xml.etree.ElementTree as ET
@@ -43,12 +45,13 @@ ENCODING_ALIASES = {
     "iso-8859-1": "latin-1",
     "iso8859-1": "latin-1",
 }
-NUMERIC_TYPE_MARKERS = ("decimal", "double", "real", "float", "int")
+NUMERIC_TYPE_MARKERS = (
+    "decimal", "double", "real", "float", "int", "bigint", "smallint",
+    "tinyint", "hugeint", "ubigint", "uinteger", "usmallint", "utinyint", "uhugeint",
+)
 TEMPORAL_TYPE_MARKERS = ("date", "timestamp")
 DEFAULT_TOP_VALUES = 10
 MAX_TOP_VALUES = 50
-DEFAULT_MAX_ROWS = 200
-MAX_ROWS_LIMIT = 1000
 XLSX_SHEET_TAG = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}sheet"
 
 
@@ -327,11 +330,39 @@ def validate_column_names(names: Sequence[str]) -> None:
         raise ProfileError(f"The source has duplicate column names: {rendered}")
 
 
+def source_sha256(source: Path) -> str:
+    digest = hashlib.sha256()
+    with source.open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def parsing_settings(source_format: str, args: argparse.Namespace) -> dict[str, Any]:
+    if source_format == "xlsx":
+        return {"header": True, "range": "auto-detected", "types": "inferred"}
+    return {
+        "header": True,
+        "sample_size": -1,
+        "ignore_errors": False,
+        "normalize_names": False,
+        "delimiter": args.delimiter,
+        "encoding": normalize_encoding(args.encoding) or "utf-8",
+        "quote": args.quote,
+        "escape": args.escape,
+        "skip_rows": args.skip_rows,
+        "all_varchar": args.all_varchar,
+        "null_padding": args.null_padding,
+        "unspecified_options": "DuckDB defaults or auto-detection",
+    }
+
+
 def profile_command(args: argparse.Namespace) -> dict[str, Any]:
     if not 1 <= args.top_values <= MAX_TOP_VALUES:
         raise ProfileError(f"top-values must be between 1 and {MAX_TOP_VALUES}.")
     source = require_absolute_path(args.source, "Source")
     source_format = validate_source(source)
+    fingerprint = source_sha256(source)
     sheet = resolve_sheet(source, args.sheet) if source_format == "xlsx" else None
 
     connection = duckdb.connect(":memory:")
@@ -384,11 +415,14 @@ def profile_command(args: argparse.Namespace) -> dict[str, Any]:
         ]
         duplicate_row_count = int(
             connection.execute(
-                "SELECT count(*) FROM (SELECT 1 AS one FROM dataset GROUP BY ALL HAVING count(*) > 1)"
+                "SELECT count(*) - (SELECT count(*) FROM (SELECT DISTINCT * FROM dataset)) FROM dataset"
             ).fetchone()[0]
         )
     finally:
         connection.close()
+
+    if source_sha256(source) != fingerprint:
+        raise ProfileError("Source changed during profiling. Discard this run and retry with a stable file.")
 
     return {
         "action": "profile",
@@ -397,64 +431,16 @@ def profile_command(args: argparse.Namespace) -> dict[str, Any]:
         "source_format": source_format,
         "sheet": sheet,
         "generated_at": utc_now(),
+        "source_sha256": fingerprint,
+        "parsing_settings": parsing_settings(source_format, args),
+        "python_version": platform.python_version(),
+        "duckdb_version": duckdb.__version__,
         "python_executable": sys.executable,
         "row_count": row_count,
         "column_count": len(columns),
         "columns": columns,
         "candidate_keys": candidate_keys,
         "duplicate_row_count": duplicate_row_count,
-    }
-
-
-def query_command(args: argparse.Namespace) -> dict[str, Any]:
-    if not 1 <= args.max_rows <= MAX_ROWS_LIMIT:
-        raise ProfileError(f"max-rows must be between 1 and {MAX_ROWS_LIMIT}.")
-    source = require_absolute_path(args.source, "Source")
-    source_format = validate_source(source)
-    sheet = resolve_sheet(source, args.sheet) if source_format == "xlsx" else None
-    sql_file = require_absolute_path(args.sql_file, "SQL file")
-    if not sql_file.is_file():
-        raise ProfileError(f"SQL file does not exist: {sql_file}")
-    sql = sql_file.read_text(encoding="utf-8").strip()
-    if not sql:
-        raise ProfileError("SQL file is empty.")
-
-    connection = duckdb.connect(":memory:")
-    try:
-        configure_connection(connection, source, source_format, args.install_excel_extension)
-        relation = source_relation(source, source_format, sheet, args)
-        connection.execute(
-            f"CREATE VIEW {quote_identifier(TABLE_NAME)} AS SELECT * FROM {relation}"
-        )
-        statements = connection.extract_statements(sql)
-        if len(statements) != 1 or statements[0].type != duckdb.StatementType.SELECT:
-            statement_types = [statement.type.name for statement in statements]
-            raise ProfileError(
-                "Analysis SQL must contain exactly one SELECT statement. "
-                f"Parsed statement types: {statement_types}"
-            )
-        try:
-            cursor = connection.execute(sql)
-        except duckdb.Error as exc:
-            raise ProfileError(f"DuckDB query failed: {exc}") from exc
-        column_names = [description[0] for description in cursor.description]
-        fetched = cursor.fetchmany(args.max_rows + 1)
-        truncated = len(fetched) > args.max_rows
-        rows = fetched[: args.max_rows]
-    finally:
-        connection.close()
-
-    return {
-        "action": "query",
-        "source": str(source),
-        "source_file": source.name,
-        "source_format": source_format,
-        "sheet": sheet,
-        "columns": column_names,
-        "rows": [[json_value(value) for value in row] for row in rows],
-        "returned_rows": len(rows),
-        "truncated": truncated,
-        "max_rows": args.max_rows,
     }
 
 
@@ -488,14 +474,6 @@ def build_parser() -> argparse.ArgumentParser:
     profile_parser.add_argument("--install-excel-extension", action="store_true")
     add_csv_override_arguments(profile_parser)
 
-    query_parser = subparsers.add_parser("query", help="Run one read-only SELECT against the source")
-    query_parser.add_argument("--source", required=True)
-    query_parser.add_argument("--sql-file", required=True)
-    query_parser.add_argument("--sheet")
-    query_parser.add_argument("--max-rows", type=int, default=DEFAULT_MAX_ROWS)
-    query_parser.add_argument("--install-excel-extension", action="store_true")
-    add_csv_override_arguments(query_parser)
-
     inspect_parser = subparsers.add_parser("inspect", help="Report source format and sheets")
     inspect_parser.add_argument("--source", required=True)
     return parser
@@ -507,8 +485,6 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         if args.command == "profile":
             result = profile_command(args)
-        elif args.command == "query":
-            result = query_command(args)
         else:
             result = inspect_command(args)
         json.dump(result, sys.stdout, ensure_ascii=False, indent=2)

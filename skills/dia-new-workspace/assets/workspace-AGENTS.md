@@ -5,7 +5,7 @@
 - Put code and one-off scripts in `Scripts`.
 - Put received data and reference files in `Inputs`. Treat files in `Inputs` as read-only source material.
 - Put files produced from the inputs in `Outputs`. Name new outputs so their origin is clear.
-- Keep drafts of manual documents beside the work they belong to, and move final versions to `Outputs`.
+- Keep document drafts and final results in `Outputs`, with names that distinguish drafts from final versions.
 
 ## Safety
 

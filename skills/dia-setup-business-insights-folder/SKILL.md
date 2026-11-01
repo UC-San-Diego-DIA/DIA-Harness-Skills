@@ -2,7 +2,7 @@
 name: dia-setup-business-insights-folder
 description: Create or validate a DIA business-insights local project folder connected to existing ClickUp resources. Use only when explicitly invoked as $dia-setup-business-insights-folder. Do not create ClickUp content or perform project work.
 metadata:
-  status: development
+  status: archived
 ---
 
 # Set up a business insights folder

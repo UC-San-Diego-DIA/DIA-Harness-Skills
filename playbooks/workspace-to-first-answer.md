@@ -10,7 +10,7 @@ Set up a local data-analysis workspace and reach the first defensible answer fro
 
 ## Sequence
 
-1. `$dia-new-data-analysis-workspace` - one run per project. Creates the schema-1 workspace with immutable raw inputs, numbered pipeline scripts, dashboard-ready output, and `docs/transcripts/` for meeting records.
+1. `$dia-new-workspace` with the data-analysis layout - one run per project. Creates the schema-1 workspace with immutable raw inputs, numbered pipeline scripts, dashboard-ready output, and `docs/transcripts/` for meeting records.
 2. Place the dataset in `data/raw/`. The workspace skill never copies or creates data files, so the user performs this step between the two skill runs.
 3. `$dia-analyze-local-data` - one run per file. Links the file into a read-only DuckDB view under `scratch/analysis/` and answers ad hoc questions from that view, recording every question and its SQL.
 

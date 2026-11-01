@@ -26,6 +26,7 @@ if ($All) {
 
     $skillsToInstall = @(
         Get-ChildItem -LiteralPath $sourceRoot -Directory |
+            Where-Object { (Get-Content -Raw -LiteralPath (Join-Path $_.FullName "SKILL.md")) -notmatch "(?m)^\s+status:\s*archived\s*$" } |
             Sort-Object -Property Name |
             ForEach-Object { $_.Name }
     )

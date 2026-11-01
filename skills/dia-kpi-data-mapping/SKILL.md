@@ -2,7 +2,7 @@
 name: dia-kpi-data-mapping
 description: Validate a confirmed KPI artifact against one named dataset and draft a declarative mapping report naming the fields that supply each metric, the calculation to build, and explicit data gaps. Use only when explicitly invoked as $dia-kpi-data-mapping. Does not execute calculations or build pipeline scripts.
 metadata:
-  status: testing
+  status: development
 ---
 
 # DIA KPI Data Mapping

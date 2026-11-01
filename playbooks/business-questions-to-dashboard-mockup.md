@@ -12,7 +12,7 @@ Stop after step 3 when the mapping report is the deliverable. Continue to step 4
 
 ## Sequence
 
-1. `$dia-new-data-analysis-workspace` - one run per project. Creates the schema-1 data-analysis workspace; the user places the dataset in `data/raw/` afterwards.
+1. `$dia-new-workspace` with the data-analysis layout - one run per project. Creates the schema-1 data-analysis workspace; the user places the dataset in `data/raw/` afterwards.
 2. `$dia-transcript-to-kpis` - one run per conversation, inside the workspace. Saves the transcript in `docs/transcripts/` and, after the user confirms the draft, writes `docs/Business-Questions-and-KPIs-YYYY-MM-DD-<topic>.md` and `docs/kpi-facts.yaml`.
 3. `$dia-kpi-data-mapping` - one run per dataset, inside the workspace. The user names the dataset; the skill re-validates the KPI artifact and the dataset, then writes `docs/KPI-Data-Mapping-YYYY-MM-DD-<topic>.md` naming the fields that supply each KPI, the calculations to build, and the data gaps.
 4. `$dia-dashboard-mockup` - one run per mapping report, inside the workspace. The user confirms the panel outline; the skill renders `docs/Dashboard-Mockup-YYYY-MM-DD-<topic>.html` from the UCSD-branded template with mock data and explicit data-gap panels.

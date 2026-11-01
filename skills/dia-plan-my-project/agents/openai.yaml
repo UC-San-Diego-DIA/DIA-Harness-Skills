@@ -1,6 +1,6 @@
 interface:
   display_name: "Plan My Project"
-  short_description: "Interview you about a project and write plan.md"
-  default_prompt: "Use $dia-plan-my-project to interview me about this workspace project and produce its plan.md."
+  short_description: "Plan the steps to meet a task or project goal"
+  default_prompt: "Use $dia-plan-my-project to help me refine this task or project goal and create or revise plan.md with the minimum steps needed to achieve it."
 policy:
   allow_implicit_invocation: false

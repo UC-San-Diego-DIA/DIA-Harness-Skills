@@ -39,7 +39,7 @@ Only add optional directories when the skill uses them. Do not add a README or c
 
 `dia-dashboard-mockup` owns rendering one confirmed KPI data mapping report into a single self-contained UCSD-branded HTML dashboard mockup with mock data and explicit data-gap panels. It does not produce mapping reports, KPI artifacts, or requirements documents, read datasets, execute calculations, publish or send anything, or replace real dashboards.
 
-dia-dataset-profile owns a one-time profile of one CSV or Excel file: field inventory, distributions, missingness, candidate keys, anomalies, and suggested metrics or KPIs, plus one-off answers to business questions the profile surfaces. It does not create workspaces, keep a question history, map confirmed KPIs, execute calculations, or produce other deliverables.
+`dia-dataset-profile` owns one confirmed orientation report for one CSV file or selected XLSX sheet: contents, field inventory, distributions, missingness, candidate identifiers, duplicate and unusual values, possible uses, and questions for the data owner. It explains existing profile findings but does not answer new business calculations, define KPIs, map confirmed KPIs, create workspaces, update data dictionaries, or produce other deliverables.
 
 `dia-data-model-intake` owns local, deterministic extraction of facts from one Oracle BI Publisher data model into `model-facts.yaml`. It does not execute the model's SQL, connect to data sources, interpret business meaning, author documentation, or change source files.
 
@@ -55,17 +55,15 @@ dia-dataset-profile owns a one-time profile of one CSV or Excel file: field inve
 
 `dia-transcript-to-kpis` owns converting a supplied Zoom transcript of a business-owner requirements or discovery conversation into a confirmed local business-questions-and-KPIs Markdown file with a schema-version-1 `kpi-facts.yaml` beside it. It does not produce meeting notes, requirements documents, process diagrams, ClickUp content, or Project Hub publication, and it does not map KPIs to datasets.
 
-`dia-process-meeting-transcript` owns one transcript's meeting-note synthesis, Project Hub publication, DIA-owned action-item extraction, and approved task creation. It does not own transcript capture, project-folder setup, connection setup, general ClickUp task management, or follow-through in other systems.
-
 `dia-bi-publisher-sql-optimizer` owns analyzing one BI Publisher data model's SQL Monitor report and data engine log, producing an optimization report plus a candidate rewrite that preserves output columns, column order, and row grain, and running delta analysis when the user re-runs the candidate and supplies fresh diagnostics. It does not execute SQL, connect to a database, apply rewrites in BI Publisher, extract data-model facts, or map KPIs to datasets.
 
-`dia-start-my-day` owns read-only daily prioritization from ClickUp, Outlook calendar, and Outlook mail, plus user-approved follow-through in those systems. It does not own connection setup, other evidence sources, or unapproved external changes.
+`dia-start-my-day` owns a daily chat brief from open assigned ClickUp tasks, today's and the following two days' Outlook calendar, and the last 72 hours of Outlook mail, with matching HTML on request and user-approved follow-through in those systems. It hands disconnected ClickUp access to the installed setup skill only after user approval. It does not own connection setup, other evidence sources, or unapproved external changes.
 
-`dia-setup-business-insights-folder` owns local creation and validation of the schema-1 business-insights project folder for existing ClickUp resources. It does not create or change ClickUp content, migrate conflicting folders, process project files, analyze data, or create deliverables.
+`dia-setup-business-insights-folder` is archived and retained outside active catalogs and bulk installation. It owns local creation and validation of the schema-1 business-insights project folder for existing ClickUp resources. It does not create or change ClickUp content, migrate conflicting folders, process project files, analyze data, or create deliverables.
 
-`dia-new-simple-workspace` owns local creation of one simple workspace with fixed `Scripts`, `Inputs`, and `Outputs` directories plus README and AGENTS files. It does not connect to ClickUp, create a project manifest, validate or migrate other folder structures, or process project content.
+`dia-new-workspace` owns interviewing the user, choosing a simple or data-analysis layout, creating its local folders and project-context README and AGENTS files, moving explicitly confirmed starting files, and giving the open-folder handoff to planning. It does not analyze content, create a plan, connect external systems, or switch the Harness project.
 
-`dia-plan-my-project` owns interviewing the user about one existing workspace's project goal and writing a confirmed, human-readable `plan.md` at the workspace root. It does not create workspaces, create ClickUp content, process project files, or execute the steps of the plan it writes.
+`dia-plan-my-project` owns helping the user refine one task or project goal and creating or revising a confirmed, human-readable `plan.md` at an existing workspace's root with the minimum sequence of work needed to achieve it. It reads relevant local documents for planning context but does not create workspaces, redefine stakeholder requirements, analyze datasets, extract source-model facts, connect external systems, or execute the plan.
 
 `dia-tableau-workbook-intake` owns local, deterministic extraction of facts from one Tableau workbook package or workbook XML document into `workbook-facts.yaml`. It does not open Tableau, connect to Tableau Server, read the package's data extract, interpret business meaning, author documentation, or change source files.
 
@@ -79,7 +77,7 @@ dia-dataset-profile owns a one-time profile of one CSV or Excel file: field inve
 - Keep each skill focused on one outcome.
 - Use lowercase hyphenated skill names prefixed with `dia-` for skill folders.
 - Keep the display name and slug consistent: a skill's folder, `SKILL.md` `name`, and `agents/openai.yaml` slug are `dia-` plus the lowercase hyphenated display name, and users invoke it as `$dia-<name>` (for example, "Analyze Local Data" is `dia-analyze-local-data`, invoked as `$dia-analyze-local-data`). When naming or renaming a skill, update the folder, `SKILL.md`, `agents/openai.yaml`, the `README.md` and `docs/index.html` catalogs, and any scripts, tests, or workflows that reference the slug.
-- Declare each skill's lifecycle in its `SKILL.md` frontmatter as `metadata.status: development`, `testing`, or `production`. Skills start in development, get promoted to testing, and finally to production. The `docs/index.html` catalog shows production and testing skills, each with a small lifecycle indicator; development skills stay out of the catalog; the repository validator enforces this.
+- Declare each skill's lifecycle in its `SKILL.md` frontmatter as `metadata.status: development`, `testing`, `production`, or `archived`. Skills start in development, get promoted to testing, and finally to production. Archived skills stay in the repository but are excluded from active catalogs and bulk installation. The landing page catalogs active skills with production selected by default.
 - Keep user-specific data and secrets out of the repository.
 - Preserve explicit invocation policies.
 - Update the catalog and workspace map when paths or skill boundaries change.

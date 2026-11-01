@@ -2,7 +2,7 @@
 name: dia-data-model-docs
 description: Draft four analyst-facing documents from one model-facts.yaml file and its data-model-profile.md. Use only when explicitly invoked as $dia-data-model-docs. Interactive confirmation is the default; draft mode writes candidate files without a confirmation gate.
 metadata:
-  status: testing
+  status: development
 ---
 
 # Draft data-model documentation

@@ -3,6 +3,8 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$Root,
 
+    [string]$ProjectContext = "",
+
     [switch]$Apply
 )
 
@@ -106,6 +108,12 @@ foreach ($templatePath in @($readmeTemplatePath, $agentsTemplatePath)) {
 
 $requiredDirectories = @('Scripts', 'Inputs', 'Outputs')
 
+foreach ($otherLayoutMarker in @('project.yaml', 'data', 'scratch', 'source-data', 'deliverables')) {
+    if (Test-Path -LiteralPath (Join-Path $resolvedRoot $otherLayoutMarker)) {
+        $conflicts.Add("Target contains another layout marker: $otherLayoutMarker. Choose a separate workspace.")
+    }
+}
+
 foreach ($relativeDirectory in $requiredDirectories) {
     $directoryPath = Join-Path $resolvedRoot $relativeDirectory
     if (Test-Path -LiteralPath $directoryPath -PathType Leaf) {
@@ -160,11 +168,11 @@ foreach ($relativeDirectory in $requiredDirectories) {
 if (-not (Test-Path -LiteralPath (Join-Path $resolvedRoot 'README.md'))) {
     $readmeText = Get-Content -Raw -LiteralPath $readmeTemplatePath
     $readmeText = $readmeText.Replace('{{FOLDER_NAME}}', $rootName)
-    [System.IO.File]::WriteAllText((Join-Path $resolvedRoot 'README.md'), (ConvertTo-NormalizedText $readmeText) + [Environment]::NewLine, $utf8WithoutBom)
+    [System.IO.File]::WriteAllText((Join-Path $resolvedRoot 'README.md'), (ConvertTo-NormalizedText ($readmeText + $ProjectContext)) + [Environment]::NewLine, $utf8WithoutBom)
 }
 if (-not (Test-Path -LiteralPath (Join-Path $resolvedRoot 'AGENTS.md'))) {
     $agentsText = Get-Content -Raw -LiteralPath $agentsTemplatePath
-    [System.IO.File]::WriteAllText((Join-Path $resolvedRoot 'AGENTS.md'), (ConvertTo-NormalizedText $agentsText) + [Environment]::NewLine, $utf8WithoutBom)
+    [System.IO.File]::WriteAllText((Join-Path $resolvedRoot 'AGENTS.md'), (ConvertTo-NormalizedText ($agentsText + $ProjectContext)) + [Environment]::NewLine, $utf8WithoutBom)
 }
 
 $postApplyConflicts = [System.Collections.Generic.List[string]]::new()

@@ -57,6 +57,6 @@ The skill intentionally omits `sql/`, `src/`, `notebooks/`, and version-control 
 
 ## Invariants
 
-- A setup run never overwrites, moves, renames, or deletes existing local content. It only adds missing files and folders.
+- Layout creation only adds missing files and folders; it never overwrites, moves, renames, or deletes existing content. Separately confirmed starting-file moves may bring existing files into the workspace.
 - The workspace is created locally only, with no repository, remote, or external service connection.
 - The generated `README.md`, `AGENTS.md`, and manifest are starting points the user may edit; the helper preserves existing versions.

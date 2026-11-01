@@ -34,6 +34,14 @@ jobs:
         shell: pwsh
         run: .\scripts\test-create-workspace.ps1
 
+      - name: Test workspace starting-file moves
+        shell: pwsh
+        run: .\scripts\test-workspace-file-moves.ps1
+
+      - name: Test combined workspace setup
+        shell: pwsh
+        run: .\scripts\test-combined-workspace.ps1
+
       - name: Test data-model intake helper
         shell: pwsh
         run: .\scripts\test-data-model-intake.ps1 -Python python

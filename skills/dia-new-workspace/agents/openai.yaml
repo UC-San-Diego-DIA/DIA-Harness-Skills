@@ -1,0 +1,6 @@
+interface:
+  display_name: "New Workspace"
+  short_description: "Choose a layout and create a local project workspace"
+  default_prompt: "Use $dia-new-workspace to help me choose and create a workspace for my project."
+policy:
+  allow_implicit_invocation: false

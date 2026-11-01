@@ -31,10 +31,10 @@ function Invoke-WorkspaceHelper {
 }
 
 $repositoryRoot = Split-Path -Parent $PSScriptRoot
-$helper = Join-Path $repositoryRoot 'skills\dia-new-simple-workspace\scripts\create_simple_workspace.ps1'
+$helper = Join-Path $repositoryRoot 'skills\dia-new-workspace\scripts\create_simple_workspace.ps1'
 $pwsh = Join-Path $PSHOME 'pwsh.exe'
 $temporaryBase = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
-$testRoot = Join-Path $temporaryBase "dia-new-simple-workspace-$([System.Guid]::NewGuid().ToString('N'))"
+$testRoot = Join-Path $temporaryBase "dia-new-workspace-$([System.Guid]::NewGuid().ToString('N'))"
 $resolvedTestRoot = [System.IO.Path]::GetFullPath($testRoot)
 $safePrefix = $temporaryBase.TrimEnd([System.IO.Path]::DirectorySeparatorChar) + [System.IO.Path]::DirectorySeparatorChar
 
@@ -46,7 +46,7 @@ try {
     New-Item -ItemType Directory -Path $resolvedTestRoot | Out-Null
 
     $folderRoot = Join-Path $resolvedTestRoot 'Example Work'
-    $commonArguments = @('-Root', $folderRoot)
+    $commonArguments = @('-Root', $folderRoot, '-ProjectContext', "`n`n## Project context`nGoal: prepare a training guide.")
 
     $plan = Invoke-WorkspaceHelper -Arguments $commonArguments
     Assert-True ($plan.action -eq 'planned') 'A new folder did not produce a plan.'
@@ -70,6 +70,12 @@ try {
 
     $agents = Get-Content -Raw -LiteralPath (Join-Path $folderRoot 'AGENTS.md')
     Assert-True ($agents.Contains('Inputs')) 'AGENTS file does not describe the folder responsibilities.'
+    Assert-True ($agents.Contains('prepare a training guide') -and $readme.Contains('prepare a training guide')) 'Confirmed context did not reach both documents.'
+
+    $mixedRoot = Join-Path $resolvedTestRoot 'Mixed'
+    New-Item -ItemType Directory -Path (Join-Path $mixedRoot 'data') -Force | Out-Null
+    $null = Invoke-WorkspaceHelper -Arguments @('-Root', $mixedRoot, '-Apply') -ExpectedExitCode 2
+    Assert-True (-not (Test-Path (Join-Path $mixedRoot 'Inputs'))) 'Another layout was modified.'
 
     $valid = Invoke-WorkspaceHelper -Arguments $commonArguments
     Assert-True ($valid.action -eq 'valid') 'A second run did not report a valid working folder.'

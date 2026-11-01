@@ -1,6 +1,6 @@
 interface:
   display_name: "Dataset Profile"
-  short_description: "Profile one local CSV or Excel dataset"
-  default_prompt: "Use $dia-dataset-profile to profile my dataset and suggest metrics and KPIs."
+  short_description: "Understand a new dataset before using it"
+  default_prompt: "Use $dia-dataset-profile to help me understand this dataset, how to read it, possible uses, and what needs clarification."
 policy:
   allow_implicit_invocation: false
