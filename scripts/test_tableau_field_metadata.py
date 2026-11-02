@@ -298,7 +298,7 @@ class FieldMetadataTests(unittest.TestCase):
         self.assertEqual(revised["schema_version"], 2)
         self.assertEqual(revised["created_at"], data["created_at"])
         self.assertEqual(revised["previous_revision_sha256"], hashlib.sha256(prior).hexdigest())
-        self.assertEqual((revision.parent / revised["previous_revision_path"]).resolve(), structured)
+        self.assertEqual((revision.parent / revised["previous_revision_path"]).resolve(), structured.resolve())
         self.assertEqual(dictionary.validate(revised, revision), [])
         self.assertEqual(structured.read_bytes(), prior)
         invalid_parent = copy.deepcopy(revised)

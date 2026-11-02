@@ -61,11 +61,12 @@ def assets(root):
 def manifest(root, dataset_id, name, domain, description=None, model_facts=None):
     if not re.fullmatch(r"[a-z0-9]+(?:[.-][a-z0-9]+)*", dataset_id):
         raise ValueError("Dataset ID must use lowercase words separated by dots or hyphens.")
+    root = root.resolve()
     dictionary = runtime.load(root / "data-dictionary.yaml")
     field_facts = runtime.dictionary.facts_path(dictionary, root / "data-dictionary.yaml")
     if not field_facts.is_relative_to(root):
         raise ValueError("Keep source facts inside the pack so it can be moved as a unit.")
-    structural = model_facts or (root / "evidence" / "workbook-model-facts.yaml")
+    structural = Path(model_facts or (root / "evidence" / "workbook-model-facts.yaml")).resolve()
     if not structural.is_file():
         structural = field_facts
     if not structural.is_relative_to(root):
