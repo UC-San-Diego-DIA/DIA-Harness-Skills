@@ -1,0 +1,4 @@
+interface:
+  display_name: "Local Data Explorer"
+  short_description: "Talk to a file and build a dashboard from saved visuals"
+  default_prompt: "Use $dia-local-data-explorer to set up a local project for my CSV or Excel file, answer questions, and build an HTML dashboard from visuals I save."

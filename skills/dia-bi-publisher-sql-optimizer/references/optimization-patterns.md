@@ -1,40 +1,46 @@
-# SQL optimization patterns for export-driven rewrites
+# SQL rewrites with preservation conditions
 
-These patterns apply only when the plan and SQL text both support them, and only when they cannot change the output contract. Each pattern lists its evidence signature in an execution plan and its contract risk.
+These are investigation patterns, not blanket permissions. Apply a change only when its preservation conditions are established from SQL semantics and supplied evidence. Diagnostics estimate work; they do not prove uniqueness, foreign keys, values, or business meaning. If a condition is unknown, document the idea and leave it out of the candidate.
 
-## Zero-risk cleanups
+## Ordering and row selection
 
-**Inert CTE ordering.** Evidence: an `ORDER BY` inside a CTE that is consumed only through a join or aggregate. The optimizer discards it, but removing it removes ambiguity and any temptation for a sort. Apply freely.
+An internal `ORDER BY` can determine rows selected by `ROWNUM`, `FETCH FIRST`, `OFFSET`, or another order-dependent consumer. Trace all consumers before considering removal. Preserve final ordering, including direction, null placement and expressions. Do not add a tie-breaker or replace `ROW_NUMBER` with `MIN`/`MAX` to "fix" nondeterminism. Existing ties are a correctness uncertainty to disclose; an aggregate can choose values from different source rows.
 
-**Dead existence joins.** Evidence: a table joined on keys with no filter, no selected column, and no effect on row multiplication beyond an inner-join existence check. Removing it preserves results under referential integrity; keep it applied only with a verification step confirming no orphan rows exist, and drop the rewrite if the user cannot confirm integrity.
+## Join removal and duplicate guards
 
-**Redundant DISTINCT columns.** Evidence: a `DISTINCT` view selecting columns already functionally determined by its join keys or aggregation keys. Narrowing the DISTINCT to needed columns reduces hash-unique temp usage without changing values. Verify the removed columns truly were redundant in every row.
+For an unused inner join, prove both that every retained left row has a match under the full join/filter/security conditions and that it has exactly one match. For an unused left join, prove at most one match and that no downstream expression/filter depends on it. No orphan rows alone does not prove unchanged multiplicity. Never infer constraints from names, indexes listed in a plan, or a sample.
 
-## Low-risk rewrites
+Removing columns before `DISTINCT` can collapse rows that later produce duplicate outputs. Prove the remaining columns determine the removed values, preserve all consumers and duplicate multiplicities, and account for nulls. An outer projection selecting fewer columns is insufficient evidence.
 
-**Filter pushdown through aggregates.** Evidence: an outer-joined aggregate view whose inner `WHERE` already matches the driving filter, but whose join key could also carry the driving table's date window. Moving window filters into the CTE reduces build size. Apply only when the driving filter provably subsumes the CTE filter.
+## Restricting intermediate work
 
-**Aggregate-before-join reordering.** Evidence: a large join fanning out before a `GROUP BY` that aggregates on the smaller dimension's key. Pre-aggregating the many side reduces hash-join build size. Verify the aggregation key set is unchanged.
+Filter pushdown or restricting an intermediate source to relevant driving keys can reduce work. Prove no needed match, unmatched outer-join row, aggregate input, analytic partition, or top-N candidate is lost. Prefer an existence restriction over a multiplying join when appropriate, but still prove equivalence. Moving a predicate between `WHERE` and `ON` across an outer join can change results.
 
-**Analytic-free deduplication.** Evidence: `ROW_NUMBER() ... = 1` used purely to pick one row per key where the ordering column is stable and unique per key after other filters. A pre-filtered or aggregate-based equivalent may avoid a full window sort. Verify the tie-breaking behavior is semantically identical; if any tie could resolve differently, do not apply.
+Drop unused intermediate columns only when no consumer, deduplication, grouping, ordering, set operator or wildcard relies on them. Keep final outputs intact. Do not narrow types, truncate text, shorten output aliases, or remove output columns to make a sort smaller.
 
-## High-risk ideas (document, do not apply)
+## Aggregates and repeated work
 
-**Join restructuring of fan-out guards.** Rewriting `DISTINCT` guard CTEs, merging requisition-lookup chains, or replacing `LEFT JOIN` plus `WHERE row_num = 1` patterns can silently change which rows survive. These often hold the biggest wins on Fusion Procurement queries but require result-set diffing the user must perform; record them with explicit evidence and expected effect only.
+Pre-aggregation requires preserving all grouping/join keys, fan-out, aggregate inputs, null handling and each aggregate's meaning. Keeping the same grouping keys alone does not establish equivalence. `AVG`, distinct aggregates and outer joins require particular care.
 
-**Parallelism hints.** `/*+ PARALLEL(n) */` can cut wall-clock time on wide scans but is environment-dependent on Fusion SaaS and may be disallowed. Never place it in the candidate file; document it as a question for the database team.
+Repeated scalar subqueries or PL/SQL calls may explain repeated work, but replacing them with joins requires evidence about cardinality, no-match behavior, errors on multiple rows, and session-dependent function semantics. Do not replace security functions or secured views with base tables. Factor expressions only if evaluation timing, errors and nondeterministic values remain equivalent.
 
-**Materialization hints.** `/*+ MATERIALIZE */` on reused CTEs trades temp space for repeated-scan cost. Only document when a CTE is consumed three or more times.
+## Parameters and dates
 
-## Environment levers that do not exist in Fusion SaaS
+Inspect function-wrapped predicates and implicit conversions when supported by plan evidence. Date-range rewrites must preserve inclusive/exclusive bounds, time components, nulls, time zones and actual bind types. Preserve single-value, multivalue and all/null parameter semantics and lexical substitutions. Do not replace binds with literals or remove effective-date, language, enterprise or security filters. Missing parameter metadata is an open question, not permission to guess.
 
-Oracle Fusion Cloud environments do not allow index creation, schema changes, statistics tuning, or database-side configuration, and parallel execution hints are generally not permitted on Fusion SaaS either. When the user's environment is Fusion SaaS, these are not options to document; the SQL rewrite is the only lever. Designs that depend on a database team making a change are dead ends and must not appear in reports.
+## Hints and environment limits
 
-## Reading plan exports
+Do not add parallelism or undocumented materialization hints to the candidate or make Fusion SaaS recommendations depend on a database team changing indexes, statistics or configuration. CTE reuse count alone does not justify materialization. Preserve existing hints unless a separately justified change establishes their purpose and supported use. User-side testing in Publisher remains necessary.
 
-- A SQL Monitor report carries actuals: real elapsed time, actual rows, and actual temp usage per plan line. When actuals are present, rank hotspots by actuals first and treat plan estimates as secondary. When actuals and estimates disagree materially, trust the actuals and say so in the report.
-- Rank hotspots by `TempSpc` first, then cost, then estimated time. Wide final sorts and spilled hash joins dominate real-world Fusion reporting timeouts even when estimated times look safe.
-- Estimated bytes per row (bytes / rows) reveals row width. A final sort of a very wide rowset is usually the single largest cost driver, and in Fusion SaaS it cannot be fixed by indexing or any database-side change; the levers are reducing row width and reducing rows reaching the sort.
-- Predicate information shows where filters landed. A filter on the driving table's date window must appear on the driving table's scan, not only in a joined view.
-- `TEMP TABLE TRANSFORMATION` indicates Oracle materialized a CTE; it is not itself a problem, but check whether the materialized table is scanned once or many times.
-- A SQL Monitor report captured without actuals shows estimates only. Never present estimated times as measured; if the report lacks actuals because the query timed out before returning rows, the missing actuals are themselves the diagnostic, and the re-run after optimization must produce them.
+## Reading plans
+
+- `EXPLAIN PLAN ... FOR` and `PLAN_TABLE_OUTPUT` with `Rows`, `Bytes`, `TempSpc`, `Cost`, and `Time` describe estimates. A file named `sql_monitor.txt` can contain only this evidence. Estimated bytes/rows indicate estimated row width, not measured XML size; estimated TempSpc indicates possible work-area demand, not a measured spill.
+- Consider access paths, predicates, cardinalities and repeated operations together. A full scan or `TEMP TABLE TRANSFORMATION` is not automatically a problem. Never sum hierarchical costs or elapsed values; parent and child work can overlap or include the same work. Parallel activity is not directly additive wall-clock time.
+- When actuals exist, record units, starts, rows, waits, execution identity and fetch/completion status as provided. Account for repeated starts when comparing estimated and actual rows. Unavailable metrics stay unavailable. A failed, partial or first-N-row execution may still have actuals.
+- Plan predicates can include injected security conditions. Use them as evidence; do not copy them into submitted SQL or remove source security logic. Adaptive-plan notes require care about which operations actually ran.
+
+## Primary references
+
+- [Publisher SQL tuning](https://docs.oracle.com/en/cloud/saas/otbi/otbi-pub-design/tune-sql-query.html) distinguishes explain plans from execution diagnostics. Its general tuning suggestions still require the preservation and SaaS boundaries above.
+- [Oracle ROWNUM semantics](https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/ROWNUM-Pseudocolumn.html) explains how inner ordering affects top-N selection.
+- [SQL Monitor identity and status](https://docs.oracle.com/en/database/oracle/oracle-database/19/refrn/V-SQL_MONITOR.html) distinguishes complete fetching, partial fetching, errors and running executions.

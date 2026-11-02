@@ -2,7 +2,7 @@
 name: dia-new-workspace
 description: Interview the user and create a local simple or data-analysis workspace with project-specific README and AGENTS files, optionally moving confirmed starting files into it. Use only when explicitly invoked as $dia-new-workspace. Does not analyze files or write the project plan.
 metadata:
-  status: testing
+  status: production
 ---
 
 # New workspace

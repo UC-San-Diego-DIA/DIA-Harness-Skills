@@ -105,8 +105,8 @@ A skill that configures and verifies access from TritonAI Harness to an external
 _Avoid_: Integration workflow, task-management skill
 
 **SQL Monitor report**:
-The export produced by the BI Publisher Generate SQL Monitor Report button (SQL Monitor.txt), containing the SQL text, the plan with predicate information, and the SQL query timeout, plus real elapsed time, actual row counts, and actual temp usage per plan line when the platform captured actual execution statistics.
-_Avoid_: Query log, Estimated plan
+The diagnostic export produced by BI Publisher's Generate SQL Monitor Report control, whose contents may be an explain plan with SQL and a configured timeout, execution statistics, or both. The export's name does not establish whether its rows, times, and temporary-space figures are estimated or measured.
+_Avoid_: Query log, Measured execution report when actuals are absent
 
 **Data engine log**:
 The Data Processor debug log exported through the BI Publisher View Engine Log button, containing total data generation time, estimated XML data size, and session and dataset settings. The button name refers to the export location, not to template rendering.
@@ -125,7 +125,7 @@ The authenticated staff member's ClickUp view of work assigned to them across th
 _Avoid_: Personal List, Personal destination
 
 **Utilization review**:
-An assessment of one person's prior-day TritonAI Harness threads and conversations, producing two to four recommendations for improving existing interactions and one to three ideas for new ways to use the Harness, each validated by the user before its verdict is final.
+An assessment of one person's prior-day TritonAI Harness threads and conversations, producing up to four recommendations for improving existing interactions and up to three new usage ideas when supported by evidence, each validated by the user before its verdict is final. Either category may have no recommendations.
 _Avoid_: Usage audit, Performance review
 
 **Utilization review log**:

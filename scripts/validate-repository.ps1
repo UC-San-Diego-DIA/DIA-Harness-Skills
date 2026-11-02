@@ -188,6 +188,20 @@ if (Test-Path -LiteralPath $indexPagePath -PathType Leaf) {
             Add-ValidationError "docs/index.html: development skill '$developmentSkill' must appear in the landing page catalog"
         }
     }
+
+    $landingCardPattern = [regex]'(?s)<a class="skill"[^>]*data-status="(?<status>[^"]*)"[^>]*>\s*<span class="status-chip[^"]*">(?<chip>[^<]*)</span>'
+    $landingCards = $landingCardPattern.Matches($indexPageText)
+    foreach ($landingCard in $landingCards) {
+        $chipText = $landingCard.Groups['chip'].Value.Trim()
+        $cardStatus = $landingCard.Groups['status'].Value.Trim()
+        if ($chipText -ne $cardStatus) {
+            Add-ValidationError "docs/index.html: skill card chip '$chipText' does not match data-status '$cardStatus'"
+        }
+    }
+    $cardCount = [regex]::Matches($indexPageText, 'data-status=').Count
+    if ($cardCount -ne $landingCards.Count) {
+        Add-ValidationError "docs/index.html: found $cardCount skill cards with data-status but only $($landingCards.Count) with a status chip; every card needs one matching status chip"
+    }
 }
 
 $explicitOnlySkills = @('dia-analyze-local-data', 'dia-bi-publisher-sql-optimizer', 'dia-clickup-mcp-setup', 'dia-data-model-docs', 'dia-data-model-intake', 'dia-new-workspace', 'dia-plan-my-project', 'dia-setup-business-insights-folder', 'dia-start-my-day', 'dia-transcript-to-process-map', 'dia-transcript-to-project-request-draft', 'dia-transcript-to-requirements')

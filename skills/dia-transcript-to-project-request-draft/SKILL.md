@@ -2,7 +2,7 @@
 name: dia-transcript-to-project-request-draft
 description: Turn a Zoom transcript from a project-request conversation into a first-pass, field-by-field draft of the VCFA DIA Project Request Form that requires human review before submission. Use only when explicitly invoked as $dia-transcript-to-project-request-draft. Do not use for meeting notes, requirements documents, ClickUp tasks, or submitting the form.
 metadata:
-  status: testing
+  status: production
 ---
 
 # DIA Transcript to Project Request Draft

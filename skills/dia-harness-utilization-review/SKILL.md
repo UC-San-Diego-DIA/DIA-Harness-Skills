@@ -1,13 +1,13 @@
 ---
 name: dia-harness-utilization-review
-description: Review the previous day's TritonAI Harness threads and conversations and produce 2 to 4 ways to improve the user's existing interactions plus 1 to 3 new ways to use the Harness, recording confirmed recommendations in a local review log. Designed for a scheduled morning run and explicit invocation as $dia-harness-utilization-review. Do not use for task work, skill installation, or changes to other systems.
+description: Review the previous day's TritonAI Harness threads and conversations and suggest up to 4 ways to improve existing interactions plus up to 3 new usage ideas when supported by evidence, recording recommendations and user verdicts in a local review log. Designed for a scheduled morning run and explicit invocation as $dia-harness-utilization-review. Do not use for task work, skill installation, or changes to other systems.
 metadata:
   status: development
 ---
 
 # Harness utilization review
 
-Review the threads and conversations from the previous day the way a thoughtful colleague would: identify what went well, what created friction, and what the user has not tried yet. Deliver a small set of concrete recommendations, get the user's verdict on each, and record the outcome in a review log so future reviews measure progression instead of repeating the same advice.
+Help the user get better results from TritonAI Harness by reviewing the previous day's threads and conversations for what went well, avoidable friction, and useful opportunities. Recommend a few concrete changes to try, get the user's verdict on each, and record the feedback so future reviews avoid repeating the same advice.
 
 This skill is designed to run from a scheduled Harness task at about 09:00 `America/Los_Angeles` with one new thread per run. It also works when invoked explicitly during a session.
 
@@ -62,23 +62,25 @@ If a file cannot be parsed or is locked, skip it, note it, and continue.
 
 ## Analyze the day
 
+Keep conclusions within the available evidence. When only user messages are available, describe requests and corrections without claiming completed work, successful outcomes, or who caused the friction. When fuller evidence is available, distinguish unclear requests, assistant mistakes, and tool limitations before recommending a change. Describe capabilities as not observed in the review window unless prior use is known; one day's absence does not establish that the user has never tried them.
+
 Summarize across the window:
 
-- What the user accomplished and where the day's effort went.
+- What the user worked on, and any accomplishments supported by the evidence.
 - Friction: repeated clarifications, rework, corrections, and manual steps the Harness could have absorbed.
 - Underused capabilities that fit the user's actual work, such as scheduled tasks, worktrees, delegated reviews, memory, integrations that are loaded but never invoked, or an installed DIA skill that matched a need solved by hand.
 - Patterns that went well, so they can be reinforced.
 
-Do not invent friction to fill space. A quiet day may yield only two improvements and one idea, or none for a category.
+Do not invent friction or opportunities to fill space. Give fewer recommendations when evidence is thin, including none in either category. One useful recommendation is enough.
 
 ## Draft recommendations
 
 Produce exactly two sections, each recommendation numbered within its section:
 
-1. **Ways to improve existing interactions.** Two to four recommendations about how the user already works with the Harness, each tied to concrete prior-day activity.
-2. **New ideas for using the Harness.** One to three ideas for capabilities or workflows the user has not used, each connected to a need observed in the window.
+1. **Ways to improve existing interactions.** Up to four recommendations about how the user already works with the Harness, each tied to concrete activity in the review window.
+2. **New ideas for using the Harness.** Up to three ideas for capabilities or workflows not observed in the review window, each connected to a need observed there.
 
-For each recommendation give one to two sentences: what to do differently and the expected benefit. Name specific capabilities or skills when relevant.
+For each recommendation give one to two sentences with the observed pattern, a specific action or ready-to-use example prompt, and the expected benefit. For example: "You clarified the intended audience in several conversations. Try opening your next request with 'Write this for DIA analysts who need to decide which data gaps to resolve first' to give the first draft a clearer focus." Name specific capabilities or skills only when their availability is known. If a category has no supported recommendations, say so briefly instead of filling it.
 
 ## Read the prior log
 
@@ -112,11 +114,11 @@ One to three sentences naming the window, the threads and sessions reviewed, and
 
 ### Session summary
 
-Two to four sentences on what the window accomplished and how the interaction went.
+Two to four sentences on what the user worked on, supported outcomes, and any limits on assessing how the interaction went.
 
 ### Evidence themes
 
-Three to six short bullets naming the observed friction, strengths, and underused capabilities.
+Up to six short bullets naming supported observations about friction, strengths, and opportunities.
 
 ### Recommendations
 
@@ -142,7 +144,7 @@ In interactive mode, present both sections and ask for a verdict on each numbere
 
 Apply requested edits, confirm the final list once, then write the entry with final verdicts. If the user declines everything, record the review with declined verdicts so future reviews know the kinds were considered.
 
-In scheduled mode, the run is unattended. Write the entry immediately with every verdict set to `Pending`, then end the thread response with the two recommendation sections and one instruction: reply to this thread with accept, decline, or an edit for each numbered recommendation. When the user replies with verdicts, append a short `## Verdict update YYYY-MM-DD HH:MM` section to the same log that names the review it finalizes and records the final verdict table. Never rewrite the original entry.
+In scheduled mode, the run is unattended. Write the entry immediately with every verdict set to `Pending`. Present the two recommendation sections and, when recommendations exist, ask the user to reply to this thread with accept, decline, or an edit for each numbered recommendation. When the user replies with verdicts, append a short `## Verdict update YYYY-MM-DD HH:MM` section to the same log that names the review it finalizes and records the final verdict table. Never rewrite the original entry.
 
 ## Close the review
 
@@ -150,4 +152,4 @@ End the response with three parts, kept to 150 words or fewer:
 
 1. One sentence on the strongest pattern observed in the window.
 2. The log path after a successful write, or the reason no entry was recorded.
-3. In interactive mode, the open verdicts awaiting the user. In scheduled mode, the reminder to reply to this thread with verdicts.
+3. The open verdicts awaiting the user and, in scheduled mode, the reminder to reply to this thread with verdicts. If there are no recommendations, state that no verdicts are needed.
