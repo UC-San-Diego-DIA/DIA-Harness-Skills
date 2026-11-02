@@ -10,7 +10,7 @@ from __future__ import annotations
 import re
 
 
-KEY_RE = re.compile(r"^([A-Za-z0-9_-]+):(?:[ \t]+(.*))?$")
+KEY_RE = re.compile(r'^([A-Za-z0-9_-]+|"(?:[^"\\]|\\.)*"):(?:[ \t]+(.*))?$')
 INT_RE = re.compile(r"[-+]?\d+")
 FLOAT_RE = re.compile(r"[-+]?(\d+\.\d*|\.\d+)([eE][-+]?\d+)?")
 UNICODE_RE = re.compile(r"\\u([0-9a-fA-F]{4})")
@@ -150,7 +150,9 @@ def _parse_list(lines, index, indent):
             key_match = KEY_RE.match(rest)
             if key_match is not None:
                 item = {}
-                item[key_match.group(1)], index = _parse_value_after_key(
+                key = key_match.group(1)
+                key = _parse_quoted(key) if key.startswith('"') else key
+                item[key], index = _parse_value_after_key(
                     lines, index + 1, key_match.group(2), indent + 2
                 )
                 item, index = _parse_mapping(lines, index, indent + 2, item)
@@ -174,6 +176,9 @@ def _parse_mapping(lines, index, indent, seed):
         if match is None:
             raise YamlError(f"cannot parse line as a mapping entry: {line!r}")
         key = match.group(1)
+        key = _parse_quoted(key) if key.startswith('"') else key
+        if key in result:
+            raise YamlError(f"duplicate mapping key: {key!r}")
         result[key], index = _parse_value_after_key(
             lines, index + 1, match.group(2), indent
         )

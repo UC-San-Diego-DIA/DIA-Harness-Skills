@@ -1,28 +1,38 @@
 ---
 name: business-questions-to-dashboard-mockup
 pattern: pipeline
-description: Create a data-analysis workspace, extract confirmed business questions and KPIs from a requirements transcript, map them to the workspace dataset, and optionally render a UCSD-branded HTML dashboard mockup with mock data.
+description: Create a data-analysis workspace, capture requested KPIs, map them to a dataset, optionally select separate recommendations, and render a labeled HTML dashboard mockup.
 ---
 
 # Playbook: Business questions to dashboard mockup
 
-Move one requirements conversation from raw transcript to confirmed business questions and KPIs, then to a declarative mapping of those KPIs against the project dataset. Run this at the start of an analysis project, before any pipeline work is scoped.
-
-Stop after step 3 when the mapping report is the deliverable. Continue to step 4 when stakeholders should see what the mapped KPIs would look like on a dashboard before any pipeline work is built.
+Use one requirements conversation to identify requested business questions and
+KPIs, map them to a dataset, and optionally review a dashboard prototype.
+No KPI calculations or pipeline scripts are produced by this playbook.
 
 ## Sequence
 
-1. `$dia-new-workspace` with the data-analysis layout - one run per project. Creates the schema-1 data-analysis workspace; the user places the dataset in `data/raw/` afterwards.
-2. `$dia-transcript-to-kpis` - one run per conversation, inside the workspace. Saves the transcript in `docs/transcripts/` and, after the user confirms the draft, writes `docs/Business-Questions-and-KPIs-YYYY-MM-DD-<topic>.md` and `docs/kpi-facts.yaml`.
-3. `$dia-kpi-data-mapping` - one run per dataset, inside the workspace. The user names the dataset; the skill re-validates the KPI artifact and the dataset, then writes `docs/KPI-Data-Mapping-YYYY-MM-DD-<topic>.md` naming the fields that supply each KPI, the calculations to build, and the data gaps.
-4. `$dia-dashboard-mockup` - one run per mapping report, inside the workspace. The user confirms the panel outline; the skill renders `docs/Dashboard-Mockup-YYYY-MM-DD-<topic>.html` from the UCSD-branded template with mock data and explicit data-gap panels.
+1. `$dia-new-workspace` with the data-analysis layout. Open the resulting folder as the Harness project. Starting files move only when explicitly confirmed during setup. Otherwise place or copy the CSV into `data/raw/` and transcript into `docs/transcripts/` separately, before invoking the next skill. A shell directory change does not switch the Harness project.
+2. `$dia-transcript-to-kpis` inside the workspace. A supplied transcript stays at its existing path. Review one complete draft, then save `docs/Business-Questions-and-KPIs-YYYY-MM-DD-<topic>.md` and `docs/kpi-facts.yaml`. Deferred ideas remain separate from the confirmed KPI facts.
+3. `$dia-kpi-data-mapping` inside the workspace. Supply the CSV path and confirmed artifact pair. Review exact fields, calculations to build, assumptions, and missing components. If requested, also review separate schema-supported recommendations and select none or specific additions. Save `docs/KPI-Data-Mapping-YYYY-MM-DD-<topic>.md` with the dashboard inclusion list after confirmation.
+4. `$dia-dashboard-mockup` from that confirmed mapping report. Review the panel outline, then render `docs/Dashboard-Mockup-YYYY-MM-DD-<topic>.html`. Include selected measures only, visible requested/recommended origin labels, mock values, and explicit gap panels. The template is a local prototype with a chart CDN dependency, not an offline working dashboard.
 
-Variant: when no workspace exists yet, step 2 can run outside a workspace and saves its artifacts in the working directory. The mapping in step 3 is designed for a workspace dataset, so create the workspace first when mapping is expected. The mockup in step 4 follows its mapping report's location.
+Stop after step 3 when mapping is enough. Continue to step 4 for a stakeholder
+prototype. Steps 2-4 can also write in the working directory outside an analysis
+workspace; choose a workspace first when its folder organization is wanted.
 
 ## Handoffs
 
-- `kpi-facts.yaml` is the machine-readable contract between steps 2 and 3; step 3 re-validates its `schema_version: 1` before mapping anything.
-- The mapping report is the contract between steps 3 and 4: every mock panel traces to one mapped KPI, and every data gap in the report renders as its own no-data panel rather than a missing chart.
-- The mapping report is declarative documentation: it names fields and calculations but does not execute them. Building the metrics happens later through the workspace pipeline or ad hoc analysis, outside this playbook.
-- The mockup never reads the dataset or executes the mapped calculations. Its numbers are mock placeholders, and the file says so on every panel and in the footer, so stakeholder review never mistakes a placeholder for a result.
-- Data gaps from step 3 remain the follow-up list for stakeholders and source systems. Resolve them before building pipeline scripts, because a gap in the report means no dataset field supports that KPI component today.
+- The paired KPI Markdown and schema-version-1 facts preserve transcript-confirmed requests. Dataset-derived recommendations never modify them.
+- Read the Markdown deferred-ideas context when proposing candidates. A dataset column does not reopen a deferred or rejected business decision.
+- Candidate recommendations carry proposed definitions, exact fields, assumptions, evidence limits, and individual selection. They remain dataset-derived even after selection.
+- The Markdown mapping report is the dashboard contract. Its inclusion list records every requested measure and candidate with an explicit selection. Candidate-mode runs skip optional version-1 mapping YAML because that schema cannot represent provenance and selection.
+- Requested-only legacy reports remain supported. Recommendations without explicit selection cannot become panels automatically.
+- Mapping is a specification, not a calculation. Missing data stays missing, with a source-system request rather than a proxy.
+- Mockup numbers are fabricated placeholders. Included gaps stay visible; no data is read or computed at the rendering step.
+
+## Release dependency
+
+The transcript and mapping skills remain in development until their acceptance
+runs support promotion. The standard production/testing installer skips them.
+Publishing a session-ready catalog requires that separate release step.

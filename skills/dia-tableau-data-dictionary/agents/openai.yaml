@@ -1,0 +1,4 @@
+interface:
+  display_name: "Tableau Data Dictionary"
+  short_description: "Explain Tableau fields in a concise analyst dictionary"
+  default_prompt: "Use $dia-tableau-data-dictionary to enrich this Tableau workbook's field meanings using dataset context, save versioned YAML, and generate a concise analyst reference."

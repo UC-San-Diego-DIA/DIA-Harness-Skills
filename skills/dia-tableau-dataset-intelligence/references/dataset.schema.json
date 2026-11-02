@@ -1,0 +1,219 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Dataset Intelligence Pack manifest, schema version 1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "document_type",
+    "dataset_id",
+    "name",
+    "domain",
+    "description",
+    "business_owner",
+    "technical_owner",
+    "status",
+    "data_verification",
+    "reviewed",
+    "build_state",
+    "created_at",
+    "updated_at",
+    "source",
+    "assets",
+    "generated_views"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "document_type": {
+      "const": "dataset_intelligence_pack"
+    },
+    "dataset_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "domain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "business_owner": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "technical_owner": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "const": "draft"
+    },
+    "data_verification": {
+      "const": "not_tested"
+    },
+    "reviewed": {
+      "type": "boolean"
+    },
+    "build_state": {
+      "enum": [
+        "scaffold",
+        "complete"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "updated_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input_name",
+        "format",
+        "workbook_sha256",
+        "facts",
+        "model_facts"
+      ],
+      "properties": {
+        "input_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "format": {
+          "enum": [
+            "twb",
+            "twbx"
+          ]
+        },
+        "workbook_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "facts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "model_facts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        }
+      }
+    },
+    "assets": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "path",
+          "schema_version",
+          "sha256"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "dictionary",
+              "model",
+              "glossary",
+              "metrics",
+              "questions"
+            ]
+          },
+          "path": {
+            "enum": [
+              "data-dictionary.yaml",
+              "data-model.yaml",
+              "business-glossary.yaml",
+              "metrics.yaml",
+              "questions.yaml"
+            ]
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "sha256": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "generated_views": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "sha256"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      }
+    }
+  }
+}

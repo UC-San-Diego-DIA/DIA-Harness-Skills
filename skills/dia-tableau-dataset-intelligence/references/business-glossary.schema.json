@@ -1,0 +1,197 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Dataset business glossary",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "document_type",
+    "dataset_id",
+    "source_workbook_sha256",
+    "status",
+    "reviewed",
+    "terms",
+    "open_questions"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "document_type": {
+      "const": "business_glossary"
+    },
+    "dataset_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_workbook_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "status": {
+      "const": "draft"
+    },
+    "reviewed": {
+      "type": "boolean"
+    },
+    "terms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "term_id",
+          "name",
+          "definition",
+          "synonyms",
+          "field_refs",
+          "approval_status",
+          "verification",
+          "open_questions"
+        ],
+        "properties": {
+          "term_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "definition": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "text",
+              "status",
+              "evidence_refs",
+              "confirmed_by",
+              "confirmed_at",
+              "basis"
+            ],
+            "properties": {
+              "text": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "enum": [
+                  "proposed",
+                  "confirmed"
+                ]
+              },
+              "evidence_refs": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "confirmed_by": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "confirmed_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "basis": {
+                "enum": [
+                  "workbook_description",
+                  "recorded_metadata",
+                  "formula_derived",
+                  "context_inferred",
+                  "supplied_context",
+                  "name_based",
+                  "analyst_confirmed"
+                ]
+              }
+            }
+          },
+          "synonyms": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "text",
+                "status",
+                "evidence_refs",
+                "confirmed_by",
+                "confirmed_at"
+              ],
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "status": {
+                  "enum": [
+                    "proposed",
+                    "confirmed"
+                  ]
+                },
+                "evidence_refs": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "confirmed_by": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "confirmed_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "field_refs": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "approval_status": {
+            "enum": [
+              "proposed",
+              "confirmed"
+            ]
+          },
+          "verification": {
+            "const": "not_tested"
+          },
+          "open_questions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "open_questions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

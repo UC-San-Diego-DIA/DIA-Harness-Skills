@@ -61,3 +61,23 @@ jobs:
       - name: Test workbook-intake helper
         shell: pwsh
         run: .\scripts\test-workbook-intake.ps1 -Python python
+
+      - name: Test Tableau field metadata and standalone dictionary installation
+        shell: pwsh
+        run: python .\scripts\test_tableau_field_metadata.py
+
+      - name: Test Tableau model extraction
+        shell: pwsh
+        run: python .\scripts\test_tableau_model_structure.py
+
+      - name: Test Tableau business glossary
+        shell: pwsh
+        run: python .\scripts\test_tableau_glossary.py
+
+      - name: Test Tableau metric and question proposals
+        shell: pwsh
+        run: python .\scripts\test_tableau_proposals.py
+
+      - name: Test Dataset Intelligence Pack integration and installation
+        shell: pwsh
+        run: python .\scripts\test_tableau_pack.py

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Tableau Dataset Intelligence"
+  short_description: "Build a structured Tableau Dataset Intelligence Pack"
+  default_prompt: "Use $dia-tableau-dataset-intelligence to build a complete local Dataset Intelligence Pack from this TWB or TWBX, with contextual metadata and generated analyst views."

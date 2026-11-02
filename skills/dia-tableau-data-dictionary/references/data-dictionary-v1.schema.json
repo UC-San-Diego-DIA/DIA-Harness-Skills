@@ -1,0 +1,460 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Tableau data dictionary, schema version 1",
+  "description": "Structured source for the generated Markdown dictionary; recorded metadata snapshots use workbook field metadata version 1.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "document_type",
+    "dictionary_id",
+    "revision",
+    "previous_revision_sha256",
+    "previous_revision_path",
+    "created_at",
+    "updated_at",
+    "tool_version",
+    "source",
+    "workbook",
+    "extraction_warnings",
+    "datasources",
+    "parameters"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "document_type": {
+      "const": "tableau_data_dictionary"
+    },
+    "dictionary_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "previous_revision_sha256": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "updated_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tool_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "facts_path",
+        "facts_sha256",
+        "workbook_sha256",
+        "field_metadata_version"
+      ],
+      "properties": {
+        "facts_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "facts_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "workbook_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "field_metadata_version": {
+          "const": 1
+        }
+      }
+    },
+    "workbook": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "tableau_version",
+        "source_build",
+        "source_platform",
+        "repository_location"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string"
+        },
+        "tableau_version": {
+          "type": "string"
+        },
+        "source_build": {
+          "type": "string"
+        },
+        "source_platform": {
+          "type": "string"
+        },
+        "repository_location": {
+          "type": "string"
+        }
+      }
+    },
+    "extraction_warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "datasources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "caption",
+          "fields",
+          "field_inventory"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "caption": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/field"
+            }
+          },
+          "field_inventory": {
+            "$ref": "#/$defs/field_inventory"
+          }
+        }
+      }
+    },
+    "parameters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "datasource",
+          "name",
+          "caption",
+          "members"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "datasource": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "caption": {
+            "type": "string"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "previous_revision_path": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "$defs": {
+    "nullable_string": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "field": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "caption",
+        "datatype",
+        "role",
+        "type",
+        "hidden",
+        "default_aggregation",
+        "description",
+        "calculation",
+        "field_kind",
+        "aliases",
+        "source_columns",
+        "evidence",
+        "conflicts",
+        "definition",
+        "open_questions"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "caption": {
+          "$ref": "#/$defs/nullable_string"
+        },
+        "datatype": {
+          "$ref": "#/$defs/nullable_string"
+        },
+        "role": {
+          "$ref": "#/$defs/nullable_string"
+        },
+        "type": {
+          "$ref": "#/$defs/nullable_string"
+        },
+        "hidden": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "default_aggregation": {
+          "$ref": "#/$defs/nullable_string"
+        },
+        "description": {
+          "$ref": "#/$defs/nullable_string"
+        },
+        "field_kind": {
+          "enum": [
+            "source",
+            "calculated"
+          ]
+        },
+        "calculation": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "class",
+                "formula"
+              ],
+              "properties": {
+                "class": {
+                  "$ref": "#/$defs/nullable_string"
+                },
+                "formula": {
+                  "$ref": "#/$defs/nullable_string"
+                }
+              }
+            }
+          ]
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "key",
+              "value"
+            ],
+            "properties": {
+              "key": {
+                "$ref": "#/$defs/nullable_string"
+              },
+              "value": {
+                "$ref": "#/$defs/nullable_string"
+              }
+            }
+          }
+        },
+        "source_columns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "table",
+              "name",
+              "datatype"
+            ],
+            "properties": {
+              "table": {
+                "$ref": "#/$defs/nullable_string"
+              },
+              "name": {
+                "$ref": "#/$defs/nullable_string"
+              },
+              "datatype": {
+                "$ref": "#/$defs/nullable_string"
+              }
+            }
+          }
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "conflicts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "attribute",
+              "evidence"
+            ],
+            "properties": {
+              "attribute": {
+                "type": "string"
+              },
+              "evidence": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "definition": {
+          "$ref": "#/$defs/definition"
+        },
+        "open_questions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "field_inventory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "field_count",
+        "skipped_records",
+        "conflicting_fields",
+        "warnings"
+      ],
+      "properties": {
+        "scope": {
+          "enum": [
+            "workbook_datasource",
+            "worksheet_dependencies_only"
+          ]
+        },
+        "field_count": {
+          "type": "integer"
+        },
+        "skipped_records": {
+          "type": "integer"
+        },
+        "conflicting_fields": {
+          "type": "integer"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "definition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "text",
+        "basis",
+        "confirmation_status",
+        "confirmed_at",
+        "confirmed_by"
+      ],
+      "properties": {
+        "text": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "basis": {
+          "enum": [
+            "workbook_description",
+            "formula_derived",
+            "name_based",
+            "analyst_confirmed",
+            "undocumented"
+          ]
+        },
+        "confirmation_status": {
+          "enum": [
+            "unconfirmed",
+            "confirmed"
+          ]
+        },
+        "confirmed_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "confirmed_by": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

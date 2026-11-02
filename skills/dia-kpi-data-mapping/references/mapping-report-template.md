@@ -24,6 +24,7 @@ Rows: [row-count estimate and how it was estimated, stated as approximate]
 
 **Question:** [the business question from the KPI artifact, verbatim]
 **Status:** Mapped | Partial | Blocked
+**Origin:** Stakeholder-requested
 
 ### Required fields
 
@@ -74,3 +75,18 @@ This report documents what to build. It contains no calculated results; build th
 - Use file names for sources, not absolute paths.
 - Do not quote sample data values in the report. The schema description is enough; the report is documentation, not a data extract.
 - Mark anything not established by the artifact or the dataset schema as `Needs confirmation.`
+
+## Optional recommendations and dashboard inclusion
+
+When the user requests dataset-derived recommendations, read
+[candidate-recommendations.md](candidate-recommendations.md). Append its separate
+candidate sections and the final dashboard inclusion table before "How to use
+this report". Candidate questions and names are proposals, so the requested-KPI
+rules about verbatim artifact names and questions do not apply to them. All
+field-evidence, declarative-calculation, assumption, and gap rules still apply.
+
+In requested-KPI-only mode, include a dashboard inclusion table listing the
+mapped requested KPI IDs, names, origin `Stakeholder-requested`, and Yes or No.
+Default to Yes for the user's selected mapping scope, retaining gap panels,
+unless the user explicitly excludes an item. Confirm this table with the draft.
+Do not add an empty recommendations section.

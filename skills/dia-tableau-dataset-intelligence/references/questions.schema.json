@@ -1,0 +1,209 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Analytical questions",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "document_type",
+    "dataset_id",
+    "source_workbook_sha256",
+    "status",
+    "reviewed",
+    "questions"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "document_type": {
+      "const": "analytical_questions"
+    },
+    "dataset_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_workbook_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "status": {
+      "const": "draft"
+    },
+    "reviewed": {
+      "type": "boolean"
+    },
+    "questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "status",
+          "origin",
+          "support",
+          "support_rationale",
+          "field_refs",
+          "glossary_refs",
+          "assumptions",
+          "approval_gates",
+          "approval",
+          "data_verification",
+          "question",
+          "rationale",
+          "metric_refs",
+          "dimension_refs",
+          "date_field_ref"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "proposed",
+              "approved"
+            ]
+          },
+          "origin": {
+            "const": "schema_proposed"
+          },
+          "support": {
+            "enum": [
+              "supported",
+              "conditional",
+              "unsupported"
+            ]
+          },
+          "support_rationale": {
+            "type": "string",
+            "minLength": 1
+          },
+          "field_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          },
+          "glossary_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0
+          },
+          "assumptions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0
+          },
+          "approval_gates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "requirement",
+                "resolved",
+                "evidence"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "requirement": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "resolved": {
+                  "type": "boolean"
+                },
+                "evidence": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "minItems": 0
+          },
+          "approval": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "by",
+                  "at",
+                  "evidence"
+                ],
+                "properties": {
+                  "by": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "evidence": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            ]
+          },
+          "data_verification": {
+            "const": "not_tested"
+          },
+          "question": {
+            "type": "string",
+            "minLength": 1
+          },
+          "rationale": {
+            "type": "string",
+            "minLength": 1
+          },
+          "metric_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          },
+          "dimension_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0
+          },
+          "date_field_ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "minItems": 0
+    }
+  }
+}

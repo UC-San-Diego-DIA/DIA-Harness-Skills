@@ -134,6 +134,38 @@ foreach ($currentSkill in $skillsToInstall) {
     try {
         Copy-Item -LiteralPath $sourceSkill -Destination $stagingSkill -Recurse
 
+        # Bundle maintained intake helpers without a second installed skill.
+        if ($currentSkill -eq 'dia-tableau-data-dictionary') {
+            $intakeScripts = Join-Path $sourceRoot 'dia-tableau-workbook-intake\scripts'
+            $bundledScripts = Join-Path $stagingSkill 'scripts\workbook_intake'
+            New-Item -ItemType Directory -Path $bundledScripts -Force | Out-Null
+            foreach ($helper in @('extract_workbook_facts.py', 'field_metadata.py', 'model_structure.py', 'facts_common.py', 'validate_facts.py', 'schema_check.py', 'yaml_min.py')) {
+                Copy-Item -LiteralPath (Join-Path $intakeScripts $helper) -Destination $bundledScripts
+            }
+            Copy-Item -LiteralPath (Join-Path $repositoryRoot 'docs\shared\workbook-facts.schema.json') -Destination $bundledScripts
+        }
+        elseif ($currentSkill -eq 'dia-tableau-dataset-intelligence') {
+            $dictionaryDependency = Join-Path $stagingSkill 'scripts\dependencies\dia-tableau-data-dictionary'
+            New-Item -ItemType Directory -Path (Join-Path $dictionaryDependency 'scripts') -Force | Out-Null
+            New-Item -ItemType Directory -Path (Join-Path $dictionaryDependency 'references') -Force | Out-Null
+            $dictionarySource = Join-Path $sourceRoot 'dia-tableau-data-dictionary'
+            foreach ($helper in @('data_dictionary.py', 'dictionary_enrichment.py', 'prepare_dictionary.py')) {
+                Copy-Item -LiteralPath (Join-Path $dictionarySource "scripts\$helper") -Destination (Join-Path $dictionaryDependency 'scripts')
+            }
+            foreach ($reference in @('data-dictionary.schema.json', 'data-dictionary-v1.schema.json', 'dictionary-guide.md')) {
+                Copy-Item -LiteralPath (Join-Path $dictionarySource "references\$reference") -Destination (Join-Path $dictionaryDependency 'references')
+            }
+            $bundledIntake = Join-Path $dictionaryDependency 'scripts\workbook_intake'
+            New-Item -ItemType Directory -Path $bundledIntake -Force | Out-Null
+            foreach ($helper in @('extract_workbook_facts.py', 'field_metadata.py', 'model_structure.py', 'facts_common.py', 'validate_facts.py', 'schema_check.py', 'yaml_min.py')) {
+                Copy-Item -LiteralPath (Join-Path $sourceRoot "dia-tableau-workbook-intake\scripts\$helper") -Destination $bundledIntake
+            }
+            Copy-Item -LiteralPath (Join-Path $repositoryRoot 'docs\shared\workbook-facts.schema.json') -Destination $bundledIntake
+        }
+        elseif ($currentSkill -eq 'dia-tableau-workbook-intake') {
+            Copy-Item -LiteralPath (Join-Path $repositoryRoot 'docs\shared\workbook-facts.schema.json') -Destination (Join-Path $stagingSkill 'scripts')
+        }
+
         if (-not (Test-Path -LiteralPath (Join-Path $stagingSkill 'SKILL.md') -PathType Leaf)) {
             throw "Staged skill is missing SKILL.md at '$stagingSkill'."
         }

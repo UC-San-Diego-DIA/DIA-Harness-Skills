@@ -2,6 +2,12 @@
 
 This contract describes `kpi-mapping.yaml` schema version 1, the optional machine-readable companion to `KPI-Data-Mapping-YYYY-MM-DD-<topic>.md`. Write it only when it genuinely adds value for the user's follow-up work, and keep it consistent with the Markdown report.
 
+Version 1 supports requested-KPI-only mapping. It has no candidate origin,
+recommendation, or dashboard-selection fields. When recommendations were
+requested, write the Markdown report only, even if the user selects none.
+Do not write candidates into this contract, invent extension fields, or write
+a partial companion that appears to represent the whole candidate-mode report.
+
 ## Top-level object
 
 | Field | Type | Meaning |

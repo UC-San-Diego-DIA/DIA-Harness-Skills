@@ -112,13 +112,16 @@ try {
         'dia-dashboard-mockup',
         'dia-data-model-profiler',
         'dia-dataset-profile',
+        'dia-kpi-data-mapping',
         'dia-plan-my-project',
         'dia-start-my-day',
+        'dia-tableau-data-dictionary',
         'dia-tableau-workbook-intake',
         'dia-transcript-to-meeting-notes',
         'dia-transcript-to-process-map',
         'dia-transcript-to-project-request-draft',
-        'dia-transcript-to-requirements'
+        'dia-transcript-to-requirements',
+        'dia-transcript-to-kpis'
     )
     foreach ($expectedSkill in $expectedStatusSkills) {
         $installedStatusEntry = Join-Path $statusDestination "$expectedSkill\SKILL.md"
@@ -130,10 +133,9 @@ try {
         'dia-data-model-docs',
         'dia-data-model-intake',
         'dia-harness-utilization-review',
-        'dia-kpi-data-mapping',
         'dia-tableau-dashboard-docs',
+        'dia-tableau-dataset-intelligence',
         'dia-tableau-workbook-audit',
-        'dia-transcript-to-kpis',
         'dia-setup-business-insights-folder'
     )) {
         $unexpectedPath = Join-Path $statusDestination $unexpectedSkill

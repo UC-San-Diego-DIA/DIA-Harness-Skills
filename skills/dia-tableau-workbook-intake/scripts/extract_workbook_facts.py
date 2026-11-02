@@ -14,6 +14,9 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
 
+from field_metadata import extract_field_metadata
+from model_structure import extract_model_structure
+
 
 from facts_common import (
     SCHEMA_VERSION,
@@ -118,7 +121,7 @@ def load_workbook_document(raw: bytes, warnings: list[str], notes: list[dict]):
         raise ExtractionError(
             "input is not UTF-8 text and is not a .twbx package"
         ) from exc
-    if "<workbook" not in xml_text:
+    if re.search(r"<(?:[A-Za-z_][\w.-]*:)?workbook(?:\s|>)", xml_text) is None:
         raise ExtractionError(
             "input is neither a .twbx package nor a .twb workbook XML document"
         )
@@ -480,10 +483,11 @@ def parse_workbook(root, warnings: list[str], notes: list[dict], expected: dict)
         if len(names) > 1
     ]
 
+    extract_field_metadata(root, datasources)
     location = child(root, "repository-location")
     expected["dashboards"] = len(children(dashboards_element, "dashboard")) if dashboards_element is not None else 0
     expected["worksheets"] = len(children(worksheets_element, "worksheet")) if worksheets_element is not None else 0
-    expected["datasources"] = len(children(datasources_element, "datasource")) if datasources_element is not None else 0
+    expected["datasources"] = len(datasources)
     expected["parameters"] = 0
     if datasources_element is not None:
         for datasource in children(datasources_element, "datasource"):
@@ -495,6 +499,7 @@ def parse_workbook(root, warnings: list[str], notes: list[dict], expected: dict)
 
     return {
         "schema_version": SCHEMA_VERSION,
+        "field_metadata_version": 1,
         "workbook": {
             "name": "",
             "tableau_version": root.get("version", ""),
@@ -533,6 +538,11 @@ def assign_ids(facts: dict, assigner: IdAssigner):
             f"{workbook_id}__ds__{slugify(datasource['name'])}",
             f"datasources[{index}]",
         )
+        for field_index, field in enumerate(datasource.get("fields", [])):
+            field["id"] = assigner.assign(
+                f"{datasource['id']}__field__{slugify(field['name'])}",
+                f"datasources[{index}].fields[{field_index}]",
+            )
     for index, parameter in enumerate(facts["parameters"]):
         parameter["id"] = assigner.assign(
             f"{workbook_id}__param__{slugify(parameter['caption'])}",
@@ -707,6 +717,13 @@ def quote_scalar(value: str) -> str:
     return '"' + out + '"'
 
 
+def render_key(value):
+    value = str(value)
+    if re.fullmatch(r"[A-Za-z0-9_-]+", value) and value.lower() not in BOOL_LIKE and not INT_RE.fullmatch(value):
+        return value
+    return quote_scalar(value)
+
+
 def render_scalar(value) -> str:
     if value is None:
         return "null"
@@ -743,6 +760,7 @@ def render_dict(value: dict, indent: int):
     pad = " " * indent
     out = []
     for key, item in value.items():
+        key = render_key(key)
         if isinstance(item, dict):
             if item:
                 out.append(f"{pad}{key}:")
@@ -755,7 +773,7 @@ def render_dict(value: dict, indent: int):
                 out.extend(render_list(item, indent + 2))
             else:
                 out.append(f"{pad}{key}: []")
-        elif is_multiline(item):
+        elif is_multiline(item) and key not in ("formula", "text"):
             block = block_lines(item, indent + 2)
             out.append(f"{pad}{key}: {block[0]}")
             out.extend(block[1:])
@@ -812,6 +830,13 @@ def build_summary(facts: dict, output_path: Path):
         "sheets_on_dashboards": len(facts["derived"]["sheets_on_dashboards"]),
         "orphan_sheets": len(facts["derived"]["orphan_sheets"]),
         "parameters": len(facts["parameters"]),
+        "fields": sum(len(source.get("fields", [])) for source in facts["datasources"]),
+        "field_metadata_version": facts.get("field_metadata_version"),
+        "field_warnings": [
+            {"datasource_id": source["id"], "warning": warning}
+            for source in facts["datasources"]
+            for warning in source.get("field_inventory", {}).get("warnings", [])
+        ],
         "calculations": sum(
             len(worksheet.get("calculations", []))
             for worksheet in facts["worksheets"]
@@ -857,6 +882,9 @@ def main(argv=None):
     if not source.is_file():
         print(f"Error: input is not a regular file: {source}", file=sys.stderr)
         return 1
+    if source.resolve() == output.resolve():
+        print("Error: the output path must differ from the input workbook.", file=sys.stderr)
+        return 1
     if output.exists() and not args.replace:
         print(
             f"Error: output already exists: {output}. Pass --replace to overwrite it.",
@@ -890,6 +918,8 @@ def main(argv=None):
         )
         assigner = IdAssigner()
         _, sheet_ids, dashboard_ids = assign_ids(facts, assigner)
+        facts["model_metadata_version"] = 1
+        extract_model_structure(root, facts["datasources"])
         facts["anomalies"] = build_anomalies(
             facts, notes, sheet_ids, dashboard_ids, assigner
         )
@@ -899,6 +929,8 @@ def main(argv=None):
             key: facts[key]
             for key in (
                 "schema_version",
+                "field_metadata_version",
+                "model_metadata_version",
                 "provenance",
                 "workbook",
                 "extraction",

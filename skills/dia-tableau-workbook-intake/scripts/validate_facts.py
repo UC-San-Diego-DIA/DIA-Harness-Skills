@@ -17,6 +17,7 @@ from pathlib import Path
 import schema_check
 import yaml_min
 from facts_common import SCHEMA_VERSION, slugify
+from model_structure import validate_model_structure
 
 
 def resolve_schema_path(explicit):
@@ -44,6 +45,9 @@ def collect_ids(facts):
     for index, datasource in enumerate(facts.get("datasources", [])):
         if "id" in datasource:
             pairs.append((datasource["id"], f"datasources[{index}].id"))
+        for field_index, field in enumerate(datasource.get("fields", [])):
+            if "id" in field:
+                pairs.append((field["id"], f"datasources[{index}].fields[{field_index}].id"))
     for index, parameter in enumerate(facts.get("parameters", [])):
         if "id" in parameter:
             pairs.append((parameter["id"], f"parameters[{index}].id"))
@@ -95,6 +99,12 @@ def check_ids(facts):
                 f"datasources[{index}].id",
             )
         )
+        for field_index, field in enumerate(datasource.get("fields", [])):
+            checks.append((
+                field.get("id"),
+                f"{datasource.get('id')}__field__{slugify(field.get('name', ''))}",
+                f"datasources[{index}].fields[{field_index}].id",
+            ))
     for index, parameter in enumerate(facts.get("parameters", [])):
         checks.append(
             (
@@ -156,6 +166,25 @@ def check_completeness(facts):
     return violations
 
 
+def check_field_metadata(facts):
+    """Old v2 files remain valid; the extension requires a consistent inventory."""
+    violations = []
+    if facts.get("field_metadata_version") != 1:
+        return violations
+    for index, source in enumerate(facts.get("datasources", [])):
+        fields = source.get("fields")
+        inventory = source.get("field_inventory", {})
+        if not isinstance(fields, list) or inventory.get("field_count") != len(fields):
+            violations.append({"path": f"datasources[{index}]", "code": "FIELD_COUNT_MISMATCH",
+                               "message": "field metadata requires fields and a matching field_count"})
+            continue
+        names = [field.get("name") for field in fields]
+        if len(set(names)) != len(names):
+            violations.append({"path": f"datasources[{index}].fields", "code": "DUPLICATE_FIELD",
+                               "message": "field names must be unique within a data source"})
+    return violations
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
         description="Validate a workbook-facts.yaml file against schema version 2.",
@@ -211,6 +240,8 @@ def main(argv=None):
         if facts is not None and isinstance(facts, dict):
             violations.extend(check_ids(facts))
             violations.extend(check_completeness(facts))
+            violations.extend(check_field_metadata(facts))
+            violations.extend(validate_model_structure(facts))
 
     result = {
         "valid": not violations,

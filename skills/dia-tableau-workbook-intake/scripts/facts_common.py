@@ -6,7 +6,7 @@ import hashlib
 
 
 SCHEMA_VERSION = 2
-TOOL_VERSION = "2.0.0"
+TOOL_VERSION = "2.2.0"
 SCHEMA_URL = (
     "https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/"
     "docs/shared/workbook-facts.schema.json"

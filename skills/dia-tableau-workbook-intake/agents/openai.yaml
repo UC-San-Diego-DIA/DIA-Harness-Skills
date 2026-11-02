@@ -1,6 +1,6 @@
 interface:
   display_name: "DIA Tableau Workbook Intake"
-  short_description: "Extract facts from one Tableau workbook"
+  short_description: "Extract Tableau workbook facts and field metadata"
   default_prompt: "Use $dia-tableau-workbook-intake to extract deterministic facts from one Tableau workbook package into workbook-facts.yaml."
 
 policy:

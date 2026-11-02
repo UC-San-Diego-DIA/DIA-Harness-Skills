@@ -1,7 +1,7 @@
 interface:
   display_name: "DIA Dashboard Mockup"
-  short_description: "Render a UCSD-branded HTML dashboard mockup from one KPI data mapping report"
-  default_prompt: "Use $dia-dashboard-mockup to turn my KPI data mapping report into a confirmed UCSD-branded HTML dashboard mockup with mock data."
+  short_description: "Render selected mapped KPIs with mock data and source labels"
+  default_prompt: "Use $dia-dashboard-mockup to render my confirmed mapping report's selected measures with mock data, source labels, and explicit gap panels."
 
 policy:
   allow_implicit_invocation: false

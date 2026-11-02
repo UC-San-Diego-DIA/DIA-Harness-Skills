@@ -437,13 +437,13 @@ section[id]{scroll-margin-top:84px}
           </div>
           <p>Turn a Zoom transcript into detailed local meeting notes, with no ClickUp writes.</p>
         </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-kpis" title="View dia-transcript-to-kpis on GitHub" data-status="development">
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-kpis" title="View dia-transcript-to-kpis on GitHub" data-status="production">
           <span class="status-chip development">development</span>
           <div class="skill-head">
             <h4 class="skill-cmd">$dia-transcript-to-kpis</h4>
             <i data-lucide="github"></i>
           </div>
-          <p>Extract confirmed business questions and KPIs from a requirements transcript into Markdown and kpi-facts.yaml.</p>
+          <p>Capture confirmed business questions and KPIs in paired Markdown and kpi-facts.yaml, keeping deferred ideas separate.</p>
         </a>
         <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-requirements" title="View dia-transcript-to-requirements on GitHub" data-status="production">
           <span class="status-chip production">production</span>
@@ -517,13 +517,13 @@ section[id]{scroll-margin-top:84px}
           </div>
           <p>Answer ad hoc questions about one CSV or Excel file inside a data-analysis workspace with a read-only DuckDB view under <code>scratch/analysis</code>.</p>
         </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-kpi-data-mapping" title="View dia-kpi-data-mapping on GitHub" data-status="development">
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-kpi-data-mapping" title="View dia-kpi-data-mapping on GitHub" data-status="production">
           <span class="status-chip development">development</span>
           <div class="skill-head">
             <h4 class="skill-cmd">$dia-kpi-data-mapping</h4>
             <i data-lucide="github"></i>
           </div>
-          <p>Validate a confirmed KPI artifact against one named dataset and draft a declarative mapping report naming required fields, calculations to build, and data gaps.</p>
+          <p>Map requested KPIs to dataset fields and gaps, with optional separate data-supported recommendations selected by the user.</p>
         </a>
         <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-dashboard-mockup" title="View dia-dashboard-mockup on GitHub" data-status="testing">
           <span class="status-chip testing">testing</span>
@@ -531,7 +531,7 @@ section[id]{scroll-margin-top:84px}
             <h4 class="skill-cmd">$dia-dashboard-mockup</h4>
             <i data-lucide="github"></i>
           </div>
-          <p>Render a UCSD-branded HTML dashboard mockup with mock data and explicit data-gap panels from one KPI data mapping report.</p>
+          <p>Render selected requested and recommended measures from a confirmed mapping report, preserving origins, mock labels, and data-gap panels.</p>
         </a>
         <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-dataset-profile" title="View dia-dataset-profile on GitHub" data-status="production">
           <span class="status-chip production">production</span>
@@ -588,13 +588,29 @@ section[id]{scroll-margin-top:84px}
           </div>
           <p>Analyze one BI Publisher data model's SQL Monitor report and data engine log, and produce a faster candidate rewrite with identical output columns.</p>
         </a>
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-tableau-dataset-intelligence" title="View dia-tableau-dataset-intelligence on GitHub" data-status="development">
+          <span class="status-chip development">development</span>
+          <div class="skill-head">
+            <h4 class="skill-cmd">$dia-tableau-dataset-intelligence</h4>
+            <i data-lucide="github"></i>
+          </div>
+          <p>Build a complete structured Dataset Intelligence Pack from TWB or TWBX metadata, with contextual analyst views and unverified proposals.</p>
+        </a>
+        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-tableau-data-dictionary" title="View dia-tableau-data-dictionary on GitHub" data-status="testing">
+          <span class="status-chip testing">testing</span>
+          <div class="skill-head">
+            <h4 class="skill-cmd">$dia-tableau-data-dictionary</h4>
+            <i data-lucide="github"></i>
+          </div>
+          <p>Explain Tableau fields using dataset context and generate a concise analyst dictionary from versioned metadata.</p>
+        </a>
         <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-tableau-workbook-intake" title="View dia-tableau-workbook-intake on GitHub" data-status="testing">
           <span class="status-chip testing">testing</span>
           <div class="skill-head">
             <h4 class="skill-cmd">$dia-tableau-workbook-intake</h4>
             <i data-lucide="github"></i>
           </div>
-          <p>Extract deterministic facts from one Tableau workbook package into workbook-facts.yaml.</p>
+          <p>Extract deterministic workbook facts and data-source field metadata into workbook-facts.yaml.</p>
         </a>
         <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-tableau-dashboard-docs" title="View dia-tableau-dashboard-docs on GitHub" data-status="development">
           <span class="status-chip development">development</span>
@@ -662,7 +678,7 @@ section[id]{scroll-margin-top:84px}
       </article>
       <article class="pb">
         <h3>Business questions to dashboard mockup</h3>
-        <p class="pb-desc">Create the analysis workspace, confirm business questions and KPIs from the transcript, and map them to the dataset. Stop at the mapping, or continue to a UCSD-branded HTML mockup with mock data and data-gap panels.</p>
+        <p class="pb-desc">Create the analysis workspace, capture requested KPIs, and map them to data. Optionally select separate data-supported recommendations, then render a mockup with origin labels and explicit gaps.</p>
         <ol class="steps">
           <li><span class="step-num">1</span><code>$dia-new-workspace</code></li>
           <li><span class="step-num">2</span><code>$dia-transcript-to-kpis</code></li>
@@ -819,7 +835,6 @@ Object.keys(stats).forEach(function (key) {
 </script>
 </body>
 </html>
-
 
 
 
