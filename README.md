@@ -6,6 +6,7 @@ This repository is the reviewed source for DIA skills used in TritonAI Harness o
 
 | Skill | Use it for | Invocation |
 | --- | --- | --- |
+| [`dia-local-data-explorer`](skills/dia-local-data-explorer/SKILL.md) *(development)* | Creating a local project for one CSV or XLSX sheet, asking questions, saving real-data visuals, and building an offline HTML dashboard | `$dia-local-data-explorer` |
 | [`dia-analyze-local-data`](skills/dia-analyze-local-data/SKILL.md) *(testing)* | Answering ad hoc questions about one CSV or Excel file inside a data-analysis workspace, via a linked DuckDB view under `scratch/analysis/` | `$dia-analyze-local-data` |
 | [`dia-dataset-profile`](skills/dia-dataset-profile/SKILL.md) *(production)* | Understanding one new CSV file or selected XLSX sheet: how to read it, possible uses, data issues, and questions for its owner | `$dia-dataset-profile` |
 | [`dia-clickup-mcp-setup`](skills/dia-clickup-mcp-setup/SKILL.md) *(production)* | Connecting TritonAI Harness to ClickUp through the official OAuth MCP server | `$dia-clickup-mcp-setup` |
@@ -35,6 +36,14 @@ Each skill's `SKILL.md` frontmatter declares its lifecycle with `metadata.status
 `dia-new-workspace` replaces the separate simple and data-analysis workspace creators while preserving both layouts. It is in production after a live Harness pilot of the combined interview, file moves, and planning handoff. Existing installations are not changed by this repository update.
 
 Workspace setup uses one preview for generated files and incoming file moves. A supplied data dictionary can replace the planned placeholder after confirmation. The project context carries known goals and explicit unknowns into the shorter planning interview.
+
+## Local data explorer v1
+
+Invoke `$dia-local-data-explorer` with a CSV or XLSX path to start a new local explorer project. It creates project guidance and folders, copies the file without moving the original, and records the selected sheet and snapshot hash. Ask questions in Harness, request visuals, say which ones to save, then ask to build the dashboard. Resume later from the project folder using its recorded questions and visual selections.
+
+V1 supports one file and one selected Excel sheet, read-only SQL, bar and line charts, KPI values, and tables. Dashboards contain real calculated results and query evidence, open offline, and include only saved visuals. They are point-in-time exports with panel search and CSV downloads. They do not provide browser chat, automatic refresh, multi-file joins, or cross-filtering. Python with DuckDB and pytz is required; Excel also needs DuckDB's Excel extension. The skill asks before installing missing dependencies. The installer bundles the maintained analysis engine so no second skill installation is needed.
+
+See the [workflow and command contract](skills/dia-local-data-explorer/references/workflow.md). This is a new end-to-end workflow; the existing analysis, workspace, and mockup skills keep their narrower responsibilities.
 
 ## Archived skills
 

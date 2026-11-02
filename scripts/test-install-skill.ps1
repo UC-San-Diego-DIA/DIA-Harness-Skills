@@ -37,6 +37,10 @@ try {
         Assert-True (Test-Path -LiteralPath $installedSkillEntry -PathType Leaf) "$skillName fresh install did not copy SKILL.md."
     }
 
+    & $installer -Skill dia-local-data-explorer -Destination $destination -Force
+    Assert-True (Test-Path -LiteralPath (Join-Path $destination 'dia-local-data-explorer\scripts\duckdb_analysis.py') -PathType Leaf) 'Explorer maintained engine was not bundled.'
+    Assert-True (Test-Path -LiteralPath (Join-Path $destination 'dia-local-data-explorer\assets\dashboard.html') -PathType Leaf) 'Explorer offline dashboard template was not installed.'
+
     $installedSkill = Join-Path $destination 'dia-clickup-mcp-setup'
     $installedEntry = Join-Path $installedSkill 'SKILL.md'
     $duckdbHelper = Join-Path $destination 'dia-analyze-local-data\scripts\duckdb_analysis.py'

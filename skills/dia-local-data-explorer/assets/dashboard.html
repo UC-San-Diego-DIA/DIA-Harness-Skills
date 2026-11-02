@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Local data explorer</title>
+<style>
+:root{--navy:#182b49;--blue:#006a96;--gold:#c69214;--paper:#fff;--wash:#f0f5f8;--ink:#182b49;--muted:#425b70;--rule:#c3d2dc}
+*{box-sizing:border-box}body{margin:0;background:var(--wash);color:var(--ink);font:16px/1.5 'Segoe UI',Arial,sans-serif}
+header{background:var(--navy);color:white;padding:32px max(24px,calc((100vw - 1280px)/2));border-bottom:6px solid var(--gold)}
+h1{margin:0 0 12px;font-size:clamp(26px,4vw,40px);font-weight:600;line-height:1.2}header p{max-width:78ch;margin:6px 0}
+main,footer{max-width:1328px;margin:auto;padding:24px}nav{display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:24px}
+label{display:grid;gap:4px}input,button{font:inherit;border:1px solid var(--muted);border-radius:4px;padding:8px 12px;background:white;color:var(--ink)}button{cursor:pointer}button:hover{background:#e1eef5}:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+#panels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;align-items:start}article{background:var(--paper);border:1px solid var(--rule);padding:24px;min-width:0;border-top:4px solid var(--blue)}h2{font-size:23px;margin:0 0 8px;line-height:1.3}p{overflow-wrap:anywhere}.note{color:var(--muted);font-size:14px;white-space:pre-wrap}
+.chart{overflow:auto}.chart svg{width:100%;min-width:360px;display:block}.value{font-size:48px;font-weight:600;margin:24px 0;color:var(--blue);overflow-wrap:anywhere}.table-wrap{overflow:auto;max-height:420px}table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:9px;text-align:left;border-bottom:1px solid var(--rule);vertical-align:top;overflow-wrap:anywhere}th{background:var(--wash);position:sticky;top:0}summary{cursor:pointer;padding:10px 0;color:var(--blue)}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;background:var(--wash);padding:12px}footer{font-size:13px;color:var(--muted)}footer p{margin:4px 0}code{overflow-wrap:anywhere}article[hidden]{display:none}
+@media(max-width:800px){#panels{grid-template-columns:1fr}main,footer{padding:16px}article{padding:16px}}
+@media print{header{background:white;color:var(--ink)}nav,button{display:none}#panels{display:block}article{margin-bottom:20px;break-inside:avoid}.chart svg{min-width:0}.table-wrap{max-height:none}body{background:white}}
+</style>
+<header><h1 id="title"></h1><p id="message"></p><p id="source"></p></header>
+<main><nav aria-label="Dashboard controls"><label>Find a visual<input id="search" type="search" placeholder="Search saved titles"></label><button id="print">Print dashboard</button><span id="count" role="status"></span></nav><div id="panels"></div></main>
+<footer id="provenance"></footer>
+<script id="explorer-data" type="application/json">__EXPLORER_DATA__</script>
+<script>
+'use strict';
+const data=JSON.parse(document.getElementById('explorer-data').textContent);
+const el=(tag,text,parent)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(parent)parent.append(e);return e};
+const fmt=v=>v===null?'Missing':String(v);
+document.title=data.title;document.getElementById('title').textContent=data.title;
+document.getElementById('message').textContent=data.message;
+document.getElementById('source').textContent='Source: '+data.source+(data.sheet?' | Sheet: '+data.sheet:'');
+const foot=document.getElementById('provenance');
+el('p','Snapshot recorded: '+data.snapshot_at+' | Dashboard built: '+data.built_at,foot);
+el('p','Snapshot SHA-256: '+data.snapshot_hash,foot);
+el('p','This file embeds calculated results and query evidence. It does not refresh automatically. Search filters visual titles only.',foot);
+const svgEl=(tag,attrs,parent)=>{const e=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v]of Object.entries(attrs))e.setAttribute(k,v);parent.append(e);return e};
+function table(q,parent){const wrap=el('div',undefined,parent);wrap.className='table-wrap';const t=el('table',undefined,wrap);el('caption','Calculated query results',t);const head=el('tr',undefined,el('thead',undefined,t));q.columns.forEach(c=>{const th=el('th',c,head);th.scope='col'});const body=el('tbody',undefined,t);q.rows.forEach(row=>{const tr=el('tr',undefined,body);row.forEach(v=>el('td',fmt(v),tr))});}
+function chart(p,parent){const q=p.result,xi=q.columns.indexOf(p.x),yi=q.columns.indexOf(p.y),values=q.rows.map(r=>Number(r[yi]));
+ const width=720,left=90,right=20,top=25,plotHeight=270,bottom=115,height=top+plotHeight+bottom;
+ const lo=Math.min(0,...values),hi=Math.max(0,...values),span=hi-lo||1;
+ const y=v=>top+plotHeight-(v-lo)/span*plotHeight,step=(width-left-right)/values.length,x=i=>left+step*(i+.5);
+ const wrap=el('div',undefined,parent);wrap.className='chart';const svg=svgEl('svg',{viewBox:`0 0 ${width} ${height}`,role:'img','aria-label':p.title+'. Data table below.'},wrap);svgEl('title',{},svg).textContent=p.title;
+ for(let i=0;i<=4;i++){const value=lo+(hi-lo)*i/4,yy=y(value);svgEl('line',{x1:left,x2:width-right,y1:yy,y2:yy,stroke:'#c3d2dc'},svg);svgEl('text',{x:left-10,y:yy+4,'text-anchor':'end','font-size':12,fill:'#425b70'},svg).textContent=value.toLocaleString(undefined,{maximumFractionDigits:2});}
+ svgEl('line',{x1:left,x2:width-right,y1:y(0),y2:y(0),stroke:'#425b70'},svg);
+ if(p.kind==='line')svgEl('polyline',{points:values.map((v,i)=>`${x(i)},${y(v)}`).join(' '),fill:'none',stroke:'#006a96','stroke-width':3},svg);
+ values.forEach((v,i)=>{const shape=p.kind==='bar'?svgEl('rect',{x:x(i)-step*.35,y:Math.min(y(v),y(0)),width:step*.7,height:Math.abs(y(v)-y(0)),fill:v<0?'#8f3c49':'#006a96'},svg):svgEl('circle',{cx:x(i),cy:y(v),r:4,fill:'#006a96'},svg);svgEl('title',{},shape).textContent=fmt(q.rows[i][xi])+': '+fmt(q.rows[i][yi]);
+ const label=String(q.rows[i][xi]);const tick=svgEl('text',{transform:`translate(${x(i)},${top+plotHeight+15}) rotate(-40)`,'text-anchor':'end','font-size':12,fill:'#182b49'},svg);tick.textContent=label.length>25?label.slice(0,22)+'...':label;svgEl('title',{},tick).textContent=label;});
+ el('p',p.x+' / '+p.y,parent).className='note';
+}
+function download(p){const q=p.result;const csvCell=v=>{let s=v===null?'':String(v);if(typeof v==='string'&&/^[\s]*[=+\-@]/.test(s))s="'"+s;return '"'+s.replaceAll('"','""')+'"'};
+ const content=[q.columns,...q.rows].map(row=>row.map(csvCell).join(',')).join('\r\n');const url=URL.createObjectURL(new Blob(['\uFEFF'+content],{type:'text/csv;charset=utf-8'}));const a=el('a');a.href=url;a.download=p.id+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+for(const p of data.panels){const a=el('article',undefined,document.getElementById('panels'));a.dataset.title=p.title.toLowerCase();el('h2',p.title,a);el('p',p.result.question,a).className='note';
+ if(p.kind==='kpi')el('div',fmt(p.result.rows[0][0]),a).className='value';else if(p.kind!=='table')chart(p,a);
+ el('p',p.result.note,a).className='note';
+ if(p.kind==='table')table(p.result,a);else{const d=el('details',undefined,a);el('summary','View data table',d);table(p.result,d);}
+ const evidence=el('details',undefined,a);el('summary','Query and provenance',evidence);el('p','Calculated: '+p.result.created_at+' | Question: '+p.question_id,evidence).className='note';el('pre',p.result.sql,evidence);
+ const button=el('button','Download panel CSV',a);button.addEventListener('click',()=>download(p));}
+function filter(){const needle=document.getElementById('search').value.toLowerCase();let n=0;for(const a of document.querySelectorAll('article')){a.hidden=!a.dataset.title.includes(needle);if(!a.hidden)n++;}document.getElementById('count').textContent=n+' of '+data.panels.length+' visuals';}
+document.getElementById('search').addEventListener('input',filter);document.getElementById('print').addEventListener('click',()=>window.print());filter();
+</script>
+</html>

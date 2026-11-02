@@ -76,6 +76,22 @@ _Avoid_: Dashboard file, Report
 A self-contained HTML prototype of a data product, rendered from a KPI data mapping report with mock data and explicit data-gap panels. It is a review artifact, never a working dashboard.
 _Avoid_: Prototype, Wireframe
 
+**Explorer project**:
+A local project for a conversation about one copied dataset, retaining calculated answers and visual selections for a point-in-time dashboard.
+_Avoid_: Analysis workspace, Data analysis workspace
+
+**Dataset snapshot**:
+The unchanged copy of a user-selected file used by an explorer project, with its identity recorded so answers and visuals refer to the same data.
+_Avoid_: Live source, Refreshed dataset
+
+**Saved visual**:
+A calculated visual the user selected for inclusion in an explorer project's dashboard. A preview remains a draft until selected.
+_Avoid_: Recommended visual, Dashboard mockup
+
+**Snapshot dashboard**:
+A working local dashboard of saved visuals calculated from one recorded dataset snapshot, with its results fixed at build time.
+_Avoid_: Dashboard mockup, Live dashboard
+
 **Analysis workspace**:
 The per-file working area under `scratch/analysis/` of a data-analysis workspace, holding one analysis link, recorded questions, and their SQL.
 _Avoid_: Business-analysis space, Analysis area

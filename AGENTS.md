@@ -35,6 +35,8 @@ Only add optional directories when the skill uses them. Do not add a README or c
 
 ## Current skill boundaries
 
+`dia-local-data-explorer` owns one end-to-end explorer project for one copied CSV or selected XLSX sheet: project guidance and folders, read-only questions with recorded SQL/results, visual previews, explicit saved selections, and offline snapshot dashboards using real calculated results. It reuses the maintained analysis engine without invoking the narrower analysis skill. It does not change original files, join multiple files, publish, schedule refreshes, or build live browser chat or cross-filtering.
+
 `dia-clickup-mcp-setup` owns configuration, OAuth login, restart guidance, and read-only connection verification. It does not own ClickUp task management, workflow rules, legacy server migration, or fallback authentication.
 
 `dia-dashboard-mockup` owns rendering selected measures from one confirmed KPI data mapping report into a single UCSD-branded HTML dashboard mockup, preserving stakeholder-requested versus dataset-derived origins, mock-data labels, and explicit gap panels. It follows the report inclusion list and never selects recommendations itself. It does not produce mapping reports, KPI artifacts, or requirements documents, read datasets, execute calculations, publish or send anything, or replace real dashboards.

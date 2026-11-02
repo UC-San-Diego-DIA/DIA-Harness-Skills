@@ -135,7 +135,10 @@ foreach ($currentSkill in $skillsToInstall) {
         Copy-Item -LiteralPath $sourceSkill -Destination $stagingSkill -Recurse
 
         # Bundle maintained intake helpers without a second installed skill.
-        if ($currentSkill -eq 'dia-tableau-data-dictionary') {
+        if ($currentSkill -eq 'dia-local-data-explorer') {
+            Copy-Item -LiteralPath (Join-Path $sourceRoot 'dia-analyze-local-data\scripts\duckdb_analysis.py') -Destination (Join-Path $stagingSkill 'scripts')
+        }
+        elseif ($currentSkill -eq 'dia-tableau-data-dictionary') {
             $intakeScripts = Join-Path $sourceRoot 'dia-tableau-workbook-intake\scripts'
             $bundledScripts = Join-Path $stagingSkill 'scripts\workbook_intake'
             New-Item -ItemType Directory -Path $bundledScripts -Force | Out-Null
