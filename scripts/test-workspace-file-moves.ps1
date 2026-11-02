@@ -1,4 +1,5 @@
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'Clean-TestRoot.ps1')
 $temporaryBase = [IO.Path]::GetFullPath([IO.Path]::GetTempPath())
 $testRoot = [IO.Path]::GetFullPath((Join-Path $temporaryBase ('dia-moves-' + [guid]::NewGuid())))
 if (-not $testRoot.StartsWith($temporaryBase.TrimEnd('\') + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'Unsafe test root.' }
@@ -43,5 +44,5 @@ try {
     Write-Host 'Workspace file-move tests passed.'
 }
 finally {
-    if (Test-Path -LiteralPath $testRoot) { Remove-Item -LiteralPath $testRoot -Recurse -Force }
+    Remove-TestRoot $testRoot
 }

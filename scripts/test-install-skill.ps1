@@ -2,6 +2,7 @@
 param()
 
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'Clean-TestRoot.ps1')
 
 function Assert-True {
     param(
@@ -173,7 +174,7 @@ try {
 }
 finally {
     if (Test-Path -LiteralPath $resolvedTestRoot) {
-        Remove-Item -LiteralPath $resolvedTestRoot -Recurse -Force
+        Remove-TestRoot $resolvedTestRoot
     }
 }
 

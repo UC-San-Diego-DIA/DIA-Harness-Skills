@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param([string]$OutputRoot)
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'Clean-TestRoot.ps1')
 $helper = Join-Path $PSScriptRoot '..\skills\dia-new-workspace\scripts\setup_workspace.ps1'
 $temporaryBase = [IO.Path]::GetFullPath([IO.Path]::GetTempPath())
 $testRoot = [IO.Path]::GetFullPath((Join-Path $temporaryBase ('dia-combined-' + [guid]::NewGuid())))
@@ -128,5 +129,5 @@ try {
     Write-Host 'Combined workspace tests passed.'
 }
 finally {
-    if (Test-Path -LiteralPath $testRoot) { Remove-Item -LiteralPath $testRoot -Recurse -Force }
+    Remove-TestRoot $testRoot
 }

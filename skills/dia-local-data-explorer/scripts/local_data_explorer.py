@@ -16,6 +16,8 @@ import sys
 import uuid
 
 HERE = Path(__file__).resolve().parent
+# Loading the shared engine must not write into an installed skill or source tree.
+sys.dont_write_bytecode = True
 
 
 def load_engine():
@@ -325,10 +327,11 @@ def parser():
 
 def main():
     try:
-        print(json.dumps(run(parser().parse_args()), ensure_ascii=False, allow_nan=False))
+        # ASCII JSON survives managed Windows console encodings; files remain UTF-8.
+        print(json.dumps(run(parser().parse_args()), allow_nan=False))
         return 0
     except (ValueError, RuntimeError, OSError, KeyError) as exc:
-        print(json.dumps({"error": str(exc)}, ensure_ascii=False), file=sys.stderr)
+        print(json.dumps({"error": str(exc)}), file=sys.stderr)
         return 2
 
 

@@ -121,7 +121,7 @@ pwsh -File .\scripts\validate-repository.ps1
 pwsh -File .\scripts\test-install-skill.ps1
 ```
 
-The validator checks skill packages, local Markdown links, invocation policy, and likely secrets. The installer test uses a temporary directory and never touches the active TritonAI Harness installation. The GitHub workflow also tests the DuckDB, project-folder, workspace, data-model intake, dataset-profile, and workbook-intake helpers in temporary directories.
+The validator checks skill packages, local Markdown links, invocation policy, and likely secrets. The installer test uses a temporary directory and never touches the active TritonAI Harness installation. The GitHub workflow also tests the local data explorer lifecycle and the DuckDB, project-folder, workspace, data-model intake, dataset-profile, and workbook-intake helpers in temporary directories.
 
 ## Security
 

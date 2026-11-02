@@ -30,7 +30,7 @@ $dia-local-data-explorer Use C:\Exports\activity.xlsx
   scripts/README.md         records that execution uses installed helpers
   scratch/analysis/dataset/ engine link, ANALYSIS.md, successful SQL
   questions/q-<id>.json     question, exact SQL result, note, provenance
-  visuals/v-<id>.json       chart definition, question ID, selection state
+  visuals/v-<id>.json       chart definition and question ID
   visuals/v-<id>.html       offline preview
   reports/dashboard-<id>.html
 ```

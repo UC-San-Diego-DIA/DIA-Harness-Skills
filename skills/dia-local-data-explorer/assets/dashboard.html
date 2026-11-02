@@ -35,14 +35,14 @@ const svgEl=(tag,attrs,parent)=>{const e=document.createElementNS('http://www.w3
 function table(q,parent){const wrap=el('div',undefined,parent);wrap.className='table-wrap';const t=el('table',undefined,wrap);el('caption','Calculated query results',t);const head=el('tr',undefined,el('thead',undefined,t));q.columns.forEach(c=>{const th=el('th',c,head);th.scope='col'});const body=el('tbody',undefined,t);q.rows.forEach(row=>{const tr=el('tr',undefined,body);row.forEach(v=>el('td',fmt(v),tr))});}
 function chart(p,parent){const q=p.result,xi=q.columns.indexOf(p.x),yi=q.columns.indexOf(p.y),values=q.rows.map(r=>Number(r[yi]));
  const width=720,left=90,right=20,top=25,plotHeight=270,bottom=115,height=top+plotHeight+bottom;
- const lo=Math.min(0,...values),hi=Math.max(0,...values),span=hi-lo||1;
+ const lo=Math.min(0,...values),rawHi=Math.max(0,...values),hi=rawHi===lo?rawHi+1:rawHi,span=hi-lo;
  const y=v=>top+plotHeight-(v-lo)/span*plotHeight,step=(width-left-right)/values.length,x=i=>left+step*(i+.5);
  const wrap=el('div',undefined,parent);wrap.className='chart';const svg=svgEl('svg',{viewBox:`0 0 ${width} ${height}`,role:'img','aria-label':p.title+'. Data table below.'},wrap);svgEl('title',{},svg).textContent=p.title;
  for(let i=0;i<=4;i++){const value=lo+(hi-lo)*i/4,yy=y(value);svgEl('line',{x1:left,x2:width-right,y1:yy,y2:yy,stroke:'#c3d2dc'},svg);svgEl('text',{x:left-10,y:yy+4,'text-anchor':'end','font-size':12,fill:'#425b70'},svg).textContent=value.toLocaleString(undefined,{maximumFractionDigits:2});}
  svgEl('line',{x1:left,x2:width-right,y1:y(0),y2:y(0),stroke:'#425b70'},svg);
  if(p.kind==='line')svgEl('polyline',{points:values.map((v,i)=>`${x(i)},${y(v)}`).join(' '),fill:'none',stroke:'#006a96','stroke-width':3},svg);
  values.forEach((v,i)=>{const shape=p.kind==='bar'?svgEl('rect',{x:x(i)-step*.35,y:Math.min(y(v),y(0)),width:step*.7,height:Math.abs(y(v)-y(0)),fill:v<0?'#8f3c49':'#006a96'},svg):svgEl('circle',{cx:x(i),cy:y(v),r:4,fill:'#006a96'},svg);svgEl('title',{},shape).textContent=fmt(q.rows[i][xi])+': '+fmt(q.rows[i][yi]);
- const label=String(q.rows[i][xi]);const tick=svgEl('text',{transform:`translate(${x(i)},${top+plotHeight+15}) rotate(-40)`,'text-anchor':'end','font-size':12,fill:'#182b49'},svg);tick.textContent=label.length>25?label.slice(0,22)+'...':label;svgEl('title',{},tick).textContent=label;});
+ if(i%Math.ceil(values.length/12)===0){const label=String(q.rows[i][xi]);const tick=svgEl('text',{transform:`translate(${x(i)},${top+plotHeight+15}) rotate(-40)`,'text-anchor':'end','font-size':12,fill:'#182b49'},svg);tick.textContent=label.length>16?label.slice(0,13)+'...':label;svgEl('title',{},tick).textContent=label;}});
  el('p',p.x+' / '+p.y,parent).className='note';
 }
 function download(p){const q=p.result;const csvCell=v=>{let s=v===null?'':String(v);if(typeof v==='string'&&/^[\s]*[=+\-@]/.test(s))s="'"+s;return '"'+s.replaceAll('"','""')+'"'};

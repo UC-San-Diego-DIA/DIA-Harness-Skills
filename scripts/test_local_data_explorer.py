@@ -12,6 +12,19 @@ import zipfile
 REPO = Path(__file__).resolve().parents[1]
 
 
+def excel_fixture(path):
+    ns = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main'
+    relns = 'http://schemas.openxmlformats.org/package/2006/relationships'
+    docrel = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships'
+    with zipfile.ZipFile(path, 'w') as archive:
+        archive.writestr('[Content_Types].xml', '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' + ''.join(f'<Override PartName="/xl/worksheets/sheet{i}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' for i in (1, 2)) + '</Types>')
+        archive.writestr('_rels/.rels', f'<Relationships xmlns="{relns}"><Relationship Id="rId1" Type="{docrel}/officeDocument" Target="xl/workbook.xml"/></Relationships>')
+        archive.writestr('xl/workbook.xml', f'<workbook xmlns="{ns}" xmlns:r="{docrel}"><sheets><sheet name="First" sheetId="1" r:id="rId1"/><sheet name="Second" sheetId="2" r:id="rId2"/></sheets></workbook>')
+        archive.writestr('xl/_rels/workbook.xml.rels', f'<Relationships xmlns="{relns}">' + ''.join(f'<Relationship Id="rId{i}" Type="{docrel}/worksheet" Target="worksheets/sheet{i}.xml"/>' for i in (1, 2)) + '</Relationships>')
+        for i, value in [(1, 99), (2, 10)]:
+            archive.writestr(f'xl/worksheets/sheet{i}.xml', f'<worksheet xmlns="{ns}"><sheetData><row r="1"><c r="A1" t="inlineStr"><is><t>Amount</t></is></c></row><row r="2"><c r="A2"><v>{value}</v></c></row></sheetData></worksheet>')
+
+
 def payload(path):
     html = Path(path).read_text(encoding="utf-8")
     match = re.search(r'<script id="explorer-data" type="application/json">(.*?)</script>', html, re.S)
@@ -48,7 +61,8 @@ def main():
                 ["team", "amount", "month"], ["A", 10, "2026-01"], ["A", 2, "2026-02"],
                 ["B", -2, "2026-01"], [injected, 0, "2026-02"], ["C", "", "2026-02"]])
         original = source.read_bytes()
-        state = call("init", "--source", source, "--title", "Synthetic activity")
+        state = call("init", "--source", source, "--title", "Synthetic activity \u6d3b\u52a8")
+        assert state["title"] == "Synthetic activity \u6d3b\u52a8"
         assert state["row_count"] == 5
         assert source.read_bytes() == original
         assert (project / state["snapshot"]).read_bytes() == original
@@ -133,13 +147,36 @@ def main():
 
         # XLSX selection is deterministic before any extension is installed.
         workbook = base / "sheets.xlsx"
-        with zipfile.ZipFile(workbook, "w") as archive:
-            archive.writestr("xl/workbook.xml", '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheets><sheet name="First" sheetId="1"/><sheet name="Second" sheetId="2"/></sheets></workbook>')
+        excel_fixture(workbook)
         sheets = call("inspect", "--source", workbook)
         assert "First" in str(sheets) and "Second" in str(sheets)
         unused = base / "ambiguous sheets"
         call("init", "--source", workbook, "--title", "Sheets", target=unused, bad=True)
         assert not unused.exists(), "Ambiguous sheets should fail before project writes"
+        # CI may lack a cached extension. Never download it implicitly in this test.
+        import duckdb
+        connection = duckdb.connect()
+        connection.execute('SET autoinstall_known_extensions=false')
+        try:
+            connection.execute('LOAD excel')
+            has_excel = True
+        except duckdb.Error:
+            has_excel = False
+        finally:
+            connection.close()
+        excel_project = base / 'selected excel sheet'
+        if has_excel:
+            selected = call('init', '--source', workbook, '--sheet', 'Second', '--title', 'Excel', target=excel_project)
+            assert selected['sheet'] == 'Second' and selected['row_count'] == 1
+            sql.write_text('SELECT sum(amount) AS total FROM dataset', encoding='utf-8')
+            result = call('ask', '--question', 'Selected sheet total?', '--sql-file', sql,
+                          '--note', 'Only the selected Second sheet.', target=excel_project)
+            assert float(result['rows'][0][0]) == 10
+        else:
+            failure = call('init', '--source', workbook, '--sheet', 'Second', '--title', 'Excel', target=excel_project, bad=True)
+            assert '--install-excel-extension' in failure
+            assert not (excel_project / 'explorer.json').exists()
+            print('Excel calculations skipped: extension is not cached; explicit dependency guidance verified')
         print("PASS: installed explorer lifecycle, selection, provenance, chart limits, escaping, query restrictions, and snapshot integrity")
 
 
