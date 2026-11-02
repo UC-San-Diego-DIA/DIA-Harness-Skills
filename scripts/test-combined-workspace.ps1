@@ -131,3 +131,4 @@ try {
 finally {
     Remove-TestRoot $testRoot
 }
+exit 0
