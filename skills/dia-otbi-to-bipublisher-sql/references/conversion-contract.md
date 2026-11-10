@@ -28,6 +28,7 @@ Agent_Invoice_Report-logical-parameters.sql
 Agent_Invoice_Report-physical-literal.sql
 Agent_Invoice_Report-physical-parameters.sql
 Agent_Invoice_Report-README.md
+Agent_Invoice_Report-join-research.md
 Agent_Invoice_Report-parameters/
 ```
 
@@ -37,7 +38,9 @@ The parameter directory contains one standalone list-of-values SQL file for each
 
 The logical SQL is a faithful projection of the OTBI analysis against the named subject area. It preserves selected presentation expressions, output headings, explicit filters, saved-filter references, and recorded sort order.
 
-The physical SQL substitutes each mapped presentation reference with the workbook's `DATABASE_OBJECT` and `DATABASE_COLUMN`, preserves the original column aliases and ordering, and places the substituted filter in the physical statement. If the mapped columns span more than one database object, the SQL lists the objects in `FROM` and marks join conditions as `VERIFY` work. The mapping workbook does not provide joins.
+The physical SQL substitutes each mapped presentation reference with the workbook's `DATABASE_OBJECT` and `DATABASE_COLUMN`, preserves the original column aliases and ordering, and places the substituted filter in the physical statement. The `FROM` table list is derived after column, filter, and sort substitutions, so every referenced object appears in `FROM`. If the mapped columns span more than one database object, the SQL lists the objects in `FROM` and marks join conditions as `VERIFY` work. The mapping workbook does not provide joins.
+
+The helper also writes a join-research worksheet that lists every physical table, its mapped columns and workbook rows, and every join candidate, and it records the workbook release token in the manifest. Real-time research against official Oracle documentation resolves the current release, verifies the tables and columns, and validates each join. Only `VERIFIED` joins, supported by explicit official-source evidence recorded in the worksheet, may replace a `VERIFY` marker in both physical SQL files. `CANDIDATE` and `UNRESOLVED` joins keep the `VERIFY` marker. See [join-research.md](join-research.md).
 
 Literal SQL preserves the values found in the OTBI analysis. Parameterized SQL is a separate file so the exact literal behavior is not silently replaced.
 
@@ -64,4 +67,5 @@ Before reporting success:
 2. Confirm that every physical object and column came from the supplied mapping workbook.
 3. Confirm that output headings, column order, filters, sort order, and parameter placement match the manifest.
 4. Confirm that every unresolved mapping or join is visible as a `VERIFY` item.
-5. Tell the user that the skill did not execute SQL, connect to Oracle, or modify BI Publisher.
+5. Confirm the join-research worksheet records the current Oracle documentation release, the sources used, and a verification status for every join candidate.
+6. Tell the user that the skill did not execute SQL, connect to Oracle, or modify BI Publisher.

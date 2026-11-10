@@ -719,6 +719,36 @@ def physical_sql(
         lines.append(f"    {column['physical_expression']} AS \"{alias}\",")
     if lines[-1].endswith(","):
         lines[-1] = lines[-1][:-1]
+    where_block: list[str] = []
+    filter_xml = str(analysis["filter"]["raw_xml"])
+    if filter_xml:
+        filter_node = ET.fromstring(filter_xml)
+        if parameterized:
+            physical_filter = parameterize_expression(filter_node, parameters) or ""
+        else:
+            physical_filter = str(analysis["filter"]["explicit_sql"])
+        physical_filter, selected_mappings = substitute_physical_references(
+            physical_filter,
+            subject_area,
+            mappings,
+            selected_mappings,
+        )
+        if physical_filter:
+            where_block.extend(["WHERE", f"    {physical_filter}"])
+
+    order_block: list[str] = []
+    if analysis["sorts"]:
+        order_items = []
+        for sort in analysis["sorts"]:
+            substituted, selected_mappings = substitute_physical_references(
+                str(sort["expression"]),
+                subject_area,
+                mappings,
+                selected_mappings,
+            )
+            order_items.append(f"{substituted} {sort['direction'].upper()}")
+        order_block.extend(["ORDER BY", "    " + ", ".join(order_items)])
+
     tables = sorted(
         {
             mapping["DATABASE_OBJECT"]
@@ -731,40 +761,8 @@ def physical_sql(
     lines.append("FROM " + ", ".join(tables))
     if len(tables) > 1:
         lines.append("-- VERIFY join conditions: the lineage workbook does not supply them.")
-    filter_xml = str(analysis["filter"]["raw_xml"])
-    if filter_xml:
-        filter_node = ET.fromstring(filter_xml)
-        if parameterized:
-            physical_filter = parameterize_expression(filter_node, parameters) or ""
-            physical_filter, selected_mappings = substitute_physical_references(
-                physical_filter,
-                subject_area,
-                mappings,
-                selected_mappings,
-            )
-        else:
-            physical_filter = str(analysis["filter"]["explicit_sql"])
-            physical_filter, selected_mappings = substitute_physical_references(
-                physical_filter,
-                subject_area,
-                mappings,
-                selected_mappings,
-            )
-        if physical_filter:
-            lines.append("WHERE")
-            lines.append(f"    {physical_filter}")
-    if analysis["sorts"]:
-        order_items = []
-        for sort in analysis["sorts"]:
-            substituted, selected_mappings = substitute_physical_references(
-                str(sort["expression"]),
-                subject_area,
-                mappings,
-                selected_mappings,
-            )
-            order_items.append(f"{substituted} {sort['direction'].upper()}")
-        lines.append("ORDER BY")
-        lines.append("    " + ", ".join(order_items))
+    lines.extend(where_block)
+    lines.extend(order_block)
     lines.append(";")
     return "\n".join(lines) + "\n", selected_mappings
 
@@ -801,6 +799,197 @@ def unique_database_alternatives(alternatives: list[dict[str, str]]) -> list[dic
         seen.add(key)
         unique.append(alternative)
     return unique
+
+
+def workbook_release_token(cover_text: list[str], workbook_name: str) -> str:
+    token_pattern = re.compile(r"(?:^|[^A-Za-z0-9])(2[0-9][A-D])(?:[^A-Za-z0-9]|$)")
+    for value in cover_text:
+        match = token_pattern.search(str(value))
+        if match:
+            return match.group(1)
+    match = token_pattern.search(workbook_name)
+    if match:
+        return match.group(1)
+    return "UNKNOWN"
+
+
+def build_join_research_markdown(
+    analysis_name: str,
+    subject_area: str,
+    selected_mappings: dict[str, dict[str, str]],
+    parameters: list[dict[str, object]],
+    workbook_path: Path,
+    cover_text: list[str],
+) -> str:
+    tables: dict[str, dict[str, list[str]]] = {}
+    for key, mapping in selected_mappings.items():
+        table = clean_text(mapping.get("DATABASE_OBJECT", ""))
+        column = clean_text(mapping.get("DATABASE_COLUMN", ""))
+        if not table or not column:
+            continue
+        entry = tables.setdefault(table, {"columns": [], "vos": [], "rows": []})
+        presentation_column = key.split("|", 1)[-1]
+        entry["columns"].append(f"{column} <- {presentation_column}")
+        vo_definition = clean_text(mapping.get("VO_DEFINITION", ""))
+        if vo_definition and vo_definition not in entry["vos"]:
+            entry["vos"].append(vo_definition)
+        workbook_row = clean_text(mapping.get("workbook_row", ""))
+        if workbook_row and workbook_row not in entry["rows"]:
+            entry["rows"].append(workbook_row)
+
+    table_names = sorted(tables)
+    join_pairs = [
+        (left, right)
+        for position, left in enumerate(table_names)
+        for right in table_names[position + 1 :]
+    ]
+    lov_tables: dict[str, list[str]] = {}
+    for parameter in parameters:
+        mapping = parameter.get("database_mapping") or {}
+        table = clean_text(str(mapping.get("DATABASE_OBJECT", "")))
+        if table and table not in tables:
+            lov_tables.setdefault(table, []).append(str(parameter["name"]))
+
+    lines = [
+        f"# Join research worksheet - {analysis_name}",
+        "",
+        "The mapping workbook supplies field mappings but not join conditions.",
+        "Complete this worksheet with official Oracle sources during the same run and",
+        "report every source to the user. Keep `VERIFY` markers in the physical SQL",
+        "until a join reaches `VERIFIED` status.",
+        "",
+        f"- Subject area: {subject_area}",
+        f"- Mapping workbook: {workbook_path}",
+        f"- Workbook release token: {workbook_release_token(cover_text, workbook_path.name)}",
+        "- Live documentation release: (complete during this run)",
+        "- Documentation library URL: (complete during this run)",
+        "- Access date: (complete during this run)",
+        f"- Physical tables: {len(table_names)}",
+        f"- Join candidates: {len(join_pairs)}",
+        "",
+        "## Release check",
+        "",
+        "1. Open https://docs.oracle.com/en/cloud/saas/ and select the product family",
+        "   for this subject area, such as Financials, Supply Chain Management, or",
+        "   Project Portfolio Management.",
+        "2. Record the current release shown by the documentation library, its URL, or",
+        "   its page title. Resolve it fresh in every run; never reuse an earlier run.",
+        "3. The mapping workbook remains the authority for field mappings. If the live",
+        "   release is newer than the workbook release token, source join evidence from",
+        "   the live release and note any table or column that changed.",
+        "",
+        "## Tables used by the physical SQL",
+        "",
+    ]
+    if table_names:
+        lines.append("Verify each table and its mapped columns against current-release documentation.")
+        for table in table_names:
+            entry = tables[table]
+            lines.extend(
+                [
+                    "",
+                    f"### {table}",
+                    "",
+                    f"- Mapped columns: {', '.join(entry['columns'])}",
+                    f"- Workbook rows: {', '.join(entry['rows']) or 'not recorded'}",
+                    f"- Workbook VO definitions: {'; '.join(entry['vos']) or 'none recorded'}",
+                    "- Documentation URL: (complete)",
+                    "- Documentation release: (complete)",
+                    "- Access date: (complete)",
+                    "- Verified in live release: (YES / NO / UNKNOWN)",
+                    "- Notes: (complete)",
+                ]
+            )
+    else:
+        lines.append("No physical tables were mapped.")
+
+    lines.extend(["", "## List-of-values tables", ""])
+    if lov_tables:
+        lines.append(
+            "Parameter list-of-values queries are single-table. Verify them like the tables above; they add no joins."
+        )
+        for table in sorted(lov_tables):
+            lines.extend(
+                [
+                    "",
+                    f"### {table}",
+                    "",
+                    f"- Used by parameters: {', '.join(lov_tables[table])}",
+                    "- Documentation URL: (complete)",
+                    "- Documentation release: (complete)",
+                    "- Access date: (complete)",
+                    "- Verified in live release: (YES / NO / UNKNOWN)",
+                ]
+            )
+    else:
+        lines.append("No list-of-values tables exist outside the main query.")
+
+    lines.extend(["", "## Join candidates", ""])
+    if join_pairs:
+        lines.extend(
+            [
+                "Research one block per candidate against official Oracle sources only.",
+                "",
+                "Evidence hierarchy, strongest first:",
+                "",
+                "1. A join condition stated in current-release official Oracle documentation.",
+                "2. A relationship shown by the workbook's view-object definition; record the",
+                "   workbook row as the source.",
+                "3. A documented primary-key or foreign-key relationship in current-release",
+                "   documentation.",
+                "",
+                "Column-name similarity alone is never evidence. Non-Oracle pages, AI",
+                "summaries, and SQL execution are never evidence.",
+                "",
+            ]
+        )
+        for left, right in join_pairs:
+            lines.extend(
+                [
+                    f"### {left} <-> {right}",
+                    "",
+                    f"- {left} columns: {', '.join(tables[left]['columns'])}",
+                    f"- {right} columns: {', '.join(tables[right]['columns'])}",
+                    "- Proposed condition: (complete only with recorded evidence)",
+                    "- Verification status: UNRESOLVED",
+                    "- Source URL: (complete)",
+                    "- Page title: (complete)",
+                    "- Documentation release: (complete)",
+                    "- Access date: (complete)",
+                    "- Evidence quote: (complete)",
+                    "",
+                ]
+            )
+    else:
+        lines.extend(
+            [
+                "No joins are required: every selected column resolves to one database table.",
+                "",
+                "Verification status: NOT_REQUIRED",
+                "",
+            ]
+        )
+
+    lines.extend(
+        [
+            "## Status rules",
+            "",
+            "- VERIFIED: explicit official-source evidence for the exact join condition.",
+            "  Replace the `VERIFY` comment in both physical SQL files with this join and",
+            "  keep the source recorded in this worksheet.",
+            "- CANDIDATE: strong indirect evidence, such as a workbook view-object",
+            "  association. Keep the `VERIFY` marker and present the candidate to the",
+            "  analyst for confirmation.",
+            "- UNRESOLVED: no official evidence found. Keep the `VERIFY` marker and report",
+            "  the gap together with the research that was attempted.",
+            "- NOT_REQUIRED: the query references a single database table.",
+            "",
+            "Report every join status and its source URL to the user in chat as well as in",
+            "this worksheet.",
+            "",
+        ]
+    )
+    return "\n".join(lines) + "\n"
 
 
 def parameter_readme_table(parameters: list[dict[str, object]]) -> str:
@@ -866,6 +1055,25 @@ def write_outputs(
         True,
     )
 
+    cover_text = list(workbook_facts.get("cover_text", []))
+    workbook_release = workbook_release_token(cover_text, workbook_path.name)
+    join_research_markdown = build_join_research_markdown(
+        str(analysis["analysis"]),
+        subject_area,
+        selected_mappings,
+        parameters,
+        workbook_path,
+        cover_text,
+    )
+    physical_tables = sorted(
+        {
+            clean_text(mapping.get("DATABASE_OBJECT", ""))
+            for mapping in selected_mappings.values()
+            if mapping.get("DATABASE_OBJECT")
+        }
+    )
+    join_status = "not_required" if len(physical_tables) <= 1 else "research_required"
+
     output_dir.mkdir(parents=True, exist_ok=True)
     paths = {
         "manifest": output_dir / f"{base_name}-manifest.json",
@@ -874,6 +1082,7 @@ def write_outputs(
         "physical_literal": output_dir / f"{base_name}-physical-literal.sql",
         "physical_parameters": output_dir / f"{base_name}-physical-parameters.sql",
         "readme": output_dir / f"{base_name}-README.md",
+        "join_research": output_dir / f"{base_name}-join-research.md",
     }
     parameter_dir = output_dir / f"{base_name}-parameters"
     parameter_paths: dict[str, Path] = {}
@@ -912,6 +1121,12 @@ def write_outputs(
                 "analysis": analysis,
                 "parameters": parameters,
                 "selected_physical_mappings": list(selected_mappings.values()),
+                "join_research": {
+                    "file": paths["join_research"].name,
+                    "workbook_release": workbook_release,
+                    "physical_tables": physical_tables,
+                    "status": join_status,
+                },
             },
             indent=2,
             ensure_ascii=False,
@@ -923,6 +1138,7 @@ def write_outputs(
     paths["logical_parameters"].write_text(logical_parameterized, encoding="utf-8")
     paths["physical_literal"].write_text(physical_literal, encoding="utf-8")
     paths["physical_parameters"].write_text(physical_parameterized, encoding="utf-8")
+    paths["join_research"].write_text(join_research_markdown, encoding="utf-8")
 
     readme_lines = [
         f"# {analysis['analysis']} - OTBI to BI Publisher SQL",
@@ -936,6 +1152,7 @@ def write_outputs(
         f"- Physical SQL (literal): `{paths['physical_literal'].name}`",
         f"- Physical SQL (parameters): `{paths['physical_parameters'].name}`",
         f"- Manifest: `{paths['manifest'].name}`",
+        f"- Join research worksheet: `{paths['join_research'].name}`",
         "",
         "## BI Publisher setup",
         "",
@@ -985,7 +1202,7 @@ def write_outputs(
             "",
             "## Limits",
             "",
-            "The mapping workbook does not supply join conditions. Review every join before executing physical SQL.",
+            f"The mapping workbook does not supply join conditions. Complete `{paths['join_research'].name}` with official Oracle sources before executing physical SQL.",
             "Semantic choices that have multiple mapping candidates remain `VERIFY` items.",
             "No SQL was executed and no database connection was made by this skill.",
         ]
@@ -998,6 +1215,7 @@ def write_outputs(
         "outputs": [str(path) for path in paths.values()],
         "parameter_count": len(parameters),
         "selected_mapping_count": len(selected_mappings),
+        "join_status": join_status,
     }
 
 
