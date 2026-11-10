@@ -29,7 +29,7 @@ $destination = Join-Path $resolvedTestRoot 'installed-skills'
 $whatIfDestination = Join-Path $resolvedTestRoot 'what-if-skills'
 
 try {
-    $skillsToInstall = @('dia-analyze-local-data', 'dia-clickup-mcp-setup', 'dia-data-model-docs', 'dia-data-model-intake', 'dia-new-workspace', 'dia-setup-business-insights-folder', 'dia-start-my-day', 'dia-transcript-to-process-map', 'dia-transcript-to-project-request-draft')
+    $skillsToInstall = @('dia-analyze-local-data', 'dia-clickup-mcp-setup', 'dia-data-model-docs', 'dia-data-model-intake', 'dia-new-workspace', 'dia-otbi-to-bipublisher-sql', 'dia-setup-business-insights-folder', 'dia-start-my-day', 'dia-transcript-to-process-map', 'dia-transcript-to-project-request-draft')
     foreach ($skillName in $skillsToInstall) {
         & $installer -Skill $skillName -Destination $destination -Force
 
@@ -51,6 +51,7 @@ try {
     $workspaceAgentsTemplate = Join-Path $destination 'dia-new-workspace\assets\analysis-workspace-AGENTS.md'
     $dailyBriefTemplate = Join-Path $destination 'dia-start-my-day\assets\brief-template.html'
     $dataModelFactsHelper = Join-Path $destination 'dia-data-model-intake\scripts\extract_model_facts.py'
+    $otbiConverterHelper = Join-Path $destination 'dia-otbi-to-bipublisher-sql\scripts\convert_otbi_catalog.py'
     $dataModelFactsSchema = Join-Path $destination 'dia-data-model-intake\references\model-facts.schema.json'
     $dataModelFactsIntakeContract = Join-Path $destination 'dia-data-model-intake\references\model-facts-contract.md'
     $dataModelFactsContract = Join-Path $destination 'dia-data-model-docs\references\model-facts-contract.md'
@@ -62,6 +63,7 @@ try {
     Assert-True (Test-Path -LiteralPath $workspaceAgentsTemplate -PathType Leaf) 'Workspace AGENTS template was not installed.'
     Assert-True (Test-Path -LiteralPath $dailyBriefTemplate -PathType Leaf) 'Start My Day HTML template was not installed.'
     Assert-True (Test-Path -LiteralPath $dataModelFactsHelper -PathType Leaf) 'Data-model facts helper was not installed.'
+    Assert-True (Test-Path -LiteralPath $otbiConverterHelper -PathType Leaf) 'OTBI conversion helper was not installed.'
     Assert-True (Test-Path -LiteralPath $dataModelFactsSchema -PathType Leaf) 'Model-facts JSON Schema was not installed.'
     Assert-True (Test-Path -LiteralPath $dataModelFactsIntakeContract -PathType Leaf) 'Model-facts intake contract was not installed.'
     Assert-True (Test-Path -LiteralPath $dataModelFactsContract -PathType Leaf) 'Model-facts contract was not installed.'
@@ -118,6 +120,7 @@ try {
         'dia-data-model-profiler',
         'dia-dataset-profile',
         'dia-kpi-data-mapping',
+        'dia-otbi-to-bipublisher-sql',
         'dia-plan-my-project',
         'dia-start-my-day',
         'dia-tableau-data-dictionary',

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build, validate, and render one metadata-only Tableau Dataset Intelligence Pack."""
+"""Build, validate, and render one local Tableau Dataset Intelligence Pack."""
 
 from __future__ import annotations
 
@@ -76,7 +76,7 @@ def manifest(root, dataset_id, name, domain, description=None, model_facts=None)
     source_hash = facts["provenance"]["input_sha256"]
     if structure_facts["provenance"]["input_sha256"] != source_hash:
         raise ValueError("Field and model facts belong to different workbook snapshots.")
-    return {
+    result = {
         "schema_version": 1, "document_type": "dataset_intelligence_pack",
         "dataset_id": dataset_id, "name": name, "domain": domain,
         "description": description, "business_owner": None, "technical_owner": None,
@@ -92,9 +92,21 @@ def manifest(root, dataset_id, name, domain, description=None, model_facts=None)
                     "sha256": None} for key, (filename, _) in ASSETS.items()],
         "generated_views": [],
     }
+    profile_path = root / "evidence" / "value-profile.yaml"
+    if profile_path.exists():
+        import value_profiler
+        profile = runtime.load(profile_path)
+        if value_profiler.validate(profile, source_hash):
+            raise ValueError("Invalid value-profile evidence for this workbook snapshot.")
+        result["source"]["value_profile"] = {
+            "path": value_profiler.PROFILE_PATH, "sha256": runtime.digest(profile_path),
+            "extract_sha256": profile["provenance"]["extract_sha256"],
+        }
+        result["data_verification"] = "profiled"
+    return result
 
 
-def initialize(source, root, dataset_id, name, domain):
+def initialize(source, root, dataset_id, name, domain, profile_values=False):
     protect_library(root)
     if root.exists() and any(root.iterdir()):
         raise ValueError("Use a new or empty output directory; existing packs are never replaced.")
@@ -107,6 +119,9 @@ def initialize(source, root, dataset_id, name, domain):
     facts = runtime.dictionary.verify_facts(facts_path)
     if facts.get("model_metadata_version") != 1:
         raise ValueError("Fresh intake model_metadata_version 1 is required. Reinstall the pack skill.")
+    if profile_values:
+        import value_profiler
+        value_profiler.profile(source, root, facts["provenance"]["input_sha256"])
     dictionary = runtime.dictionary.seed(facts, facts_path, root / "data-dictionary.yaml")
     model = model_spec.seed(facts, dataset_id)
     terms = glossary.seed(dictionary, dataset_id)
@@ -135,8 +150,24 @@ def validate(root, require_sealed=None):
                 raise ValueError("timezone missing")
         except ValueError:
             fail("dataset.yaml." + key, "Use an ISO 8601 timestamp with a timezone.")
-    if data["data_verification"] != "not_tested":
-        fail("dataset.yaml.data_verification", "Metadata-only packs cannot claim data verification.")
+    profile_ref = data["source"].get("value_profile")
+    expected_verification = "profiled" if profile_ref else "not_tested"
+    if data["data_verification"] != expected_verification:
+        fail("dataset.yaml.data_verification", "Data verification must match the presence of value-profile evidence.")
+    if (root / "evidence/value-profile.yaml").exists() != bool(profile_ref):
+        fail("source.value_profile", "Value-profile evidence and its manifest reference must both be present.")
+    if profile_ref:
+        import value_profiler
+        if profile_ref["path"] != value_profiler.PROFILE_PATH:
+            fail("source.value_profile", "Use the fixed evidence/value-profile.yaml path.")
+        profile_path = within(root, profile_ref["path"])
+        if runtime.digest(profile_path) != profile_ref["sha256"]:
+            fail("source.value_profile", "Immutable value-profile evidence has changed; rebuild from the workbook.")
+        else:
+            profile = runtime.load(profile_path)
+            issues += value_profiler.validate(profile, data["source"]["workbook_sha256"])
+            if not issues and profile["provenance"]["extract_sha256"] != profile_ref["extract_sha256"]:
+                fail("source.value_profile", "Extract hash differs from the value-profile provenance.")
     if require_sealed is True and data["build_state"] != "complete":
         fail("dataset.yaml.build_state", "Finalize the reviewed pack before distributing it.")
     facts = {}
@@ -221,7 +252,10 @@ def reader_views(manifest, content, root):
     questions = content["questions"]["questions"]
     out = ["# " + runtime.md(manifest["name"]) + " Dataset Intelligence Pack", "",
            runtime.md(manifest["description"]), "",
-           "Status: draft. Business approval and data verification remain separate. No dataset values were read or calculations executed.", "",
+           ("Status: draft. Business approval and data verification remain separate. Local extract values were profiled. "
+            "Row/null counts are observations, not business-correctness tests. Metric proposals were not executed."
+            if manifest["data_verification"] == "profiled" else
+            "Status: draft. Business approval and data verification remain separate. No dataset values were read or calculations executed."), "",
            f"Dataset ID: {runtime.md(manifest['dataset_id'])}; domain: {runtime.md(manifest['domain'])}.", "",
            f"Business fields: {len(business)}; unresolved meanings: {unresolved}; glossary concepts: {len(content['glossary']['terms'])}; metric proposals: {len(metrics)}; analytical questions: {len(questions)}.", "",
            "| Analyst asset | Structured source | Readable view |", "| --- | --- | --- |",
@@ -286,6 +320,8 @@ def main(argv=None):
     init = sub.add_parser("init")
     init.add_argument("--input", required=True)
     init.add_argument("--output", required=True)
+    init.add_argument("--profile-values", action="store_true",
+                      help="Opt in to local read-only profiling of one packaged Hyper extract; requires tableauhyperapi.")
     for action in (init, sub.add_parser("assemble")):
         if action is not init:
             action.add_argument("--pack", required=True)
@@ -299,7 +335,7 @@ def main(argv=None):
     try:
         if args.command == "init":
             root = absolute(args.output)
-            initialize(absolute(args.input), root, args.dataset_id, args.name, args.domain)
+            initialize(absolute(args.input), root, args.dataset_id, args.name, args.domain, args.profile_values)
         else:
             root = absolute(args.pack)
             protect_library(root)

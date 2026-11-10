@@ -179,6 +179,7 @@ def validate(data, path, require_ready=False):
             problem(key, "Recorded workbook metadata must match the source facts.")
     stripped = copy.deepcopy(data["datasources"])
     if data["schema_version"] == 2:
+        validate_value_domains(data, path, issues)
         enrichment.validate_annotations(data, facts, issues, require_ready)
     for source_index, source_record in enumerate(stripped):
         for field_index, field in enumerate(source_record["fields"]):
@@ -187,6 +188,7 @@ def validate(data, path, require_ready=False):
             if data["schema_version"] == 2:
                 field.pop("category")
                 field.pop("enrichment")
+                field.pop("value_domain", None)
             location = f"datasources[{source_index}].fields[{field_index}].definition"
             confirmed = definition["confirmation_status"] == "confirmed"
             if confirmed != (definition["basis"] == "analyst_confirmed"):
@@ -216,6 +218,46 @@ def validate(data, path, require_ready=False):
     if stripped != field_snapshots(facts):
         problem("datasources", "Field coverage, IDs, order, or recorded metadata differ from source facts.")
     return issues
+
+
+def validate_value_domains(data, path, issues):
+    """Check optional observations against portable, hashed profiling evidence."""
+    for source in data["datasources"]:
+        for field in source["fields"]:
+            domain = field.get("value_domain")
+            if domain is None:
+                continue
+            location = field["id"] + ".value_domain"
+
+            def fail(message):
+                issues.append({"path": location, "message": message})
+
+            provenance = domain["provenance"]
+            root = path.parent.resolve()
+            profile_path = (root / provenance["profile_path"]).resolve()
+            if provenance["profile_path"] != "evidence/value-profile.yaml" or not profile_path.is_relative_to(root):
+                fail("Value domains must reference evidence/value-profile.yaml inside the output directory.")
+                continue
+            if not profile_path.is_file() or sha256(profile_path) != provenance["profile_sha256"]:
+                fail("Immutable value-profile evidence is missing or has changed.")
+                continue
+            profile = load(profile_path)
+            if (profile.get("document_type") != "tableau_value_profile" or profile.get("schema_version") != 1
+                    or profile.get("provenance", {}).get("workbook_sha256") != data["source"]["workbook_sha256"]
+                    or profile.get("provenance", {}).get("extract_sha256") != provenance["extract_sha256"]):
+                fail("Value-domain provenance differs from the workbook/extract snapshot.")
+                continue
+            matches = [(table, column) for table in profile.get("tables", [])
+                       if table.get("schema") == provenance["schema"] and table.get("name") == provenance["table"]
+                       for column in table.get("fields", []) if column.get("name") == provenance["column"]]
+            if len(matches) != 1:
+                fail("Value-domain provenance must identify exactly one physical extract column.")
+                continue
+            table, column = matches[0]
+            if (domain["row_count"] != table.get("row_count") or any(
+                domain[key] != column.get(key) for key in ("null_count", "distinct_count", "values", "values_truncated")
+            )):
+                fail("Value-domain observations must exactly match their immutable profile evidence.")
 
 
 def yaml_text(data):
