@@ -526,6 +526,9 @@
               "$ref": "#/$defs/annotation"
             }
           }
+        },
+        "value_domain": {
+          "$ref": "#/$defs/value_domain"
         }
       }
     },
@@ -590,7 +593,8 @@
             "undocumented",
             "context_inferred",
             "supplied_context",
-            "recorded_metadata"
+            "recorded_metadata",
+            "observed_values"
           ]
         },
         "confirmation_status": {
@@ -629,6 +633,93 @@
           "$ref": "#/$defs/definition"
         }
       ]
+    },
+    "value_domain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "row_count",
+        "null_count",
+        "distinct_count",
+        "values",
+        "values_truncated",
+        "provenance"
+      ],
+      "properties": {
+        "row_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "null_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "distinct_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "values": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "value",
+              "count"
+            ],
+            "properties": {
+              "value": {
+                "type": "string"
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        },
+        "values_truncated": {
+          "type": "boolean"
+        },
+        "provenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "profile_path",
+            "profile_sha256",
+            "extract_sha256",
+            "schema",
+            "table",
+            "column"
+          ],
+          "properties": {
+            "profile_path": {
+              "const": "evidence/value-profile.yaml"
+            },
+            "profile_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "extract_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "table": {
+              "type": "string",
+              "minLength": 1
+            },
+            "column": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
     }
   }
 }

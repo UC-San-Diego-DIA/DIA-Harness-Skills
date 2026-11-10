@@ -1,0 +1,7 @@
+interface:
+  display_name: "OTBI to BI Publisher SQL"
+  short_description: "Convert one OTBI analysis into BI Publisher SQL"
+  default_prompt: "Use $dia-otbi-to-bipublisher-sql to convert one OTBI analysis into logical and physical SQL for BI Publisher."
+
+policy:
+  allow_implicit_invocation: false

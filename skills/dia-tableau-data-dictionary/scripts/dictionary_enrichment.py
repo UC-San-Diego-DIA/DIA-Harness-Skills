@@ -52,6 +52,9 @@ def validate_annotations(data, facts, issues, require_ready=False):
         return found
 
     known = identifiers(facts)
+    profile_refs = {field["value_domain"]["provenance"]["profile_path"]
+                    for source in data["datasources"] for field in source["fields"] if "value_domain" in field}
+    known.update(profile_refs)
     for index, source in enumerate(data["context_sources"]):
         if source["id"] in known:
             problem(f"context_sources[{index}].id", "Context reference IDs must be unique and not shadow workbook IDs.")
@@ -76,6 +79,11 @@ def validate_annotations(data, facts, issues, require_ready=False):
             ref in {item["id"] for item in data["context_sources"]} for ref in refs
         ):
             problem(path, "Supplied-context annotations must cite a supplied context record.")
+        if value["basis"] == "observed_values" and (
+            not value["text"] or "proposed from observed values" not in value["text"]
+            or not any(ref in profile_refs for ref in refs)
+        ):
+            problem(path, 'Observed-value interpretations require the label "proposed from observed values" and profile evidence.')
         confirmed = value["confirmation_status"] == "confirmed"
         if confirmed != (value["basis"] == "analyst_confirmed"):
             problem(path, "Only analyst-confirmed annotations can have confirmed status.")
@@ -193,7 +201,10 @@ def render(data, path, md, sha256):
     if data["extraction_warnings"]:
         out += ["## Extraction limitations", ""] + ["- " + md(item) for item in data["extraction_warnings"]] + [""]
     out += ["## Structured source", "",
-            "This dictionary covers workbook metadata. Dataset values, keys, joins, and grain were not verified.", "",
+            ("This dictionary includes local extract observations. Row/null counts are observations, not business-correctness tests. "
+             "Keys, joins, grain, and proposed code meanings remain unverified."
+             if any("value_domain" in field for field in fields) else
+             "This dictionary covers workbook metadata. Dataset values, keys, joins, and grain were not verified."), "",
             "Technical IDs, original descriptions/formulas, workbook aggregation settings, native type codes, evidence, and confirmation attribution remain in the YAML.", "",
             f"YAML: {md(path.name)}; schema: {data['schema_version']}; revision: {data['revision']}.",
             f"Dictionary SHA-256: {sha256(path)}",

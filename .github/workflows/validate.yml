@@ -85,3 +85,11 @@ jobs:
       - name: Test Dataset Intelligence Pack integration and installation
         shell: pwsh
         run: python .\scripts\test_tableau_pack.py
+
+      - name: Install optional Hyper profiling test dependency
+        shell: pwsh
+        run: python -m pip install tableauhyperapi
+
+      - name: Test opt-in local Hyper value profiling
+        shell: pwsh
+        run: python .\scripts\test_tableau_value_profile.py

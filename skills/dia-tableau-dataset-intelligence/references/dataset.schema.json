@@ -63,7 +63,10 @@
       "const": "draft"
     },
     "data_verification": {
-      "const": "not_tested"
+      "enum": [
+        "not_tested",
+        "profiled"
+      ]
     },
     "reviewed": {
       "type": "boolean"
@@ -138,6 +141,28 @@
               "minLength": 1
             },
             "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "value_profile": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "sha256",
+            "extract_sha256"
+          ],
+          "properties": {
+            "path": {
+              "const": "evidence/value-profile.yaml"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "extract_sha256": {
               "type": "string",
               "pattern": "^[a-f0-9]{64}$"
             }
