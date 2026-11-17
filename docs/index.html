@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
 <title>DIA Skills &amp; Playbooks - UC San Diego</title>
-<script src="https://unpkg.com/lucide@latest"></script>
 <style>
 :root{
   --navy:#182B49;
@@ -130,9 +129,42 @@ section[id]{scroll-margin-top:84px}
 .explain-item h3{font-size:16.5px;margin:12px 0 6px}
 .explain-item p{margin:0;color:var(--muted);font-size:14.5px;line-height:1.6}
 
+.composition{
+  display:grid;grid-template-columns:minmax(0,1fr) 104px minmax(0,1.05fr);
+  gap:12px;align-items:center;margin-top:34px;padding-top:28px;
+  border-top:1px solid var(--line);
+}
+.compose-skills{display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.compose-chip{
+  display:inline-flex;align-items:center;gap:7px;
+  font-family:"JetBrains Mono","Cascadia Code",Consolas,monospace;
+  font-size:12px;font-weight:700;color:var(--blue);
+  background:rgba(0,98,155,.07);border:1px solid rgba(0,98,155,.2);
+  padding:7px 11px;border-radius:5px;white-space:nowrap;
+}
+.compose-chip::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--turquoise);flex-shrink:0}
+.compose-arrows{width:100%;height:96px;color:rgba(24,43,73,.36)}
+.compose-playbook{
+  background:var(--navy);color:#fff;border-left:4px solid var(--yellow);
+  border-radius:8px;padding:16px 18px;box-shadow:0 6px 16px rgba(24,43,73,.12);
+}
+.compose-kicker{
+  display:block;font-size:10px;font-weight:800;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--turquoise);margin-bottom:5px;
+}
+.compose-playbook strong{display:block;font-size:16px;line-height:1.3}
+.compose-meta{display:block;margin-top:6px;font-size:12.5px;color:rgba(255,255,255,.68)}
+
+.sr-only{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+}
+.icon-sprite{position:absolute;width:0;height:0;overflow:hidden}
+
 .section-head h2{font-size:30px;letter-spacing:-.01em;margin:0 0 6px}
-.section-head p{color:var(--muted);font-size:15.5px;margin:0 0 40px}
-.lifecycle-filter{display:flex;gap:10px;flex-wrap:wrap;margin:-22px 0 36px}
+.section-head p{color:var(--muted);font-size:15.5px;margin:0 0 24px}
+.filter-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:-8px 0 6px}
+.lifecycle-filter{display:flex;gap:8px;flex-wrap:wrap}
 .filter-chip{
   position:relative;display:inline-flex;align-items:center;cursor:pointer;
   font-size:12.5px;font-weight:700;color:var(--muted);
@@ -142,11 +174,45 @@ section[id]{scroll-margin-top:84px}
 .filter-chip{border:0;font-family:inherit}
 .filter-chip:hover{background:rgba(24,43,73,.11)}
 .filter-chip:focus{outline:2px solid var(--turquoise);outline-offset:2px}
+.filter-chip.checked[data-value="all"]{background:var(--blue);color:#fff}
 .filter-chip.checked[data-value="production"]{background:var(--green);color:#fff}
 .filter-chip.checked[data-value="testing"]{background:var(--turquoise);color:var(--navy)}
 .filter-chip.checked[data-value="development"]{background:var(--navy);color:#fff}
+.chip-count{font-weight:600;opacity:.78;margin-left:1px}
+.filter-legend{
+  display:flex;align-items:center;gap:8px 18px;flex-wrap:wrap;
+  margin:0 0 22px;color:var(--muted);font-size:12.5px;
+}
+.lifecycle-key{display:inline-flex;align-items:center;gap:6px}
+.lifecycle-key .skill-dot{width:8px;height:8px}
+.skills-toolbar{display:flex;align-items:center;gap:12px 18px;flex-wrap:wrap;margin:0 0 28px}
+.search-field{
+  display:flex;align-items:center;gap:8px;flex:0 1 380px;max-width:420px;height:40px;
+  padding:0 11px;background:#fff;border:1px solid var(--line);border-radius:7px;
+  transition:border-color .15s,box-shadow .15s;
+}
+.search-field:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,198,215,.16)}
+.search-field svg.lucide{width:16px;height:16px;color:var(--muted)}
+.search-field input{
+  flex:1;min-width:0;height:100%;border:0;outline:0;background:transparent;
+  font-family:inherit;font-size:14px;color:var(--navy);
+}
+.search-field input::placeholder{color:#8A8C8E}
+.group-jumps{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-left:auto}
+.jump-label{
+  font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  color:rgba(24,43,73,.42);margin-right:2px;
+}
+.group-jumps a{
+  font-size:12px;font-weight:650;color:var(--blue);text-decoration:none;
+  padding:5px 9px;border-radius:5px;border:1px solid transparent;
+  transition:background .15s,border-color .15s;
+}
+.group-jumps a:hover{background:rgba(0,98,155,.06);border-color:rgba(0,98,155,.18)}
+.group-jumps a:focus-visible{outline:2px solid var(--turquoise);outline-offset:2px}
 .skills{padding:56px 0 24px}
 .group{margin-bottom:48px}
+.group[id]{scroll-margin-top:96px}
 .group-head{display:flex;align-items:flex-start;gap:18px;margin-bottom:16px;flex-wrap:wrap}
 .group-num{
   font-family:"JetBrains Mono","Cascadia Code",Consolas,monospace;
@@ -155,13 +221,20 @@ section[id]{scroll-margin-top:84px}
 .group-title h3{margin:0;font-size:19px;display:flex;align-items:center;gap:9px}
 .group-title p{margin:5px 0 0;color:var(--muted);font-size:14.5px}
 .dot{width:9px;height:9px;border-radius:3px;background:var(--c,var(--blue));display:inline-block}
-.skill-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
-.skill{
-  position:relative;display:block;background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px;
-  text-decoration:none;color:inherit;
+.skill-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;align-items:stretch}
+.skill-card{
+  position:relative;display:flex;flex-direction:column;min-height:204px;
+  background:#fff;border:1px solid var(--line);border-radius:8px;
   transition:border-color .15s,transform .15s,box-shadow .15s;
 }
-.skill:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:0 6px 16px rgba(24,43,73,.08)}
+.skill-card:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:0 6px 16px rgba(24,43,73,.08)}
+.skill-card:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,198,215,.16)}
+.skill{
+  position:relative;display:flex;flex:1;flex-direction:column;
+  padding:16px 16px 10px;text-decoration:none;color:inherit;border-radius:8px 8px 0 0;
+}
+.skill:focus{outline:none}
+.skill:focus-visible{outline:2px solid var(--turquoise);outline-offset:-2px}
 .skill-hidden{display:none}
 .group-hidden{display:none}
 .skill-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;padding-right:70px}
@@ -174,18 +247,37 @@ section[id]{scroll-margin-top:84px}
 .status-chip.testing{background:var(--turquoise);color:var(--navy)}
 .status-chip.development{background:rgba(24,43,73,.08);color:var(--muted)}
 .skill-head svg.lucide{width:15px;height:15px;color:var(--muted);transition:color .15s}
-.skill:hover .skill-head svg.lucide{color:var(--blue)}
+.skill-card:hover .skill-head svg.lucide{color:var(--blue)}
 .skill-cmd{
   margin:0;font-size:14px;font-weight:700;color:var(--blue);
   overflow-wrap:anywhere;
 }
-.skill p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.55}
+.skill-desc{
+  margin:0;color:var(--muted);font-size:13.5px;line-height:1.55;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+}
+.skill-actions{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:10px 16px 12px;border-top:1px solid rgba(24,43,73,.08);
+}
+.skill-source{
+  display:inline-flex;align-items:center;gap:4px;flex-shrink:0;
+  color:var(--muted);font-size:11.5px;font-weight:600;text-decoration:none;
+}
+.skill-source:hover{color:var(--blue);text-decoration:underline}
+.skill-source svg.lucide{width:12px;height:12px}
+.skills-empty{
+  display:none;padding:28px 20px;margin:0;border:1px dashed rgba(24,43,73,.22);
+  border-radius:8px;color:var(--muted);font-size:14px;text-align:center;
+}
+.skills-empty.visible{display:block}
 
 .copy-btn{
   margin-left:auto;display:inline-flex;align-items:center;justify-content:center;
-  width:32px;height:26px;
+  gap:7px;height:30px;padding:0 10px;
   background:transparent;border:1px solid rgba(255,255,255,.28);border-radius:5px;
   color:rgba(255,255,255,.78);cursor:pointer;
+  font-family:inherit;font-size:12px;font-weight:700;line-height:1;
   transition:background .15s,color .15s,border-color .15s;
 }
 .copy-btn:hover{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.55)}
@@ -193,8 +285,30 @@ section[id]{scroll-margin-top:84px}
 .copy-btn .icon-check{display:none;color:var(--turquoise)}
 .copy-btn.copied .icon-copy{display:none}
 .copy-btn.copied .icon-check{display:inline-block}
+.copy-label-text{white-space:nowrap}
+.copy-btn.card-copy{
+  margin:0;height:28px;padding:0 9px;gap:6px;
+  background:#fff;border-color:rgba(0,98,155,.3);color:var(--blue);
+  font-size:11.5px;font-weight:750;
+}
+.copy-btn.card-copy:hover{background:rgba(0,98,155,.07);border-color:var(--blue);color:var(--blue-dark)}
+.copy-btn.card-copy .icon-check{color:var(--green)}
+.copy-btn.card-copy svg.lucide{width:14px;height:14px}
+.copy-btn.cta-copy{
+  margin:0;height:auto;padding:12px 20px;gap:9px;border:0;border-radius:8px;
+  background:var(--yellow);color:var(--navy);font-size:15px;font-weight:700;
+}
+.copy-btn.cta-copy:hover{background:#F3E500;color:var(--navy);border:0}
+.copy-btn.cta-copy .icon-check{color:var(--green)}
 
 .playbooks{background:var(--sand);padding:64px 0}
+.pb-banner{
+  display:flex;align-items:flex-start;gap:9px;
+  margin:-14px 0 18px;padding:10px 14px;
+  background:#fff;border-left:3px solid var(--turquoise);border-radius:0 6px 6px 0;
+  color:var(--navy);font-size:14px;font-weight:600;line-height:1.5;
+}
+.pb-banner svg.lucide{width:15px;height:15px;color:var(--blue);margin-top:2px}
 .pb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .pb{
   background:#fff;border:1px solid var(--line);border-radius:8px;
@@ -220,7 +334,12 @@ section[id]{scroll-margin-top:84px}
 .pb-desc{margin:0 0 20px;color:var(--muted);font-size:14px;line-height:1.55}
 .steps{position:relative;list-style:none;margin:0 0 20px;padding:0}
 .steps::before{content:"";position:absolute;left:11px;top:16px;bottom:16px;width:2px;background:rgba(24,43,73,.16)}
-.steps li{position:relative;display:flex;align-items:center;gap:12px;padding:5px 0}
+.steps li{position:relative;display:flex;align-items:center;gap:12px;padding:6px 0}
+.steps li + li::before{
+  content:"";position:absolute;left:6px;top:-7px;width:0;height:0;
+  border-left:5px solid transparent;border-right:5px solid transparent;
+  border-top:6px solid rgba(24,43,73,.5);
+}
 .step-num{
   width:24px;height:24px;border-radius:6px;flex-shrink:0;position:relative;z-index:1;
   background:var(--navy);color:#fff;
@@ -233,6 +352,15 @@ section[id]{scroll-margin-top:84px}
   background:rgba(0,98,155,.07);padding:3px 8px;border-radius:4px;
   overflow-wrap:anywhere;
 }
+.steps .step-skill{display:flex;align-items:center;gap:8px;min-width:0}
+.skill-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.skill-dot.production{background:var(--green)}
+.skill-dot.testing{background:var(--turquoise)}
+.skill-dot.development{background:rgba(24,43,73,.25)}
+.pb h3 .skill-dot{display:inline-block;vertical-align:middle;margin-left:8px}
+.pb-legend{display:flex;align-items:center;gap:8px 20px;flex-wrap:wrap;margin-top:12px;font-size:12.5px;color:var(--muted)}
+.pb-legend-item{display:inline-flex;align-items:center;gap:7px}
+.pb-legend-item strong{font-weight:750;color:var(--navy)}
 .pb-foot{
   margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;
   border-top:1px solid var(--line);padding-top:14px;
@@ -269,6 +397,9 @@ section[id]{scroll-margin-top:84px}
 .cta-inner{max-width:660px;margin:0 auto;text-align:center}
 .cta h2{font-size:30px;letter-spacing:-.01em;margin:0 0 10px}
 .cta p{color:rgba(255,255,255,.8);font-size:16px;line-height:1.6;margin:0 0 26px}
+.cta-actions{display:flex;justify-content:center;margin:0 0 18px}
+.cta-note{margin:0;font-size:14px;color:rgba(255,255,255,.72)}
+.cta-note code{color:var(--yellow)}
 .foot{background:var(--navy);color:#fff;border-top:1px solid rgba(255,255,255,.16);padding:28px 0}
 .foot-inner{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap}
 .foot-brand{display:flex;align-items:center;gap:12px}
@@ -280,8 +411,10 @@ section[id]{scroll-margin-top:84px}
 @media (max-width:980px){
   .hero-grid{grid-template-columns:1fr;gap:36px}
   .explain-grid{grid-template-columns:1fr;gap:24px}
+  .composition{grid-template-columns:1fr 84px 1fr}
   .pb-grid{grid-template-columns:1fr}
   .pb.spanfull{grid-column:auto}
+  .group-jumps{margin-left:0}
   .fan{grid-template-columns:96px 16px 1fr}
   .fan-out::before{width:13px;left:-13px}
   .fan-src::after{width:8px;right:-2px}
@@ -291,10 +424,74 @@ section[id]{scroll-margin-top:84px}
   .hero h1{font-size:34px}
   .stats div{padding:2px 18px}
   .stats strong{font-size:24px}
+  .composition{grid-template-columns:1fr;gap:14px}
+  .compose-skills{align-items:stretch}
+  .compose-chip{justify-content:center;white-space:normal;text-align:center}
+  .compose-arrows{width:34px;height:34px;margin:0 auto;transform:rotate(90deg)}
+  .search-field{flex:1 1 100%;max-width:none}
+  .filter-legend{font-size:12px}
 }
 </style>
 </head>
 <body>
+
+<svg class="icon-sprite" aria-hidden="true" focusable="false">
+  <symbol id="i-library" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m16 6 4 14"/>
+    <path d="M12 6v14"/>
+    <path d="M8 8v12"/>
+    <path d="M4 4v16"/>
+  </symbol>
+  <symbol id="i-compass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/>
+    <path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z"/>
+  </symbol>
+  <symbol id="i-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 12h14"/>
+    <path d="m12 5 7 7-7 7"/>
+  </symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+    <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+  </symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 6 9 17l-5-5"/>
+  </symbol>
+  <symbol id="i-puzzle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M15.39 4.39a1 1 0 0 0 1.68-.474 2.5 2.5 0 1 1 3.014 3.015 1 1 0 0 0-.474 1.68l1.683 1.682a2.414 2.414 0 0 1 0 3.414L19.61 15.39a1 1 0 0 1-1.68-.474 2.5 2.5 0 1 0-3.014 3.015 1 1 0 0 1 .474 1.68l-1.683 1.682a2.414 2.414 0 0 1-3.414 0L8.61 19.61a1 1 0 0 0-1.68.474 2.5 2.5 0 1 1-3.014-3.015 1 1 0 0 0 .474-1.68l-1.683-1.682a2.414 2.414 0 0 1 0-3.414L4.39 8.61a1 1 0 0 1 1.68.474 2.5 2.5 0 1 0 3.014-3.015 1 1 0 0 1-.474-1.68l1.683-1.682a2.414 2.414 0 0 1 3.414 0z"/>
+  </symbol>
+  <symbol id="i-route" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 5h8.5a1 1 0 010 7h-11a1 1 0 000 7H15"/>
+    <circle cx="18" cy="19" r="3"/>
+    <circle cx="6" cy="5" r="3"/>
+  </symbol>
+  <symbol id="i-trending-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M16 7h6v6"/>
+    <path d="m22 7-8.5 8.5-5-5L2 17"/>
+  </symbol>
+  <symbol id="i-external-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M15 3h6v6"/>
+    <path d="M10 14 21 3"/>
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+  </symbol>
+  <symbol id="i-git-branch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M15 6a9 9 0 0 0-9 9V3"/>
+    <circle cx="18" cy="6" r="3"/>
+    <circle cx="6" cy="18" r="3"/>
+  </symbol>
+  <symbol id="i-list-ordered" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M11 5h10"/>
+    <path d="M11 12h10"/>
+    <path d="M11 19h10"/>
+    <path d="M4 4h1v5"/>
+    <path d="M4 9h2"/>
+    <path d="M6.5 20H3.4c0-1 2.6-1.925 2.6-3.5a1.5 1.5 0 0 0-2.6-1.02"/>
+  </symbol>
+  <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m21 21-4.34-4.34"/>
+    <circle cx="11" cy="11" r="8"/>
+  </symbol>
+</svg>
 
 <header class="nav">
   <div class="shell nav-inner">
@@ -320,30 +517,31 @@ section[id]{scroll-margin-top:84px}
 <section class="hero">
   <div class="shell hero-grid">
     <div>
-      <p class="eyebrow"><i data-lucide="library"></i>DIA Skill Library</p>
+      <p class="eyebrow"><svg class="lucide" aria-hidden="true"><use href="#i-library"></use></svg>DIA Skill Library</p>
       <h1>Skills &amp; playbooks for Data, Insights &amp; Analytics</h1>
       <p class="lede">A practical skill system for the DIA team: sequenced, named, and tuned so every workflow runs the same trusted way, from first transcript to a defensible answer.</p>
       <div class="hero-actions">
-        <a class="btn btn-primary" href="#skills"><i data-lucide="compass"></i>Browse skills</a>
-        <a class="btn btn-ghost" href="#playbooks">See playbooks<i data-lucide="arrow-right"></i></a>
+        <a class="btn btn-primary" href="#skills"><svg class="lucide" aria-hidden="true"><use href="#i-compass"></use></svg>Browse skills</a>
+        <a class="btn btn-ghost" href="#playbooks">See playbooks<svg class="lucide" aria-hidden="true"><use href="#i-arrow-right"></use></svg></a>
       </div>
       <div class="stats">
-      <div><strong data-stat="skills">21</strong><span>Total number of skills</span></div>
-      <div><strong data-stat="playbooks">4</strong><span>Total number of playbooks</span></div>
-      <div><strong data-stat="groups">5</strong><span>Total number of skill groups</span></div>
+      <div><strong data-stat="skills">23</strong><span>skills</span></div>
+      <div><strong data-stat="playbooks">5</strong><span>playbooks</span></div>
+      <div><strong data-stat="workflows">5</strong><span>end-to-end workflows</span></div>
       </div>
     </div>
     <div class="term">
       <div class="term-head">
         <span class="term-dot"></span>
         <span>Install these skills in TritonAI Harness</span>
-        <button type="button" class="copy-btn" data-copy-target="hero-install-prompt" aria-label="Copy install prompt" title="Copy prompt">
-          <i data-lucide="copy" class="icon-copy"></i>
-          <i data-lucide="check" class="icon-check"></i>
+        <button type="button" class="copy-btn" data-copy-target="hero-install-prompt" aria-label="Copy install prompt" title="Copy the prompt, then paste it into TritonAI Harness">
+          <svg class="lucide icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg>
+          <svg class="lucide icon-check" aria-hidden="true"><use href="#i-check"></use></svg>
+          <span class="copy-label-text">Copy install prompt</span>
         </button>
       </div>
       <div class="term-steps">
-        <span><span class="n">1</span>Click the copy button</span>
+        <span><span class="n">1</span>Copy the install prompt</span>
         <span><span class="n">2</span>Paste into TritonAI Harness in "No Project" or the "TritonAI" project</span>
         <span><span class="n">3</span>Send the message</span>
       </div>
@@ -353,21 +551,41 @@ section[id]{scroll-margin-top:84px}
 </section>
 
 <section class="explain">
-  <div class="shell explain-grid">
-    <div class="explain-item">
-      <i data-lucide="puzzle"></i>
-      <h3>What is a skill?</h3>
-      <p>A small, sharp instruction your agent runs the same way every time: connecting ClickUp, validating a project folder, writing a daily brief.</p>
+  <div class="shell">
+    <div class="explain-grid">
+      <div class="explain-item">
+        <svg class="lucide" aria-hidden="true"><use href="#i-puzzle"></use></svg>
+        <h3>What is a skill?</h3>
+        <p>A small, sharp instruction your agent runs the same way every time: connecting ClickUp, validating a project folder, writing a daily brief.</p>
+      </div>
+      <div class="explain-item">
+        <svg class="lucide" aria-hidden="true"><use href="#i-route"></use></svg>
+        <h3>What is a playbook?</h3>
+        <p>A curated sequence of skills for an end-to-end workflow. Pipelines hand off in one direction; fan-outs branch one shared input into several outputs.</p>
+      </div>
+      <div class="explain-item">
+        <svg class="lucide" aria-hidden="true"><use href="#i-trending-up"></use></svg>
+        <h3>Why it compounds</h3>
+        <p>Every skill lives in one reviewed repository. Tuning one step improves every workflow that runs through it.</p>
+      </div>
     </div>
-    <div class="explain-item">
-      <i data-lucide="route"></i>
-      <h3>What is a playbook?</h3>
-      <p>A curated sequence of skills for an end-to-end workflow. Pipelines hand off in one direction; fan-outs branch one shared input into several outputs.</p>
-    </div>
-    <div class="explain-item">
-      <i data-lucide="trending-up"></i>
-      <h3>Why it compounds</h3>
-      <p>Every skill lives in one reviewed repository. Tuning one step improves every workflow that runs through it.</p>
+    <div class="composition" aria-label="Three skills compose one playbook">
+      <div class="compose-skills">
+        <span class="compose-chip">$dia-new-workspace</span>
+        <span class="compose-chip">$dia-transcript-to-kpis</span>
+        <span class="compose-chip">$dia-kpi-data-mapping</span>
+      </div>
+      <svg class="compose-arrows" viewBox="0 0 104 96" fill="none" aria-hidden="true">
+        <path d="M2 16c42 0 38 32 80 32" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M2 48h80" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M2 80c42 0 38-32 80-32" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="m74 41 8 7-8 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="compose-playbook">
+        <span class="compose-kicker">Playbook</span>
+        <strong>Business questions to dashboard mockup</strong>
+        <span class="compose-meta">4 skills, one command, in order</span>
+      </div>
     </div>
   </div>
 </section>
@@ -378,10 +596,32 @@ section[id]{scroll-margin-top:84px}
       <h2>Skills</h2>
       <p>Grouped by when you reach for them. Every skill is invoked explicitly with its <code>$dia-</code> command.</p>
     </div>
-    <div class="lifecycle-filter" id="lifecycle-filter" role="group" aria-label="Filter skills by lifecycle">
-      <button type="button" class="filter-chip" data-value="production" aria-pressed="true">production</button>
-      <button type="button" class="filter-chip" data-value="testing" aria-pressed="false">testing</button>
-      <button type="button" class="filter-chip" data-value="development" aria-pressed="false">development</button>
+    <div class="filter-row">
+      <div class="lifecycle-filter" id="lifecycle-filter" role="group" aria-label="Filter skills by lifecycle">
+        <button type="button" class="filter-chip" data-value="all" aria-pressed="false" title="Show every lifecycle">All</button>
+        <button type="button" class="filter-chip checked" data-value="production" aria-pressed="true" title="Production = ready for daily use">Production <span class="chip-count">(4)</span></button>
+        <button type="button" class="filter-chip checked" data-value="testing" aria-pressed="true" title="Testing = pilot-ready, may change">Testing <span class="chip-count">(6)</span></button>
+        <button type="button" class="filter-chip" data-value="development" aria-pressed="false" title="Development = in progress">Development <span class="chip-count">(13)</span></button>
+      </div>
+    </div>
+    <p class="filter-legend">
+      <span class="lifecycle-key"><span class="skill-dot production"></span>Production = ready for daily use</span>
+      <span class="lifecycle-key"><span class="skill-dot testing"></span>Testing = pilot-ready, may change</span>
+      <span class="lifecycle-key"><span class="skill-dot development"></span>Development = in progress</span>
+    </p>
+    <div class="skills-toolbar">
+      <label class="search-field" for="skill-search">
+        <svg class="lucide" aria-hidden="true"><use href="#i-search"></use></svg>
+        <input id="skill-search" type="search" placeholder="Search command or description" aria-label="Search skills by command or description" autocomplete="off">
+      </label>
+      <nav class="group-jumps" aria-label="Jump to a skill group">
+        <span class="jump-label">Jump to</span>
+        <a href="#g1">Connect &amp; Setup</a>
+        <a href="#g2">Meeting Workflow</a>
+        <a href="#g3">Daily Rituals</a>
+        <a href="#g4">Data Analysis</a>
+        <a href="#g5">Documentation</a>
+      </nav>
     </div>
 
     <div class="group" id="g1">
@@ -393,30 +633,63 @@ section[id]{scroll-margin-top:84px}
         </div>
       </div>
       <div class="skill-grid">
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-clickup-mcp-setup" title="View dia-clickup-mcp-setup on GitHub" data-status="production">
-          <span class="status-chip production">production</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-clickup-mcp-setup</h4>
-            <i data-lucide="github"></i>
+        <div class="skill-card">
+          <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-clickup-mcp-setup" data-status="production">
+            <span class="status-chip production">production</span>
+            <div class="skill-head">
+              <h4 class="skill-cmd">$dia-clickup-mcp-setup</h4>
+            </div>
+            <p class="skill-desc">Connect TritonAI Harness to ClickUp through official OAuth and verify Workspace access.</p>
+          </a>
+          <div class="skill-actions">
+            <button type="button" class="copy-btn card-copy" data-copy-command="$dia-clickup-mcp-setup" aria-label="Copy $dia-clickup-mcp-setup command" title="Copy $dia-clickup-mcp-setup to the clipboard">
+              <svg class="lucide icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg>
+              <svg class="lucide icon-check" aria-hidden="true"><use href="#i-check"></use></svg>
+              <span class="copy-label-text">Copy command</span>
+            </button>
+            <a class="skill-source" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-clickup-mcp-setup" title="View dia-clickup-mcp-setup source on GitHub">
+              <svg class="lucide" aria-hidden="true"><use href="#i-external-link"></use></svg>View source
+            </a>
           </div>
-          <p>Connect TritonAI Harness to ClickUp through official OAuth and verify Workspace access.</p>
-        </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-new-workspace" title="View dia-new-workspace on GitHub" data-status="production">
-          <span class="status-chip production">production</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-new-workspace</h4>
-            <i data-lucide="github"></i>
+        </div>
+        <div class="skill-card">
+          <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-new-workspace" data-status="production">
+            <span class="status-chip production">production</span>
+            <div class="skill-head">
+              <h4 class="skill-cmd">$dia-new-workspace</h4>
+            </div>
+            <p class="skill-desc">Choose a simple or data-analysis layout, create the workspace, optionally move confirmed files, then open it to plan the work.</p>
+          </a>
+          <div class="skill-actions">
+            <button type="button" class="copy-btn card-copy" data-copy-command="$dia-new-workspace" aria-label="Copy $dia-new-workspace command" title="Copy $dia-new-workspace to the clipboard">
+              <svg class="lucide icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg>
+              <svg class="lucide icon-check" aria-hidden="true"><use href="#i-check"></use></svg>
+              <span class="copy-label-text">Copy command</span>
+            </button>
+            <a class="skill-source" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-new-workspace" title="View dia-new-workspace source on GitHub">
+              <svg class="lucide" aria-hidden="true"><use href="#i-external-link"></use></svg>View source
+            </a>
           </div>
-          <p>Choose a simple or data-analysis layout, create the workspace, move confirmed files, then open it to plan the work.</p>
-        </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-plan-my-project" title="View dia-plan-my-project on GitHub" data-status="production">
-          <span class="status-chip production">production</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-plan-my-project</h4>
-            <i data-lucide="github"></i>
+        </div>
+        <div class="skill-card">
+          <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-plan-my-project" data-status="production">
+            <span class="status-chip production">production</span>
+            <div class="skill-head">
+              <h4 class="skill-cmd">$dia-plan-my-project</h4>
+            </div>
+            <p class="skill-desc">Refine a task or project goal and create or revise a confirmed plan.md with the minimum steps needed to achieve it.</p>
+          </a>
+          <div class="skill-actions">
+            <button type="button" class="copy-btn card-copy" data-copy-command="$dia-plan-my-project" aria-label="Copy $dia-plan-my-project command" title="Copy $dia-plan-my-project to the clipboard">
+              <svg class="lucide icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg>
+              <svg class="lucide icon-check" aria-hidden="true"><use href="#i-check"></use></svg>
+              <span class="copy-label-text">Copy command</span>
+            </button>
+            <a class="skill-source" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-plan-my-project" title="View dia-plan-my-project source on GitHub">
+              <svg class="lucide" aria-hidden="true"><use href="#i-external-link"></use></svg>View source
+            </a>
           </div>
-          <p>Refine a task or project goal and create or revise a confirmed plan.md with the minimum steps needed to achieve it.</p>
-        </a>
+        </div>
       </div>
     </div>
 
@@ -429,46 +702,101 @@ section[id]{scroll-margin-top:84px}
         </div>
       </div>
       <div class="skill-grid">
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-meeting-notes" title="View dia-transcript-to-meeting-notes on GitHub" data-status="production">
-          <span class="status-chip production">production</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-transcript-to-meeting-notes</h4>
-            <i data-lucide="github"></i>
+        <div class="skill-card">
+          <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-meeting-notes" data-status="testing">
+            <span class="status-chip testing">testing</span>
+            <div class="skill-head">
+              <h4 class="skill-cmd">$dia-transcript-to-meeting-notes</h4>
+            </div>
+            <p class="skill-desc">Turn a Zoom transcript into detailed local meeting notes, with no ClickUp writes.</p>
+          </a>
+          <div class="skill-actions">
+            <button type="button" class="copy-btn card-copy" data-copy-command="$dia-transcript-to-meeting-notes" aria-label="Copy $dia-transcript-to-meeting-notes command" title="Copy $dia-transcript-to-meeting-notes to the clipboard">
+              <svg class="lucide icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg>
+              <svg class="lucide icon-check" aria-hidden="true"><use href="#i-check"></use></svg>
+              <span class="copy-label-text">Copy command</span>
+            </button>
+            <a class="skill-source" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-meeting-notes" title="View dia-transcript-to-meeting-notes source on GitHub">
+              <svg class="lucide" aria-hidden="true"><use href="#i-external-link"></use></svg>View source
+            </a>
           </div>
-          <p>Turn a Zoom transcript into detailed local meeting notes, with no ClickUp writes.</p>
-        </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-kpis" title="View dia-transcript-to-kpis on GitHub" data-status="production">
-          <span class="status-chip production">production</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-transcript-to-kpis</h4>
-            <i data-lucide="github"></i>
+        </div>
+        <div class="skill-card">
+          <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-kpis" data-status="testing">
+            <span class="status-chip testing">testing</span>
+            <div class="skill-head">
+              <h4 class="skill-cmd">$dia-transcript-to-kpis</h4>
+            </div>
+            <p class="skill-desc">Capture confirmed business questions and KPIs in paired Markdown and kpi-facts.yaml, keeping deferred ideas separate.</p>
+          </a>
+          <div class="skill-actions">
+            <button type="button" class="copy-btn card-copy" data-copy-command="$dia-transcript-to-kpis" aria-label="Copy $dia-transcript-to-kpis command" title="Copy $dia-transcript-to-kpis to the clipboard">
+              <svg class="lucide icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg>
+              <svg class="lucide icon-check" aria-hidden="true"><use href="#i-check"></use></svg>
+              <span class="copy-label-text">Copy command</span>
+            </button>
+            <a class="skill-source" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-kpis" title="View dia-transcript-to-kpis source on GitHub">
+              <svg class="lucide" aria-hidden="true"><use href="#i-external-link"></use></svg>View source
+            </a>
           </div>
-          <p>Capture confirmed business questions and KPIs in paired Markdown and kpi-facts.yaml, keeping deferred ideas separate.</p>
-        </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-requirements" title="View dia-transcript-to-requirements on GitHub" data-status="production">
-          <span class="status-chip production">production</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-transcript-to-requirements</h4>
-            <i data-lucide="github"></i>
+        </div>
+        <div class="skill-card">
+          <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-requirements" data-status="testing">
+            <span class="status-chip testing">testing</span>
+            <div class="skill-head">
+              <h4 class="skill-cmd">$dia-transcript-to-requirements</h4>
+            </div>
+            <p class="skill-desc">Turn a business-owner requirements conversation into a decision-driven requirements document.</p>
+          </a>
+          <div class="skill-actions">
+            <button type="button" class="copy-btn card-copy" data-copy-command="$dia-transcript-to-requirements" aria-label="Copy $dia-transcript-to-requirements command" title="Copy $dia-transcript-to-requirements to the clipboard">
+              <svg class="lucide icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg>
+              <svg class="lucide icon-check" aria-hidden="true"><use href="#i-check"></use></svg>
+              <span class="copy-label-text">Copy command</span>
+            </button>
+            <a class="skill-source" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-requirements" title="View dia-transcript-to-requirements source on GitHub">
+              <svg class="lucide" aria-hidden="true"><use href="#i-external-link"></use></svg>View source
+            </a>
           </div>
-          <p>Turn a business-owner requirements conversation into a decision-driven requirements document.</p>
-        </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-process-map" title="View dia-transcript-to-process-map on GitHub" data-status="testing">
-          <span class="status-chip testing">testing</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-transcript-to-process-map</h4>
-            <i data-lucide="github"></i>
+        </div>
+        <div class="skill-card">
+          <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-process-map" data-status="testing">
+            <span class="status-chip testing">testing</span>
+            <div class="skill-head">
+              <h4 class="skill-cmd">$dia-transcript-to-process-map</h4>
+            </div>
+            <p class="skill-desc">Save the transcript, inventory its possible processes, build ROI-based outlines for the ones you confirm, then render the approved maps as diagrams.</p>
+          </a>
+          <div class="skill-actions">
+            <button type="button" class="copy-btn card-copy" data-copy-command="$dia-transcript-to-process-map" aria-label="Copy $dia-transcript-to-process-map command" title="Copy $dia-transcript-to-process-map to the clipboard">
+              <svg class="lucide icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg>
+              <svg class="lucide icon-check" aria-hidden="true"><use href="#i-check"></use></svg>
+              <span class="copy-label-text">Copy command</span>
+            </button>
+            <a class="skill-source" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-process-map" title="View dia-transcript-to-process-map source on GitHub">
+              <svg class="lucide" aria-hidden="true"><use href="#i-external-link"></use></svg>View source
+            </a>
           </div>
-          <p>Save the transcript, inventory its possible processes, build ROI-based outlines for the ones you confirm, then render the approved maps as diagrams.</p>
-        </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-project-request-draft" title="View dia-transcript-to-project-request-draft on GitHub" data-status="production">
-          <span class="status-chip production">production</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-transcript-to-project-request-draft</h4>
-            <i data-lucide="github"></i>
+        </div>
+        <div class="skill-card">
+          <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-project-request-draft" data-status="production">
+            <span class="status-chip production">production</span>
+            <div class="skill-head">
+              <h4 class="skill-cmd">$dia-transcript-to-project-request-draft</h4>
+            </div>
+            <p class="skill-desc">Draft a first-pass Project Request form fill-in from a project-request transcript; every field needs human review and every data gap is named.</p>
+          </a>
+          <div class="skill-actions">
+            <button type="button" class="copy-btn card-copy" data-copy-command="$dia-transcript-to-project-request-draft" aria-label="Copy $dia-transcript-to-project-request-draft command" title="Copy $dia-transcript-to-project-request-draft to the clipboard">
+              <svg class="lucide icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg>
+              <svg class="lucide icon-check" aria-hidden="true"><use href="#i-check"></use></svg>
+              <span class="copy-label-text">Copy command</span>
+            </button>
+            <a class="skill-source" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-transcript-to-project-request-draft" title="View dia-transcript-to-project-request-draft source on GitHub">
+              <svg class="lucide" aria-hidden="true"><use href="#i-external-link"></use></svg>View source
+            </a>
           </div>
-          <p>Draft a first-pass Project Request form fill-in from a project-request transcript; every field needs human review and every data gap is named.</p>
-        </a>
+        </div>
       </div>
     </div>
 
@@ -481,22 +809,25 @@ section[id]{scroll-margin-top:84px}
         </div>
       </div>
       <div class="skill-grid">
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-start-my-day" title="View dia-start-my-day on GitHub" data-status="production">
-          <span class="status-chip production">production</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-start-my-day</h4>
-            <i data-lucide="github"></i>
+        <div class="skill-card">
+          <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-start-my-day" data-status="testing">
+            <span class="status-chip testing">testing</span>
+            <div class="skill-head">
+              <h4 class="skill-cmd">$dia-start-my-day</h4>
+            </div>
+            <p class="skill-desc">Choose today's focus in chat from open assigned ClickUp tasks, today's and the next two days' calendar, and the last 72 hours of Outlook mail. HTML on request; follow-ups require approval.</p>
+          </a>
+          <div class="skill-actions">
+            <button type="button" class="copy-btn card-copy" data-copy-command="$dia-start-my-day" aria-label="Copy $dia-start-my-day command" title="Copy $dia-start-my-day to the clipboard">
+              <svg class="lucide icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg>
+              <svg class="lucide icon-check" aria-hidden="true"><use href="#i-check"></use></svg>
+              <span class="copy-label-text">Copy command</span>
+            </button>
+            <a class="skill-source" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-start-my-day" title="View dia-start-my-day source on GitHub">
+              <svg class="lucide" aria-hidden="true"><use href="#i-external-link"></use></svg>View source
+            </a>
           </div>
-          <p>Choose today's focus in chat from open assigned ClickUp tasks, today's and the next two days' calendar, and the last 72 hours of Outlook mail. HTML on request; follow-ups require approval.</p>
-        </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-harness-utilization-review" title="View dia-harness-utilization-review on GitHub" data-status="development">
-          <span class="status-chip development">development</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-harness-utilization-review</h4>
-            <i data-lucide="github"></i>
-          </div>
-          <p>Scheduled morning review of yesterday's threads and conversations, with interaction improvements and new usage ideas.</p>
-        </a>
+        </div>
       </div>
     </div>
 
@@ -509,46 +840,101 @@ section[id]{scroll-margin-top:84px}
         </div>
       </div>
       <div class="skill-grid">
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-local-data-explorer" title="View dia-local-data-explorer on GitHub" data-status="development">
-          <span class="status-chip development">development</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-local-data-explorer</h4>
-            <i data-lucide="github"></i>
+        <div class="skill-card">
+          <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-local-data-explorer" data-status="development">
+            <span class="status-chip development">development</span>
+            <div class="skill-head">
+              <h4 class="skill-cmd">$dia-local-data-explorer</h4>
+            </div>
+            <p class="skill-desc">Set up a local project for one CSV or Excel sheet, ask questions, save real-data visuals, and build an offline HTML dashboard.</p>
+          </a>
+          <div class="skill-actions">
+            <button type="button" class="copy-btn card-copy" data-copy-command="$dia-local-data-explorer" aria-label="Copy $dia-local-data-explorer command" title="Copy $dia-local-data-explorer to the clipboard">
+              <svg class="lucide icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg>
+              <svg class="lucide icon-check" aria-hidden="true"><use href="#i-check"></use></svg>
+              <span class="copy-label-text">Copy command</span>
+            </button>
+            <a class="skill-source" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-local-data-explorer" title="View dia-local-data-explorer source on GitHub">
+              <svg class="lucide" aria-hidden="true"><use href="#i-external-link"></use></svg>View source
+            </a>
           </div>
-          <p>Set up a local project for one CSV or Excel sheet, ask questions, save real-data visuals, and build an offline HTML dashboard.</p>
-        </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-analyze-local-data" title="View dia-analyze-local-data on GitHub" data-status="testing">
-          <span class="status-chip testing">testing</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-analyze-local-data</h4>
-            <i data-lucide="github"></i>
+        </div>
+        <div class="skill-card">
+          <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-analyze-local-data" data-status="development">
+            <span class="status-chip development">development</span>
+            <div class="skill-head">
+              <h4 class="skill-cmd">$dia-analyze-local-data</h4>
+            </div>
+            <p class="skill-desc">Answer ad hoc questions about one CSV or Excel file inside a data-analysis workspace with a read-only DuckDB view under <code>scratch/analysis</code>.</p>
+          </a>
+          <div class="skill-actions">
+            <button type="button" class="copy-btn card-copy" data-copy-command="$dia-analyze-local-data" aria-label="Copy $dia-analyze-local-data command" title="Copy $dia-analyze-local-data to the clipboard">
+              <svg class="lucide icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg>
+              <svg class="lucide icon-check" aria-hidden="true"><use href="#i-check"></use></svg>
+              <span class="copy-label-text">Copy command</span>
+            </button>
+            <a class="skill-source" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-analyze-local-data" title="View dia-analyze-local-data source on GitHub">
+              <svg class="lucide" aria-hidden="true"><use href="#i-external-link"></use></svg>View source
+            </a>
           </div>
-          <p>Answer ad hoc questions about one CSV or Excel file inside a data-analysis workspace with a read-only DuckDB view under <code>scratch/analysis</code>.</p>
-        </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-kpi-data-mapping" title="View dia-kpi-data-mapping on GitHub" data-status="production">
-          <span class="status-chip production">production</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-kpi-data-mapping</h4>
-            <i data-lucide="github"></i>
+        </div>
+        <div class="skill-card">
+          <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-kpi-data-mapping" data-status="development">
+            <span class="status-chip development">development</span>
+            <div class="skill-head">
+              <h4 class="skill-cmd">$dia-kpi-data-mapping</h4>
+            </div>
+            <p class="skill-desc">Map confirmed KPIs to dataset fields and gaps, with optional separate data-supported recommendations selected by the user.</p>
+          </a>
+          <div class="skill-actions">
+            <button type="button" class="copy-btn card-copy" data-copy-command="$dia-kpi-data-mapping" aria-label="Copy $dia-kpi-data-mapping command" title="Copy $dia-kpi-data-mapping to the clipboard">
+              <svg class="lucide icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg>
+              <svg class="lucide icon-check" aria-hidden="true"><use href="#i-check"></use></svg>
+              <span class="copy-label-text">Copy command</span>
+            </button>
+            <a class="skill-source" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-kpi-data-mapping" title="View dia-kpi-data-mapping source on GitHub">
+              <svg class="lucide" aria-hidden="true"><use href="#i-external-link"></use></svg>View source
+            </a>
           </div>
-          <p>Map requested KPIs to dataset fields and gaps, with optional separate data-supported recommendations selected by the user.</p>
-        </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-dashboard-mockup" title="View dia-dashboard-mockup on GitHub" data-status="testing">
-          <span class="status-chip testing">testing</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-dashboard-mockup</h4>
-            <i data-lucide="github"></i>
+        </div>
+        <div class="skill-card">
+          <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-dashboard-mockup" data-status="development">
+            <span class="status-chip development">development</span>
+            <div class="skill-head">
+              <h4 class="skill-cmd">$dia-dashboard-mockup</h4>
+            </div>
+            <p class="skill-desc">Render selected requested and recommended measures from a confirmed mapping report into a UCSD-branded HTML mockup, preserving origins, mock labels, and data-gap panels.</p>
+          </a>
+          <div class="skill-actions">
+            <button type="button" class="copy-btn card-copy" data-copy-command="$dia-dashboard-mockup" aria-label="Copy $dia-dashboard-mockup command" title="Copy $dia-dashboard-mockup to the clipboard">
+              <svg class="lucide icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg>
+              <svg class="lucide icon-check" aria-hidden="true"><use href="#i-check"></use></svg>
+              <span class="copy-label-text">Copy command</span>
+            </button>
+            <a class="skill-source" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-dashboard-mockup" title="View dia-dashboard-mockup source on GitHub">
+              <svg class="lucide" aria-hidden="true"><use href="#i-external-link"></use></svg>View source
+            </a>
           </div>
-          <p>Render selected requested and recommended measures from a confirmed mapping report, preserving origins, mock labels, and data-gap panels.</p>
-        </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-dataset-profile" title="View dia-dataset-profile on GitHub" data-status="production">
-          <span class="status-chip production">production</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-dataset-profile</h4>
-            <i data-lucide="github"></i>
+        </div>
+        <div class="skill-card">
+          <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-dataset-profile" data-status="development">
+            <span class="status-chip development">development</span>
+            <div class="skill-head">
+              <h4 class="skill-cmd">$dia-dataset-profile</h4>
+            </div>
+            <p class="skill-desc">Understand one new CSV file or selected XLSX sheet: how to read it, possible uses, data issues, and questions for its owner.</p>
+          </a>
+          <div class="skill-actions">
+            <button type="button" class="copy-btn card-copy" data-copy-command="$dia-dataset-profile" aria-label="Copy $dia-dataset-profile command" title="Copy $dia-dataset-profile to the clipboard">
+              <svg class="lucide icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg>
+              <svg class="lucide icon-check" aria-hidden="true"><use href="#i-check"></use></svg>
+              <span class="copy-label-text">Copy command</span>
+            </button>
+            <a class="skill-source" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-dataset-profile" title="View dia-dataset-profile source on GitHub">
+              <svg class="lucide" aria-hidden="true"><use href="#i-external-link"></use></svg>View source
+            </a>
           </div>
-          <p>Understand one new CSV file or selected XLSX sheet: how to read it, possible uses, data issues, and questions for its owner.</p>
-        </a>
+        </div>
 
 
 
@@ -564,89 +950,200 @@ section[id]{scroll-margin-top:84px}
         </div>
       </div>
       <div class="skill-grid">
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-data-model-intake" title="View dia-data-model-intake on GitHub" data-status="development">
-          <span class="status-chip development">development</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-data-model-intake</h4>
-            <i data-lucide="github"></i>
+        <div class="skill-card">
+          <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-data-model-intake" data-status="development">
+            <span class="status-chip development">development</span>
+            <div class="skill-head">
+              <h4 class="skill-cmd">$dia-data-model-intake</h4>
+            </div>
+            <p class="skill-desc">Extract deterministic facts from one Oracle BI Publisher data model into model-facts.yaml.</p>
+          </a>
+          <div class="skill-actions">
+            <button type="button" class="copy-btn card-copy" data-copy-command="$dia-data-model-intake" aria-label="Copy $dia-data-model-intake command" title="Copy $dia-data-model-intake to the clipboard">
+              <svg class="lucide icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg>
+              <svg class="lucide icon-check" aria-hidden="true"><use href="#i-check"></use></svg>
+              <span class="copy-label-text">Copy command</span>
+            </button>
+            <a class="skill-source" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-data-model-intake" title="View dia-data-model-intake source on GitHub">
+              <svg class="lucide" aria-hidden="true"><use href="#i-external-link"></use></svg>View source
+            </a>
           </div>
-          <p>Extract deterministic facts from one Oracle BI Publisher data model into model-facts.yaml.</p>
-        </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-data-model-profiler" title="View dia-data-model-profiler on GitHub" data-status="testing">
-          <span class="status-chip testing">testing</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-data-model-profiler</h4>
-            <i data-lucide="github"></i>
+        </div>
+        <div class="skill-card">
+          <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-data-model-profiler" data-status="development">
+            <span class="status-chip development">development</span>
+            <div class="skill-head">
+              <h4 class="skill-cmd">$dia-data-model-profiler</h4>
+            </div>
+            <p class="skill-desc">Profile one model-facts.yaml for grain, filters, hard-coded logic, join and dedup patterns, row-count risk, and source lineage.</p>
+          </a>
+          <div class="skill-actions">
+            <button type="button" class="copy-btn card-copy" data-copy-command="$dia-data-model-profiler" aria-label="Copy $dia-data-model-profiler command" title="Copy $dia-data-model-profiler to the clipboard">
+              <svg class="lucide icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg>
+              <svg class="lucide icon-check" aria-hidden="true"><use href="#i-check"></use></svg>
+              <span class="copy-label-text">Copy command</span>
+            </button>
+            <a class="skill-source" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-data-model-profiler" title="View dia-data-model-profiler source on GitHub">
+              <svg class="lucide" aria-hidden="true"><use href="#i-external-link"></use></svg>View source
+            </a>
           </div>
-          <p>Profile one model-facts.yaml for grain, filters, hard-coded logic, join patterns, and source lineage.</p>
-        </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-data-model-docs" title="View dia-data-model-docs on GitHub" data-status="development">
-          <span class="status-chip development">development</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-data-model-docs</h4>
-            <i data-lucide="github"></i>
+        </div>
+        <div class="skill-card">
+          <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-data-model-docs" data-status="development">
+            <span class="status-chip development">development</span>
+            <div class="skill-head">
+              <h4 class="skill-cmd">$dia-data-model-docs</h4>
+            </div>
+            <p class="skill-desc">Draft analyst-facing documents, including a data dictionary and a KPI and business-questions catalog, from one model-facts.yaml and its structural profile.</p>
+          </a>
+          <div class="skill-actions">
+            <button type="button" class="copy-btn card-copy" data-copy-command="$dia-data-model-docs" aria-label="Copy $dia-data-model-docs command" title="Copy $dia-data-model-docs to the clipboard">
+              <svg class="lucide icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg>
+              <svg class="lucide icon-check" aria-hidden="true"><use href="#i-check"></use></svg>
+              <span class="copy-label-text">Copy command</span>
+            </button>
+            <a class="skill-source" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-data-model-docs" title="View dia-data-model-docs source on GitHub">
+              <svg class="lucide" aria-hidden="true"><use href="#i-external-link"></use></svg>View source
+            </a>
           </div>
-          <p>Draft analyst-facing documents, including a data dictionary and a KPI and business-questions catalog, from one model-facts.yaml and its structural profile.</p>
-        </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-bi-publisher-sql-optimizer" title="View dia-bi-publisher-sql-optimizer on GitHub" data-status="development">
-          <span class="status-chip development">development</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-bi-publisher-sql-optimizer</h4>
-            <i data-lucide="github"></i>
+        </div>
+        <div class="skill-card">
+          <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-bi-publisher-sql-optimizer" data-status="testing">
+            <span class="status-chip testing">testing</span>
+            <div class="skill-head">
+              <h4 class="skill-cmd">$dia-bi-publisher-sql-optimizer</h4>
+            </div>
+            <p class="skill-desc">Review one BI Publisher SQL dataset with a required SQL Monitor export and confirmed 200-row editor smoke test, propose behavior-preserving changes, and compare before/after estimated plans.</p>
+          </a>
+          <div class="skill-actions">
+            <button type="button" class="copy-btn card-copy" data-copy-command="$dia-bi-publisher-sql-optimizer" aria-label="Copy $dia-bi-publisher-sql-optimizer command" title="Copy $dia-bi-publisher-sql-optimizer to the clipboard">
+              <svg class="lucide icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg>
+              <svg class="lucide icon-check" aria-hidden="true"><use href="#i-check"></use></svg>
+              <span class="copy-label-text">Copy command</span>
+            </button>
+            <a class="skill-source" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-bi-publisher-sql-optimizer" title="View dia-bi-publisher-sql-optimizer source on GitHub">
+              <svg class="lucide" aria-hidden="true"><use href="#i-external-link"></use></svg>View source
+            </a>
           </div>
-          <p>Review one BI Publisher SQL dataset with a required SQL Monitor export and confirmed 200-row editor smoke test, propose behavior-preserving changes, and compare before/after estimated plans.</p>
-        </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-otbi-to-bipublisher-sql" title="View dia-otbi-to-bipublisher-sql on GitHub" data-status="testing">
-          <span class="status-chip testing">testing</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-otbi-to-bipublisher-sql</h4>
-            <i data-lucide="database"></i>
+        </div>
+        <div class="skill-card">
+          <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-otbi-to-bip-sql" data-status="testing">
+            <span class="status-chip testing">testing</span>
+            <div class="skill-head">
+              <h4 class="skill-cmd">$dia-otbi-to-bip-sql</h4>
+            </div>
+            <p class="skill-desc">Translate an OTBI analysis in a .catalog file into reviewable BI Publisher SQL using an OFC mapping workbook, with field, formula, filter, currency, and join traceability.</p>
+          </a>
+          <div class="skill-actions">
+            <button type="button" class="copy-btn card-copy" data-copy-command="$dia-otbi-to-bip-sql" aria-label="Copy $dia-otbi-to-bip-sql command" title="Copy $dia-otbi-to-bip-sql to the clipboard">
+              <svg class="lucide icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg>
+              <svg class="lucide icon-check" aria-hidden="true"><use href="#i-check"></use></svg>
+              <span class="copy-label-text">Copy command</span>
+            </button>
+            <a class="skill-source" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-otbi-to-bip-sql" title="View dia-otbi-to-bip-sql source on GitHub">
+              <svg class="lucide" aria-hidden="true"><use href="#i-external-link"></use></svg>View source
+            </a>
           </div>
-          <p>Convert one OTBI analysis into logical and physical BI Publisher SQL using official Oracle lineage mappings, parameters, list-of-values SQL, and real-time join research.</p>
-        </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-tableau-dataset-intelligence" title="View dia-tableau-dataset-intelligence on GitHub" data-status="development">
-          <span class="status-chip development">development</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-tableau-dataset-intelligence</h4>
-            <i data-lucide="github"></i>
+        </div>
+        <div class="skill-card">
+          <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-tableau-dataset-intelligence" data-status="development">
+            <span class="status-chip development">development</span>
+            <div class="skill-head">
+              <h4 class="skill-cmd">$dia-tableau-dataset-intelligence</h4>
+            </div>
+            <p class="skill-desc">Build a complete structured Dataset Intelligence Pack from TWB or TWBX metadata, with opt-in local Hyper value profiling, contextual analyst views, and unverified proposals.</p>
+          </a>
+          <div class="skill-actions">
+            <button type="button" class="copy-btn card-copy" data-copy-command="$dia-tableau-dataset-intelligence" aria-label="Copy $dia-tableau-dataset-intelligence command" title="Copy $dia-tableau-dataset-intelligence to the clipboard">
+              <svg class="lucide icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg>
+              <svg class="lucide icon-check" aria-hidden="true"><use href="#i-check"></use></svg>
+              <span class="copy-label-text">Copy command</span>
+            </button>
+            <a class="skill-source" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-tableau-dataset-intelligence" title="View dia-tableau-dataset-intelligence source on GitHub">
+              <svg class="lucide" aria-hidden="true"><use href="#i-external-link"></use></svg>View source
+            </a>
           </div>
-          <p>Build a complete structured Dataset Intelligence Pack from TWB or TWBX metadata, with opt-in local Hyper value profiling, contextual analyst views, and unverified proposals.</p>
-        </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-tableau-data-dictionary" title="View dia-tableau-data-dictionary on GitHub" data-status="testing">
-          <span class="status-chip testing">testing</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-tableau-data-dictionary</h4>
-            <i data-lucide="github"></i>
+        </div>
+        <div class="skill-card">
+          <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-tableau-data-dictionary" data-status="development">
+            <span class="status-chip development">development</span>
+            <div class="skill-head">
+              <h4 class="skill-cmd">$dia-tableau-data-dictionary</h4>
+            </div>
+            <p class="skill-desc">Explain Tableau fields using dataset context and generate a concise analyst dictionary from versioned metadata.</p>
+          </a>
+          <div class="skill-actions">
+            <button type="button" class="copy-btn card-copy" data-copy-command="$dia-tableau-data-dictionary" aria-label="Copy $dia-tableau-data-dictionary command" title="Copy $dia-tableau-data-dictionary to the clipboard">
+              <svg class="lucide icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg>
+              <svg class="lucide icon-check" aria-hidden="true"><use href="#i-check"></use></svg>
+              <span class="copy-label-text">Copy command</span>
+            </button>
+            <a class="skill-source" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-tableau-data-dictionary" title="View dia-tableau-data-dictionary source on GitHub">
+              <svg class="lucide" aria-hidden="true"><use href="#i-external-link"></use></svg>View source
+            </a>
           </div>
-          <p>Explain Tableau fields using dataset context and generate a concise analyst dictionary from versioned metadata.</p>
-        </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-tableau-workbook-intake" title="View dia-tableau-workbook-intake on GitHub" data-status="testing">
-          <span class="status-chip testing">testing</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-tableau-workbook-intake</h4>
-            <i data-lucide="github"></i>
+        </div>
+        <div class="skill-card">
+          <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-tableau-workbook-intake" data-status="development">
+            <span class="status-chip development">development</span>
+            <div class="skill-head">
+              <h4 class="skill-cmd">$dia-tableau-workbook-intake</h4>
+            </div>
+            <p class="skill-desc">Extract deterministic workbook facts, data-source field metadata, and model structure into workbook-facts.yaml.</p>
+          </a>
+          <div class="skill-actions">
+            <button type="button" class="copy-btn card-copy" data-copy-command="$dia-tableau-workbook-intake" aria-label="Copy $dia-tableau-workbook-intake command" title="Copy $dia-tableau-workbook-intake to the clipboard">
+              <svg class="lucide icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg>
+              <svg class="lucide icon-check" aria-hidden="true"><use href="#i-check"></use></svg>
+              <span class="copy-label-text">Copy command</span>
+            </button>
+            <a class="skill-source" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-tableau-workbook-intake" title="View dia-tableau-workbook-intake source on GitHub">
+              <svg class="lucide" aria-hidden="true"><use href="#i-external-link"></use></svg>View source
+            </a>
           </div>
-          <p>Extract deterministic workbook facts and data-source field metadata into workbook-facts.yaml.</p>
-        </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-tableau-dashboard-docs" title="View dia-tableau-dashboard-docs on GitHub" data-status="development">
-          <span class="status-chip development">development</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-tableau-dashboard-docs</h4>
-            <i data-lucide="github"></i>
+        </div>
+        <div class="skill-card">
+          <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-tableau-dashboard-docs" data-status="development">
+            <span class="status-chip development">development</span>
+            <div class="skill-head">
+              <h4 class="skill-cmd">$dia-tableau-dashboard-docs</h4>
+            </div>
+            <p class="skill-desc">Draft internal dashboard-reference and sheet-specs documentation from one confirmed workbook-facts.yaml.</p>
+          </a>
+          <div class="skill-actions">
+            <button type="button" class="copy-btn card-copy" data-copy-command="$dia-tableau-dashboard-docs" aria-label="Copy $dia-tableau-dashboard-docs command" title="Copy $dia-tableau-dashboard-docs to the clipboard">
+              <svg class="lucide icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg>
+              <svg class="lucide icon-check" aria-hidden="true"><use href="#i-check"></use></svg>
+              <span class="copy-label-text">Copy command</span>
+            </button>
+            <a class="skill-source" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-tableau-dashboard-docs" title="View dia-tableau-dashboard-docs source on GitHub">
+              <svg class="lucide" aria-hidden="true"><use href="#i-external-link"></use></svg>View source
+            </a>
           </div>
-          <p>Draft internal dashboard-reference and sheet-specs documentation from one confirmed workbook-facts.yaml.</p>
-        </a>
-        <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-tableau-workbook-audit" title="View dia-tableau-workbook-audit on GitHub" data-status="development">
-          <span class="status-chip development">development</span>
-          <div class="skill-head">
-            <h4 class="skill-cmd">$dia-tableau-workbook-audit</h4>
-            <i data-lucide="github"></i>
+        </div>
+        <div class="skill-card">
+          <a class="skill" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-tableau-workbook-audit" data-status="development">
+            <span class="status-chip development">development</span>
+            <div class="skill-head">
+              <h4 class="skill-cmd">$dia-tableau-workbook-audit</h4>
+            </div>
+            <p class="skill-desc">Audit one workbook's facts: sheet usage, orphan sheets, duplicate names, calculation reuse, and parameters.</p>
+          </a>
+          <div class="skill-actions">
+            <button type="button" class="copy-btn card-copy" data-copy-command="$dia-tableau-workbook-audit" aria-label="Copy $dia-tableau-workbook-audit command" title="Copy $dia-tableau-workbook-audit to the clipboard">
+              <svg class="lucide icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg>
+              <svg class="lucide icon-check" aria-hidden="true"><use href="#i-check"></use></svg>
+              <span class="copy-label-text">Copy command</span>
+            </button>
+            <a class="skill-source" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/tree/main/skills/dia-tableau-workbook-audit" title="View dia-tableau-workbook-audit source on GitHub">
+              <svg class="lucide" aria-hidden="true"><use href="#i-external-link"></use></svg>View source
+            </a>
           </div>
-          <p>Audit one workbook's facts: sheet usage, orphan sheets, duplicate names, calculation reuse, and parameters.</p>
-        </a>
+        </div>
       </div>
     </div>
 
+    <p class="skills-empty" id="skills-empty" role="status"></p>
   </div>
 </section>
 
@@ -654,81 +1151,87 @@ section[id]{scroll-margin-top:84px}
   <div class="shell">
     <div class="section-head">
       <h2>Playbooks</h2>
-      <p>Reviewed skills strung into end-to-end workflows. One fan-out branches from a shared input; the pipelines hand off in one direction.</p>
+      <p class="pb-banner"><svg class="lucide" aria-hidden="true"><use href="#i-route"></use></svg>A playbook is a confirmed sequence of skills - you invoke one command and the steps run in order.</p>
+      <p>Reviewed skills strung into end-to-end workflows. One fan-out branches from a shared input; the pipelines hand off in one direction. The dot beside each playbook title shows the playbook's lifecycle; the dot beside every skill shows that skill's lifecycle.</p>
+      <div class="pb-legend">
+        <span class="pb-legend-item"><span class="skill-dot production"></span><strong>Production</strong> = ready for daily use</span>
+        <span class="pb-legend-item"><span class="skill-dot testing"></span><strong>Testing</strong> = pilot-ready, may change</span>
+        <span class="pb-legend-item"><span class="skill-dot development"></span><strong>Development</strong> = in progress</span>
+      </div>
     </div>
     <h3 class="pb-kind">Fan-outs <span class="pattern-chip fanout">Fan-out</span> <span class="pb-kind-note">one shared input, several independent outputs</span></h3>
     <div class="pb-grid">
       <article class="pb spanfull">
-        <h3>One transcript, many artifacts</h3>
+        <h3>One transcript, many artifacts <span class="skill-dot testing" data-pb-status="testing"></span></h3>
         <p class="pb-desc">Save one Zoom transcript, then pull whichever derived documents the meeting needs. Each branch runs on its own and asks its own confirmation.</p>
         <div class="fan">
           <div class="fan-src"><span class="fan-source">one Zoom<br>transcript</span></div>
           <div class="fan-rail"></div>
           <div class="fan-outs">
-            <div class="fan-out"><code>$dia-transcript-to-meeting-notes</code><em>&rarr; local note</em></div>
-            <div class="fan-out"><code>$dia-transcript-to-requirements</code><em>&rarr; requirements doc</em></div>
-            <div class="fan-out"><code>$dia-transcript-to-process-map</code><em>&rarr; outline &rarr; map</em></div>
-            <div class="fan-out"><code>$dia-transcript-to-kpis</code><em>&rarr; KPIs + YAML</em></div>
+            <div class="fan-out"><code>$dia-transcript-to-meeting-notes</code><span class="skill-dot testing" data-skill="$dia-transcript-to-meeting-notes"></span><em>&rarr; local note</em></div>
+            <div class="fan-out"><code>$dia-transcript-to-requirements</code><span class="skill-dot testing" data-skill="$dia-transcript-to-requirements"></span><em>&rarr; requirements doc</em></div>
+            <div class="fan-out"><code>$dia-transcript-to-process-map</code><span class="skill-dot testing" data-skill="$dia-transcript-to-process-map"></span><em>&rarr; outline &rarr; map</em></div>
+            <div class="fan-out"><code>$dia-transcript-to-kpis</code><span class="skill-dot testing" data-skill="$dia-transcript-to-kpis"></span><em>&rarr; KPIs + YAML</em></div>
           </div>
         </div>
-        <p class="fan-note"><i data-lucide="git-branch"></i>Requirements feeds the process map when both run; the other branches are independent.</p>
+        <p class="fan-note"><svg class="lucide" aria-hidden="true"><use href="#i-git-branch"></use></svg>Requirements feeds the process map when both run; the other branches are independent.</p>
         <div class="pb-foot">
-          <span class="pb-meta"><i data-lucide="list-ordered"></i>4 skills &middot; run the outputs you need</span>
-          <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/one-transcript-many-artifacts.md">Open playbook<i data-lucide="arrow-right"></i></a>
+          <span class="pb-meta"><svg class="lucide" aria-hidden="true"><use href="#i-list-ordered"></use></svg>4 skills &middot; run the outputs you need</span>
+          <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/one-transcript-many-artifacts.md">Open playbook<svg class="lucide" aria-hidden="true"><use href="#i-arrow-right"></use></svg></a>
         </div>
       </article>
     </div>
     <h3 class="pb-kind">Pipelines <span class="pattern-chip pipeline">Pipeline</span> <span class="pb-kind-note">linear handoffs, one direction</span></h3>
     <div class="pb-grid">
       <article class="pb">
-        <h3>Requirements to process map</h3>
+        <h3>Requirements to process map <span class="skill-dot testing" data-pb-status="testing"></span></h3>
         <p class="pb-desc">Turn a business-owner requirements conversation into a structured requirements document and a rendered process map.</p>
         <ol class="steps">
-          <li><span class="step-num">1</span><code>$dia-transcript-to-requirements</code></li>
-          <li><span class="step-num">2</span><code>$dia-transcript-to-process-map</code></li>
+          <li><span class="step-num">1</span><span class="step-skill"><code>$dia-transcript-to-requirements</code><span class="skill-dot testing" data-skill="$dia-transcript-to-requirements"></span></span></li>
+          <li><span class="step-num">2</span><span class="step-skill"><code>$dia-transcript-to-process-map</code><span class="skill-dot testing" data-skill="$dia-transcript-to-process-map"></span></span></li>
         </ol>
         <div class="pb-foot">
-          <span class="pb-meta"><i data-lucide="list-ordered"></i>2 skills &middot; run per requirements conversation</span>
-          <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/requirements-to-process-map.md">Open playbook<i data-lucide="arrow-right"></i></a>
+          <span class="pb-meta"><svg class="lucide" aria-hidden="true"><use href="#i-list-ordered"></use></svg>2 skills &middot; run per requirements conversation</span>
+          <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/requirements-to-process-map.md">Open playbook<svg class="lucide" aria-hidden="true"><use href="#i-arrow-right"></use></svg></a>
         </div>
       </article>
       <article class="pb">
-        <h3>Business questions to dashboard mockup</h3>
+        <h3>Business questions to dashboard mockup <span class="skill-dot development" data-pb-status="development"></span></h3>
         <p class="pb-desc">Create the analysis workspace, capture requested KPIs, and map them to data. Optionally select separate data-supported recommendations, then render a mockup with origin labels and explicit gaps.</p>
         <ol class="steps">
-          <li><span class="step-num">1</span><code>$dia-new-workspace</code></li>
-          <li><span class="step-num">2</span><code>$dia-transcript-to-kpis</code></li>
-          <li><span class="step-num">3</span><code>$dia-kpi-data-mapping</code></li>
-          <li><span class="step-num">4</span><code>$dia-dashboard-mockup</code></li>
+          <li><span class="step-num">1</span><span class="step-skill"><code>$dia-new-workspace</code><span class="skill-dot production" data-skill="$dia-new-workspace"></span></span></li>
+          <li><span class="step-num">2</span><span class="step-skill"><code>$dia-transcript-to-kpis</code><span class="skill-dot testing" data-skill="$dia-transcript-to-kpis"></span></span></li>
+          <li><span class="step-num">3</span><span class="step-skill"><code>$dia-kpi-data-mapping</code><span class="skill-dot development" data-skill="$dia-kpi-data-mapping"></span></span></li>
+          <li><span class="step-num">4</span><span class="step-skill"><code>$dia-dashboard-mockup</code><span class="skill-dot development" data-skill="$dia-dashboard-mockup"></span></span></li>
         </ol>
         <div class="pb-foot">
-          <span class="pb-meta"><i data-lucide="list-ordered"></i>4 skills &middot; stop after mapping if that's enough</span>
-          <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/business-questions-to-dashboard-mockup.md">Open playbook<i data-lucide="arrow-right"></i></a>
+          <span class="pb-meta"><svg class="lucide" aria-hidden="true"><use href="#i-list-ordered"></use></svg>4 skills &middot; stop after mapping if that's enough</span>
+          <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/business-questions-to-dashboard-mockup.md">Open playbook<svg class="lucide" aria-hidden="true"><use href="#i-arrow-right"></use></svg></a>
         </div>
       </article>
       <article class="pb">
-        <h3>Data model to documentation</h3>
+        <h3>Data model to documentation <span class="skill-dot development" data-pb-status="development"></span></h3>
         <p class="pb-desc">Extract facts from one Oracle BI Publisher data model, profile its structure for grain, filters, and lineage, then draft analyst-facing documentation. Stop after the profile when that's the deliverable.</p>
         <ol class="steps">
-          <li><span class="step-num">1</span><code>$dia-data-model-intake</code></li>
-          <li><span class="step-num">2</span><code>$dia-data-model-profiler</code></li>
-          <li><span class="step-num">3</span><code>$dia-data-model-docs</code></li>
+          <li><span class="step-num">1</span><span class="step-skill"><code>$dia-data-model-intake</code><span class="skill-dot development" data-skill="$dia-data-model-intake"></span></span></li>
+          <li><span class="step-num">2</span><span class="step-skill"><code>$dia-data-model-profiler</code><span class="skill-dot development" data-skill="$dia-data-model-profiler"></span></span></li>
+          <li><span class="step-num">3</span><span class="step-skill"><code>$dia-data-model-docs</code><span class="skill-dot development" data-skill="$dia-data-model-docs"></span></span></li>
         </ol>
         <div class="pb-foot">
-          <span class="pb-meta"><i data-lucide="list-ordered"></i>3 skills &middot; stop after profiling if that's enough</span>
-          <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/data-model-to-documentation.md">Open playbook<i data-lucide="arrow-right"></i></a>
+          <span class="pb-meta"><svg class="lucide" aria-hidden="true"><use href="#i-list-ordered"></use></svg>3 skills &middot; stop after profiling if that's enough</span>
+          <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/data-model-to-documentation.md">Open playbook<svg class="lucide" aria-hidden="true"><use href="#i-arrow-right"></use></svg></a>
         </div>
       </article>
       <article class="pb">
-        <h3>Workspace to first answer</h3>
+        <h3>Workspace to first answer <span class="skill-dot development" data-pb-status="development"></span></h3>
         <p class="pb-desc">Scaffold the workspace, drop one file in <code>data/raw/</code>, link it, and answer ad hoc questions read-only.</p>
         <ol class="steps">
-          <li><span class="step-num">1</span><code>$dia-new-workspace</code></li>
-          <li><span class="step-num">2</span><code>$dia-analyze-local-data</code></li>
+          <li><span class="step-num">1</span><span class="step-skill"><code>$dia-new-workspace</code><span class="skill-dot production" data-skill="$dia-new-workspace"></span></span></li>
+          <li><span class="step-num">2</span><span class="step-skill"><code>$dia-analyze-local-data</code><span class="skill-dot development" data-skill="$dia-analyze-local-data"></span></span></li>
         </ol>
         <div class="pb-foot">
-          <span class="pb-meta"><i data-lucide="list-ordered"></i>2 skills &middot; setup once, answer ad hoc</span>
-          <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/workspace-to-first-answer.md">Open playbook<i data-lucide="arrow-right"></i></a>
+          <span class="pb-meta"><svg class="lucide" aria-hidden="true"><use href="#i-list-ordered"></use></svg>2 skills &middot; setup once, answer ad hoc</span>
+          <a class="btn-link" href="https://github.com/UC-San-Diego-DIA/DIA-Harness-Skills/blob/main/playbooks/workspace-to-first-answer.md">Open playbook<svg class="lucide" aria-hidden="true"><use href="#i-arrow-right"></use></svg></a>
         </div>
       </article>
     </div>
@@ -738,7 +1241,15 @@ section[id]{scroll-margin-top:84px}
 <section class="cta">
   <div class="shell cta-inner">
     <h2>Load the library into your agent</h2>
-    <p>The copyable prompt at the top of this page installs every production and testing skill in one paste, and it keeps working as the library grows. Prefer PowerShell? The README documents single-skill installs, lifecycle filters, and an install-everything command.</p>
+    <p>This prompt installs every production and testing skill in one paste, and it keeps working as the library grows. Prefer PowerShell? The README documents single-skill installs, lifecycle filters, and an install-everything command.</p>
+    <div class="cta-actions">
+      <button type="button" class="copy-btn cta-copy" data-copy-target="hero-install-prompt" aria-label="Copy install prompt" title="Copy the prompt, then paste it into TritonAI Harness">
+        <svg class="lucide icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg>
+        <svg class="lucide icon-check" aria-hidden="true"><use href="#i-check"></use></svg>
+        <span class="copy-label-text">Copy install prompt</span>
+      </button>
+    </div>
+    <p class="cta-note">After installing, restart TritonAI Harness, then type <code>$dia-</code> plus the skill name.</p>
   </div>
 </section>
 
@@ -757,97 +1268,203 @@ section[id]{scroll-margin-top:84px}
   </div>
 </footer>
 
+<span class="sr-only" id="copy-status" role="status" aria-live="polite"></span>
+
 <script>
-lucide.createIcons();
+(function () {
+  'use strict';
 
-function fallbackCopyText(text) {
-  var area = document.createElement('textarea');
-  area.value = text;
-  area.setAttribute('readonly', '');
-  area.style.position = 'fixed';
-  area.style.opacity = '0';
-  document.body.appendChild(area);
-  area.select();
-  document.execCommand('copy');
-  document.body.removeChild(area);
-}
+  function fallbackCopyText(text) {
+    var area = document.createElement('textarea');
+    area.value = text;
+    area.setAttribute('readonly', '');
+    area.style.position = 'fixed';
+    area.style.opacity = '0';
+    document.body.appendChild(area);
+    area.select();
+    document.execCommand('copy');
+    document.body.removeChild(area);
+  }
 
-function markCopied(button) {
-  button.classList.add('copied');
-  button.setAttribute('aria-label', 'Prompt copied');
-  window.setTimeout(function () {
-    button.classList.remove('copied');
-    button.setAttribute('aria-label', 'Copy install prompt');
-  }, 1800);
-}
-
-document.querySelectorAll('.copy-btn').forEach(function (button) {
-  button.addEventListener('click', function () {
-    var target = document.getElementById(button.getAttribute('data-copy-target'));
-    if (!target) {
-      return;
-    }
-    var text = target.textContent.trim();
-    var mark = function () { markCopied(button); };
+  function copyText(text, done) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(mark, function () {
+      navigator.clipboard.writeText(text).then(done, function () {
         fallbackCopyText(text);
-        mark();
+        done();
       });
     }
     else {
       fallbackCopyText(text);
-      mark();
+      done();
+    }
+  }
+
+  function flashCopied(button, message) {
+    var label = button.querySelector('.copy-label-text');
+    var status = document.getElementById('copy-status');
+    if (button._resetTimer) {
+      window.clearTimeout(button._resetTimer);
+    }
+    button.classList.add('copied');
+    button.setAttribute('aria-label', message);
+    if (label) {
+      label.textContent = 'Copied';
+    }
+    if (status) {
+      status.textContent = message;
+    }
+    button._resetTimer = window.setTimeout(function () {
+      button.classList.remove('copied');
+      button.setAttribute('aria-label', button.getAttribute('data-default-aria') || 'Copy');
+      if (label) {
+        label.textContent = button.getAttribute('data-default-label') || 'Copy';
+      }
+      if (status) {
+        status.textContent = '';
+      }
+      button._resetTimer = null;
+    }, 1800);
+  }
+
+  document.querySelectorAll('.copy-btn').forEach(function (button) {
+    button.setAttribute('data-default-aria', button.getAttribute('aria-label') || 'Copy');
+    var label = button.querySelector('.copy-label-text');
+    if (label) {
+      button.setAttribute('data-default-label', label.textContent);
     }
   });
-});
 
-var lifecycleFilter = document.getElementById('lifecycle-filter');
-if (lifecycleFilter) {
-  var applyLifecycleFilter = function () {
-    var selected = null;
-    lifecycleFilter.querySelectorAll('.filter-chip').forEach(function (chip) {
-      var pressed = chip.getAttribute('aria-pressed') === 'true';
-      if (pressed) {
-        selected = chip.getAttribute('data-value');
+  document.querySelectorAll('[data-copy-target]').forEach(function (button) {
+    button.addEventListener('click', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      var target = document.getElementById(button.getAttribute('data-copy-target'));
+      if (!target) {
+        return;
       }
-      chip.classList.toggle('checked', pressed);
-    });
-    document.querySelectorAll('#skills .group').forEach(function (group) {
-      var visible = 0;
-      group.querySelectorAll('.skill').forEach(function (skill) {
-        var show = selected === null || selected === skill.getAttribute('data-status');
-        skill.classList.toggle('skill-hidden', !show);
-        if (show) {
-          visible += 1;
-        }
+      copyText(target.textContent.trim(), function () {
+        flashCopied(button, 'Install prompt copied');
       });
-      group.classList.toggle('group-hidden', visible === 0);
-    });
-  };
-  lifecycleFilter.querySelectorAll('.filter-chip').forEach(function (chip) {
-    chip.addEventListener('click', function () {
-      var activate = chip.getAttribute('aria-pressed') !== 'true';
-      lifecycleFilter.querySelectorAll('.filter-chip').forEach(function (other) {
-        other.setAttribute('aria-pressed', other === chip && activate ? 'true' : 'false');
-      });
-      applyLifecycleFilter();
     });
   });
-  applyLifecycleFilter();
-}
 
-var stats = {
-  skills: document.querySelectorAll('#skills .skill').length,
-  playbooks: document.querySelectorAll('#playbooks .pb').length,
-  groups: document.querySelectorAll('#skills .group').length
-};
-Object.keys(stats).forEach(function (key) {
-  var node = document.querySelector('[data-stat="' + key + '"]');
-  if (node) {
-    node.textContent = stats[key];
+  document.querySelectorAll('[data-copy-command]').forEach(function (button) {
+    button.addEventListener('click', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      var command = button.getAttribute('data-copy-command');
+      copyText(command, function () {
+        flashCopied(button, command + ' copied');
+      });
+    });
+  });
+
+  var lifecycleFilter = document.getElementById('lifecycle-filter');
+  var searchInput = document.getElementById('skill-search');
+  var emptyState = document.getElementById('skills-empty');
+  var cards = Array.prototype.slice.call(document.querySelectorAll('#skills .skill-card'));
+  var chips = lifecycleFilter ? Array.prototype.slice.call(lifecycleFilter.querySelectorAll('.filter-chip')) : [];
+  var selected = { production: true, testing: true, development: false };
+  var counts = { production: 0, testing: 0, development: 0 };
+
+  cards.forEach(function (card) {
+    var anchor = card.querySelector('.skill');
+    var status = anchor ? anchor.getAttribute('data-status') : '';
+    if (counts[status] !== undefined) {
+      counts[status] += 1;
+    }
+  });
+
+  chips.forEach(function (chip) {
+    var value = chip.getAttribute('data-value');
+    var countNode = chip.querySelector('.chip-count');
+    if (value !== 'all' && countNode && counts[value] !== undefined) {
+      countNode.textContent = '(' + counts[value] + ')';
+    }
+  });
+
+  function syncChips() {
+    chips.forEach(function (chip) {
+      var value = chip.getAttribute('data-value');
+      var on = value === 'all'
+        ? selected.production && selected.testing && selected.development
+        : !!selected[value];
+      chip.setAttribute('aria-pressed', on ? 'true' : 'false');
+      chip.classList.toggle('checked', on);
+    });
   }
-});
+
+  function applyFilters() {
+    var query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    var total = 0;
+    cards.forEach(function (card) {
+      var anchor = card.querySelector('.skill');
+      var status = anchor ? anchor.getAttribute('data-status') : '';
+      var commandNode = card.querySelector('.skill-cmd');
+      var descNode = card.querySelector('.skill-desc');
+      var command = commandNode ? commandNode.textContent : '';
+      var slugWords = command.replace(/\$?dia-/g, ' ').replace(/-/g, ' ');
+      var haystack = (command + ' ' + slugWords + ' ' + (descNode ? descNode.textContent : '')).toLowerCase();
+      var show = !!selected[status] && (query === '' || haystack.indexOf(query) !== -1);
+      card.classList.toggle('skill-hidden', !show);
+      if (show) {
+        total += 1;
+      }
+    });
+    document.querySelectorAll('#skills .group').forEach(function (group) {
+      var visible = group.querySelectorAll('.skill-card:not(.skill-hidden)').length;
+      group.classList.toggle('group-hidden', visible === 0);
+    });
+    if (emptyState) {
+      if (total === 0) {
+        var noneSelected = !selected.production && !selected.testing && !selected.development;
+        emptyState.textContent = noneSelected
+          ? 'Select at least one lifecycle to see skills.'
+          : 'No skills match your search and lifecycle filters.';
+        emptyState.classList.add('visible');
+      }
+      else {
+        emptyState.textContent = '';
+        emptyState.classList.remove('visible');
+      }
+    }
+  }
+
+  chips.forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      var value = chip.getAttribute('data-value');
+      if (value === 'all') {
+        selected.production = true;
+        selected.testing = true;
+        selected.development = true;
+      }
+      else {
+        selected[value] = !selected[value];
+      }
+      syncChips();
+      applyFilters();
+    });
+  });
+
+  if (searchInput) {
+    searchInput.addEventListener('input', applyFilters);
+  }
+
+  syncChips();
+  applyFilters();
+
+  var stats = {
+    skills: cards.length,
+    playbooks: document.querySelectorAll('#playbooks .pb').length,
+    workflows: document.querySelectorAll('#playbooks .pb').length
+  };
+  Object.keys(stats).forEach(function (key) {
+    var node = document.querySelector('[data-stat="' + key + '"]');
+    if (node) {
+      node.textContent = stats[key];
+    }
+  });
+}());
 </script>
 </body>
 </html>

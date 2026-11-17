@@ -1,7 +1,7 @@
 interface:
   display_name: "OTBI to BI Publisher SQL"
   short_description: "Convert one OTBI analysis into BI Publisher SQL"
-  default_prompt: "Use $dia-otbi-to-bipublisher-sql to convert one OTBI analysis into logical and physical SQL for BI Publisher."
+  default_prompt: "Use $dia-otbi-to-bipublisher-sql to resolve my OTBI fields, joins, and row grain from official Oracle evidence, deliver BI Publisher SQL that retains physical rows by default, and help test it."
 
 policy:
   allow_implicit_invocation: false

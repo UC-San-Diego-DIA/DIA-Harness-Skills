@@ -52,7 +52,13 @@ try {
     $dailyBriefTemplate = Join-Path $destination 'dia-start-my-day\assets\brief-template.html'
     $dataModelFactsHelper = Join-Path $destination 'dia-data-model-intake\scripts\extract_model_facts.py'
     $otbiConverterHelper = Join-Path $destination 'dia-otbi-to-bipublisher-sql\scripts\convert_otbi_catalog.py'
+    $otbiReviewedCompiler = Join-Path $destination 'dia-otbi-to-bipublisher-sql\scripts\compile_reviewed_conversion.py'
+    $otbiAggregateExpressions = Join-Path $destination 'dia-otbi-to-bipublisher-sql\scripts\aggregate_expressions.py'
+    $otbiReviewedCompilationReference = Join-Path $destination 'dia-otbi-to-bipublisher-sql\references\reviewed-compilation.md'
     $otbiJoinResearchReference = Join-Path $destination 'dia-otbi-to-bipublisher-sql\references\join-research.md'
+    $otbiMappingWorkbookIndex = Join-Path $destination 'dia-otbi-to-bipublisher-sql\assets\mapping-workbooks\workbook-index.yaml'
+    $otbiFinMappingWorkbook = Join-Path $destination 'dia-otbi-to-bipublisher-sql\assets\mapping-workbooks\fin\26b\R13_26B_FIN_OTBI_database_mapping_with ViewObjects.xlsx'
+    $otbiPpmMappingWorkbook = Join-Path $destination 'dia-otbi-to-bipublisher-sql\assets\mapping-workbooks\ppm\26b\R13_26B_PPM_OTBI_database_mapping_with ViewObjects.xlsx'
     $dataModelFactsSchema = Join-Path $destination 'dia-data-model-intake\references\model-facts.schema.json'
     $dataModelFactsIntakeContract = Join-Path $destination 'dia-data-model-intake\references\model-facts-contract.md'
     $dataModelFactsContract = Join-Path $destination 'dia-data-model-docs\references\model-facts-contract.md'
@@ -65,7 +71,13 @@ try {
     Assert-True (Test-Path -LiteralPath $dailyBriefTemplate -PathType Leaf) 'Start My Day HTML template was not installed.'
     Assert-True (Test-Path -LiteralPath $dataModelFactsHelper -PathType Leaf) 'Data-model facts helper was not installed.'
     Assert-True (Test-Path -LiteralPath $otbiConverterHelper -PathType Leaf) 'OTBI conversion helper was not installed.'
+    Assert-True (Test-Path -LiteralPath $otbiReviewedCompiler -PathType Leaf) 'OTBI reviewed compiler was not installed.'
+    Assert-True (Test-Path -LiteralPath $otbiAggregateExpressions -PathType Leaf) 'OTBI aggregate expression runtime was not installed.'
+    Assert-True (Test-Path -LiteralPath $otbiReviewedCompilationReference -PathType Leaf) 'OTBI reviewed-compilation reference was not installed.'
     Assert-True (Test-Path -LiteralPath $otbiJoinResearchReference -PathType Leaf) 'OTBI join-research reference was not installed.'
+    Assert-True (Test-Path -LiteralPath $otbiMappingWorkbookIndex -PathType Leaf) 'OTBI bundled mapping-workbook index was not installed.'
+    Assert-True (Test-Path -LiteralPath $otbiFinMappingWorkbook -PathType Leaf) 'OTBI bundled FIN mapping workbook was not installed.'
+    Assert-True (Test-Path -LiteralPath $otbiPpmMappingWorkbook -PathType Leaf) 'OTBI bundled PPM mapping workbook was not installed.'
     Assert-True (Test-Path -LiteralPath $dataModelFactsSchema -PathType Leaf) 'Model-facts JSON Schema was not installed.'
     Assert-True (Test-Path -LiteralPath $dataModelFactsIntakeContract -PathType Leaf) 'Model-facts intake contract was not installed.'
     Assert-True (Test-Path -LiteralPath $dataModelFactsContract -PathType Leaf) 'Model-facts contract was not installed.'
@@ -95,8 +107,9 @@ try {
     Assert-True ($sourceSkillDirectories.Count -gt 0) 'No source skill directories found for the -All test.'
     foreach ($sourceSkillDirectory in $sourceSkillDirectories) {
         $installedAllEntry = Join-Path $allDestination "$($sourceSkillDirectory.Name)\SKILL.md"
-        if ($sourceSkillDirectory.Name -eq 'dia-setup-business-insights-folder') {
-            Assert-True (-not (Test-Path -LiteralPath $installedAllEntry)) 'Archived skill was installed by -All.'
+        $sourceSkillText = Get-Content -Raw -LiteralPath (Join-Path $sourceSkillDirectory.FullName 'SKILL.md')
+        if ($sourceSkillText -match '(?m)^\s+status:\s*archived\s*$') {
+            Assert-True (-not (Test-Path -LiteralPath $installedAllEntry)) "Archived skill $($sourceSkillDirectory.Name) was installed by -All."
             continue
         }
         Assert-True (Test-Path -LiteralPath $installedAllEntry -PathType Leaf) "$($sourceSkillDirectory.Name) was not installed by -All."
@@ -115,23 +128,16 @@ try {
     & $installer -Status production,testing -Destination $statusDestination -Force
 
     $expectedStatusSkills = @(
-        'dia-new-workspace',
-        'dia-analyze-local-data',
+        'dia-bi-publisher-sql-optimizer',
         'dia-clickup-mcp-setup',
-        'dia-dashboard-mockup',
-        'dia-data-model-profiler',
-        'dia-dataset-profile',
-        'dia-kpi-data-mapping',
-        'dia-otbi-to-bipublisher-sql',
+        'dia-new-workspace',
         'dia-plan-my-project',
         'dia-start-my-day',
-        'dia-tableau-data-dictionary',
-        'dia-tableau-workbook-intake',
+        'dia-transcript-to-kpis',
         'dia-transcript-to-meeting-notes',
         'dia-transcript-to-process-map',
         'dia-transcript-to-project-request-draft',
-        'dia-transcript-to-requirements',
-        'dia-transcript-to-kpis'
+        'dia-transcript-to-requirements'
     )
     foreach ($expectedSkill in $expectedStatusSkills) {
         $installedStatusEntry = Join-Path $statusDestination "$expectedSkill\SKILL.md"
@@ -139,14 +145,22 @@ try {
     }
 
     foreach ($unexpectedSkill in @(
-        'dia-bi-publisher-sql-optimizer',
+        'dia-analyze-local-data',
+        'dia-dashboard-mockup',
         'dia-data-model-docs',
         'dia-data-model-intake',
+        'dia-data-model-profiler',
+        'dia-dataset-profile',
         'dia-harness-utilization-review',
+        'dia-kpi-data-mapping',
+        'dia-local-data-explorer',
+        'dia-otbi-to-bipublisher-sql',
+        'dia-setup-business-insights-folder',
         'dia-tableau-dashboard-docs',
+        'dia-tableau-data-dictionary',
         'dia-tableau-dataset-intelligence',
         'dia-tableau-workbook-audit',
-        'dia-setup-business-insights-folder'
+        'dia-tableau-workbook-intake'
     )) {
         $unexpectedPath = Join-Path $statusDestination $unexpectedSkill
         Assert-True (-not (Test-Path -LiteralPath $unexpectedPath)) "$unexpectedSkill must not be installed by -Status production,testing."

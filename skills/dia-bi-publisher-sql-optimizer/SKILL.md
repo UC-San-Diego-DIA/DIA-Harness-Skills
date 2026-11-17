@@ -2,7 +2,7 @@
 name: dia-bi-publisher-sql-optimizer
 description: Review one Oracle BI Publisher SQL dataset using a required SQL Monitor export and confirmed 200-row editor smoke test, propose a behavior-preserving candidate, and compare before/after estimated plans in delta mode. Use only when explicitly invoked as $dia-bi-publisher-sql-optimizer.
 metadata:
-  status: development
+  status: testing
 ---
 
 # Optimize BI Publisher data model SQL

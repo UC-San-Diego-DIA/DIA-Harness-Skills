@@ -2,7 +2,7 @@
 name: dia-start-my-day
 description: Create a focused chat brief from open assigned ClickUp tasks, today's and the next two days' Outlook calendar, and the last 72 hours of Outlook mail. Offer a matching HTML version on request. Use only when explicitly invoked as $dia-start-my-day. Do not use for connection setup or other evidence sources.
 metadata:
-  status: production
+  status: testing
 ---
 
 # Start my day

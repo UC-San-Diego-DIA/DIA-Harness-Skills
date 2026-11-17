@@ -22,9 +22,10 @@ Archived skills retain their packages with `metadata.status: archived`. Exclude 
 
 ## Playbook changes
 
-- Playbook frontmatter declares `name`, `description`, and `pattern`. Use `pipeline` for linear handoffs and `fan-out` for one shared input with independent branches.
-- Update the README playbook list and the landing-page cards together.
-- Only create playbooks whose skills are all in testing or production. A playbook that needs a development skill waits until that skill promotes.
+- Playbook frontmatter declares `name`, `description`, `pattern`, and `metadata.status`. Use `pipeline` for linear handoffs and `fan-out` for one shared input with independent branches.
+- A playbook's status follows its connected skills: `production` when every connected skill is production, `testing` when every connected skill is in testing or production and at least one is testing, and `development` when any connected skill is in development. Only create a testing or production playbook whose connected skills are all in testing or production; a playbook that needs a development skill waits until that skill promotes and stays marked `development` until then.
+- Show the status visibly: a `Status:` line under the playbook title, a status marker in the README playbook list, and a status dot beside the playbook title plus per-skill dots on the landing-page card, with the section color legend covering both. Update the README playbook list and the landing-page cards together.
+- The repository validator derives each playbook's status from the `$dia-` skills it references and fails when the declared status, the visible `Status:` line, the README marker, or the landing-page title dot and skill dots disagree.
 
 ## Validation
 

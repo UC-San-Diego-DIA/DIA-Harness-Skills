@@ -2,7 +2,7 @@
 name: dia-dataset-profile
 description: Help someone understand one newly received CSV file or selected XLSX sheet through a dataset-profile report covering its contents, how to read it, possible uses, and questions to resolve before use. Use only when explicitly invoked as $dia-dataset-profile. Does not calculate business answers, define KPIs, or modify the source file.
 metadata:
-  status: production
+  status: development
 ---
 
 # Dataset Profile

@@ -1,0 +1,57 @@
+# Bundled official Oracle OTBI subject-area-to-database mapping workbooks.
+#
+# The workbook remains the sole mapping authority during conversion. The
+# required sheet and headers are defined in references/conversion-contract.md.
+# A user-supplied --mapping-workbook path overrides the bundled resolution.
+
+version: 1
+
+workbooks:
+  - family: fin
+    display_name: Oracle Financials Cloud
+    release: 26B
+    source_title: View FIN Subject Area-to-Database Mappings
+    file: fin/26b/R13_26B_FIN_OTBI_database_mapping_with ViewObjects.xlsx
+    mapping_rows: 42589
+    subject_area_count: 49
+    subject_area_prefixes:
+      - Budgetary Control
+      - Cash Management
+      - Expenses
+      - Financials Common Module
+      - Fixed Assets
+      - General Ledger
+      - Joint Venture Management
+      - OTBI Performance Real Time
+      - OTBI Usage Real Time
+      - Payables Invoices
+      - Payables Payments
+      - Receivables
+      - Revenue Management
+      - Subledger Accounting
+    sha256: 8975e1857631216ab1fd3b5abf345d8b748d7e660172c43eab2e33e739057173
+
+  - family: ppm
+    display_name: Oracle Project Portfolio Management Cloud
+    release: 26B
+    source_title: View PPM Subject Area-to-Database Mappings
+    file: ppm/26b/R13_26B_PPM_OTBI_database_mapping_with ViewObjects.xlsx
+    mapping_rows: 52865
+    subject_area_count: 38
+    subject_area_prefixes:
+      - OTBI Performance Real Time
+      - OTBI Usage Real Time
+      - Project Billing
+      - Project Control
+      - Project Costing
+      - Project Management
+      - Project Resource Management
+      - Projects
+    sha256: 3489db4dc31ddcbaa3f0bbd50714b3cd743b01fb080c09a9901d3ecf08636295
+
+not_bundled:
+  - note: >-
+      Rel13_25A_BICC_FSCM_Database_Mapping_with_ViewObjects.xlsx is a BICC
+      BIVO-to-database mapping workbook, not an OTBI subject-area mapping
+      workbook. It lacks the OTBI Subject Areas sheet required by
+      references/conversion-contract.md and cannot drive a conversion.

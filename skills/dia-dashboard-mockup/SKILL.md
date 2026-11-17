@@ -2,7 +2,7 @@
 name: dia-dashboard-mockup
 description: Render selected measures from one confirmed KPI data mapping report into a UCSD-branded HTML dashboard mockup, preserving requested versus recommended origins, mock-data labels, and data gaps. Use only when explicitly invoked as $dia-dashboard-mockup. Does not read datasets or calculate metrics.
 metadata:
-  status: testing
+  status: development
 ---
 
 # DIA Dashboard Mockup

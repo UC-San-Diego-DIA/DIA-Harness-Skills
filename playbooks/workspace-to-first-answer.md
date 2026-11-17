@@ -2,9 +2,13 @@
 name: workspace-to-first-answer
 pattern: pipeline
 description: Create a fresh data-analysis workspace, link one source file into it, and answer ad hoc questions from that file with read-only SQL.
+metadata:
+  status: development
 ---
 
 # Playbook: Workspace to first answer
+
+Status: **development** - this playbook stays flagged until `$dia-analyze-local-data` reaches testing.
 
 Set up a local data-analysis workspace and reach the first defensible answer from one source file. Run this when analysis starts on a new project or a new file arrives; each later question runs against the same linked view.
 
@@ -14,7 +18,7 @@ Set up a local data-analysis workspace and reach the first defensible answer fro
 2. Place the dataset in `data/raw/`. The workspace skill never copies or creates data files, so the user performs this step between the two skill runs.
 3. `$dia-analyze-local-data` - one run per file. Links the file into a read-only DuckDB view under `scratch/analysis/` and answers ad hoc questions from that view, recording every question and its SQL.
 
-Variant: for a confirmed KPI artifact rather than ad hoc questions, run the business-questions-to-dashboard-mockup playbook instead; it creates the workspace as its own first step and stops at the mapping report when no mockup is needed. `$dia-kpi-data-mapping` inspects the dataset schema without linking it.
+Variant: for a confirmed KPI artifact rather than ad hoc questions, run the business-questions-to-dashboard-mockup playbook instead; it creates the workspace as its own first step and stops at the mapping report when no mockup is needed. The mapping skill inspects the dataset schema without linking it.
 
 ## Handoffs
 

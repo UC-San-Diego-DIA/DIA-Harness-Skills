@@ -22,6 +22,18 @@ jobs:
         shell: pwsh
         run: .\scripts\test-install-skill.ps1
 
+      - name: Test OTBI conversion behavior
+        shell: pwsh
+        run: python -B .\scripts\test_otbi_conversion.py
+
+      - name: Test reviewed OTBI SQL compilation and BIP catalog packaging
+        shell: pwsh
+        run: python -B .\scripts\test_otbi_reviewed_conversion.py
+
+      - name: Test OTBI aggregate compilation and external prompt resolution
+        shell: pwsh
+        run: python -B .\scripts\test_otbi_aggregate_conversion.py
+
       - name: Test business-insights folder helper
         shell: pwsh
         run: .\scripts\test-setup-business-insights-folder.ps1

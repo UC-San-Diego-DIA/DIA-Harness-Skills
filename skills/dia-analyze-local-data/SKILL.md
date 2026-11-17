@@ -2,7 +2,7 @@
 name: dia-analyze-local-data
 description: Answer ad hoc business questions about one CSV or Excel file inside an existing data-analysis workspace by linking it into scratch. Use only when explicitly invoked as $dia-analyze-local-data. Do not use for production pipelines, recurring refreshes, or multi-file data models.
 metadata:
-  status: testing
+  status: development
 ---
 
 # Analyze Local Data

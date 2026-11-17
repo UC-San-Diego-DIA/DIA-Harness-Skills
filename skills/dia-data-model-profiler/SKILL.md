@@ -2,7 +2,7 @@
 name: dia-data-model-profiler
 description: Profile one model-facts.yaml file for grain, filters, hard-coded logic, join and dedup patterns, quantified row-count risk, and source lineage. Use only when explicitly invoked as $dia-data-model-profiler. Do not produce documentation, data dictionaries, or business questions.
 metadata:
-  status: testing
+  status: development
 ---
 
 # Profile a data model

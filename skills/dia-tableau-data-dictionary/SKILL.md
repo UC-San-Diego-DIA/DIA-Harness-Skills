@@ -2,7 +2,7 @@
 name: dia-tableau-data-dictionary
 description: Build a context-enriched analyst data dictionary from local Tableau TWBX or TWB metadata, save structured versioned YAML, and generate a concise Markdown reference. Use to explain what fields mean, revise definitions, or regenerate a dictionary. Does not read dataset values, profile data, or build a semantic model.
 metadata:
-  status: testing
+  status: development
 ---
 
 # Context-enriched Tableau data dictionary

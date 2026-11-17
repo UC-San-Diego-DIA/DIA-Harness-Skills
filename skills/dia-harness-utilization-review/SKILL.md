@@ -2,7 +2,7 @@
 name: dia-harness-utilization-review
 description: Review the previous day's TritonAI Harness threads and conversations and suggest up to 4 ways to improve existing interactions plus up to 3 new usage ideas when supported by evidence, recording recommendations and user verdicts in a local review log. Designed for a scheduled morning run and explicit invocation as $dia-harness-utilization-review. Do not use for task work, skill installation, or changes to other systems.
 metadata:
-  status: development
+  status: archived
 ---
 
 # Harness utilization review

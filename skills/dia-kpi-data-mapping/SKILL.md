@@ -2,7 +2,7 @@
 name: dia-kpi-data-mapping
 description: Map confirmed KPIs to one named dataset, flag data gaps, and optionally recommend separate schema-supported candidate measures for user selection. Use only when explicitly invoked as $dia-kpi-data-mapping. Does not calculate metrics or change source KPI artifacts.
 metadata:
-  status: production
+  status: development
 ---
 
 # DIA KPI Data Mapping

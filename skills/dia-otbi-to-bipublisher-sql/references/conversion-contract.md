@@ -1,71 +1,43 @@
 # Conversion contract
 
-## Inputs
+## Source evidence
 
-One run accepts exactly one OTBI `.catalog` export and one selected analysis. If the catalog contains more than one `saw:report`, the helper reports the available analyses and requires `--analysis-index` or `--analysis-name`.
+One run converts one selected analysis from one supplied catalog. The helper reads compressed report XML locally without opening Oracle. Use `--inspect` first to list analyses and expose full report XML, formulas, filter XML, sorts, and inspection blockers. It writes JSON to stdout without requiring a workbook. It does not resolve runtime dashboard context or execute logical SQL.
 
-One run also accepts exactly one official Oracle subject-area-to-database mapping workbook. The workbook must contain an `OTBI Subject Areas` sheet with these columns:
+The workbook's OTBI Subject Areas sheet must include SUBJECT_AREA, PRESENTATION_TABLE, PRESENTATION_COLUMN, DATABASE_OBJECT, and DATABASE_COLUMN. Preserve PHYSICAL_TABLE, PHYSICAL_COLUMN, VO_DEFINITION, and workbook row numbers when available. The indexed 26B FIN and PPM bundles are lineage evidence, not the OTBI repository's full semantic model. Check actual coverage and record hashes. BICC mappings are not OTBI lineage mappings.
 
-- `SUBJECT_AREA`
-- `PRESENTATION_TABLE`
-- `PRESENTATION_COLUMN`
-- `PHYSICAL_TABLE`
-- `PHYSICAL_COLUMN`
-- `VO_DEFINITION`
-- `DATABASE_OBJECT`
-- `DATABASE_COLUMN`
+Match a two-part reference within the analysis's subject area. Match a three-part reference within its explicitly named subject area. Never strip its qualifier and map it to a similarly named field elsewhere. All operands, including filter-only and sort-only fields, need coverage. Constants do not need mappings. The agent resolves workbook alternatives using source semantics and official evidence, recording the selected field and rationale. Only missing lineage or a material ambiguity that remains unresolved blocks construction.
 
-The helper requires every selected presentation column to have a nonempty `DATABASE_OBJECT` and `DATABASE_COLUMN`. Subject-area coverage alone is not enough. If the workbook omits the subject area or any selected column, the conversion stops.
+## Helper output
 
-## Output paths
+After mapping and join review, the [reviewed compiler](reviewed-compilation.md) produces literal SQL for its supported attribute and aggregate expressions, plus a local BIP data-model catalog only when requested with a supplied template. Its manifest identifies CANDIDATE_NOT_EXECUTED and separate import, execution, and reconciliation states. Its `.sql` and any generated model payload must agree. The scaffold behavior below applies to the optional investigation mode of `convert_otbi_catalog.py`, not the default delivery path.
 
-Use a new output directory for each conversion. With the base name `Agent_Invoice_Report`, the helper writes:
+For a restricted scalar analysis the helper writes:
 
 ```text
-Agent_Invoice_Report-manifest.json
-Agent_Invoice_Report-logical-literal.sql
-Agent_Invoice_Report-logical-parameters.sql
-Agent_Invoice_Report-physical-literal.sql
-Agent_Invoice_Report-physical-parameters.sql
-Agent_Invoice_Report-README.md
-Agent_Invoice_Report-join-research.md
-Agent_Invoice_Report-parameters/
+<base>-manifest.json
+<base>-logical-literal.sql
+<base>-logical-parameters.sql
+<base>-physical-literal.sql
+<base>-physical-parameters.sql
+<base>-README.md
+<base>-join-research.md
+<base>-validation.md
+<base>-parameters/<parameter>.sql
 ```
 
-The parameter directory contains one standalone list-of-values SQL file for each detected parameter. The helper does not overwrite existing files unless `--overwrite` is supplied after the user explicitly confirms that exact write.
+Physical and LOV scaffolds have a `WHERE 1 = 0` guard. The manifest and summary record blocked_scaffold, Oracle execution not_run, and reconciliation not_run. Exit 0 establishes file generation only. Logical SQL files are source references, not database SQL. The join worksheet is a research starting point.
 
-## SQL construction
+The helper preserves supported comparison, literal list, logical, pattern, null, and between filters. It keeps literal types and whitespace, uses distinct parameter names for separate predicates, and preserves headings. Between and pattern predicates remain literal unless explicitly parameterized during review. Unsupported filter nodes, unresolved variables, and saved-filter references stop generation. Full inspection evidence remains available.
 
-The logical SQL is a faithful projection of the OTBI analysis against the named subject area. It preserves selected presentation expressions, output headings, explicit filters, saved-filter references, and recorded sort order.
+The helper does not compile OTBI aggregates, conditional measures, level-based/time-series functions, descriptor keys, repository security, combined criteria, selection steps, or view-specific semantics. It rejects these when detected. Read full report XML to catch semantics outside its recognized subset. Manual translation follows [semantic-equivalence.md](semantic-equivalence.md); never bypass an error by deleting source logic or relaxing coverage.
 
-The physical SQL substitutes each mapped presentation reference with the workbook's `DATABASE_OBJECT` and `DATABASE_COLUMN`, preserves the original column aliases and ordering, and places the substituted filter in the physical statement. The `FROM` table list is derived after column, filter, and sort substitutions, so every referenced object appears in `FROM`. If the mapped columns span more than one database object, the SQL lists the objects in `FROM` and marks join conditions as `VERIFY` work. The mapping workbook does not provide joins.
+## Reviewed deliverables
 
-The helper also writes a join-research worksheet that lists every physical table, its mapped columns and workbook rows, and every join candidate, and it records the workbook release token in the manifest. Real-time research against official Oracle documentation resolves the current release, verifies the tables and columns, and validates each join. Only `VERIFIED` joins, supported by explicit official-source evidence recorded in the worksheet, may replace a `VERIFY` marker in both physical SQL files. `CANDIDATE` and `UNRESOLVED` joins keep the `VERIFY` marker. See [join-research.md](join-research.md).
+Correct physical columns, join relationships/types, row grain, filters, and calculations define construction success. Attribute candidates default to `physical_rows` with plain SELECT. Set `otbi_distinct` only for an explicit distinct-output requirement; grouped measures retain `aggregate_grain`. Record the effective policy and underlying row keys in the evidence. Ordinary output order, names, and sorting are secondary; preserve dependencies that affect calculations, record selection, or a requested consuming interface. The compiler's convenient presentation preservation is not an extra equivalence gate.
 
-Literal SQL preserves the values found in the OTBI analysis. Parameterized SQL is a separate file so the exact literal behavior is not silently replaced.
+Deliver the complete literal SQL candidate with its status and next BI Publisher test. Keep source hashes, helper provenance, workbook rows, documentation releases/URLs, selected mappings, joins, transformations, and material scope limits in the compiler manifest/plan or one concise evidence record. For manual SQL use `<base>-evidence.md`; update it with execution and reconciliation evidence as supplied. Do not duplicate the record across a README, join worksheet, report, and validation file. Existing helper outputs may be retained without creating manual counterparts. Additional evidenced keys and bridge tables are allowed for joins, security, and semantic reconstruction; projected presentation fields still need workbook lineage.
 
-## Parameters and list of values
+The reviewed physical query must be one read-only Oracle statement, optionally using WITH, nested SELECTs, explicit joins, GROUP BY, and HAVING. Do not include a trailing semicolon, OTBI-only functions, subject-area FROM clauses, presentation variables, unresolved comments, or parameter binds in the literal baseline. Align literal and parameterized variants except for intended parameter substitutions. Document BI Publisher element-name constraints separately from displayed OTBI headings.
 
-For a single-value parameter, the helper uses a bind variable such as `:P_PARAMETER_NAME`. For a multi-select parameter, it uses the documented BI Publisher lexical-reference pattern `IN (&PARAMETER_NAME)`.
-
-The helper records the source expression, operator, original value, inferred type, multi-select status, database mapping, and mapping alternatives in the manifest. It creates a list-of-values query from the selected mapping as:
-
-```sql
-SELECT DISTINCT
-    DATABASE_OBJECT.DATABASE_COLUMN AS PARAMETER_VALUE
-FROM DATABASE_OBJECT
-ORDER BY PARAMETER_VALUE;
-```
-
-If a column has more than one mapping candidate, the helper records all candidates and marks the semantic choice as `VERIFY`. Do not resolve a code-versus-meaning ambiguity by silently choosing one candidate.
-
-## Review
-
-Before reporting success:
-
-1. Re-read the manifest and all generated SQL.
-2. Confirm that every physical object and column came from the supplied mapping workbook.
-3. Confirm that output headings, column order, filters, sort order, and parameter placement match the manifest.
-4. Confirm that every unresolved mapping or join is visible as a `VERIFY` item.
-5. Confirm the join-research worksheet records the current Oracle documentation release, the sources used, and a verification status for every join candidate.
-6. Tell the user that the skill did not execute SQL, connect to Oracle, or modify BI Publisher.
+Never overwrite outputs without confirmation of the exact paths. On failure, report the actionable error and preserve inputs and existing outputs. Missing evidence produces a blocked report, not a purported working query.

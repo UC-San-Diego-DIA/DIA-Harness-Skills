@@ -2,9 +2,13 @@
 name: requirements-to-process-map
 pattern: pipeline
 description: Turn one business-owner requirements Zoom transcript into a structured requirements document and a rendered process map using reviewed DIA skills.
+metadata:
+  status: testing
 ---
 
 # Playbook: Requirements to process map
+
+Status: **testing** - every connected skill is in testing or production.
 
 Move one business-owner requirements conversation from raw transcript to a structured requirements document and a process-map diagram. Run this at the start of a project, before any work is scoped in ClickUp.
 

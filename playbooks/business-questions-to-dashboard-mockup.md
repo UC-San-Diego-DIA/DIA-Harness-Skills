@@ -2,9 +2,13 @@
 name: business-questions-to-dashboard-mockup
 pattern: pipeline
 description: Create a data-analysis workspace, capture requested KPIs, map them to a dataset, optionally select separate recommendations, and render a labeled HTML dashboard mockup.
+metadata:
+  status: development
 ---
 
 # Playbook: Business questions to dashboard mockup
+
+Status: **development** - this playbook stays flagged until `$dia-kpi-data-mapping` and `$dia-dashboard-mockup` reach testing.
 
 Use one requirements conversation to identify requested business questions and
 KPIs, map them to a dataset, and optionally review a dashboard prototype.
@@ -33,6 +37,6 @@ workspace; choose a workspace first when its folder organization is wanted.
 
 ## Release dependency
 
-The transcript and mapping skills remain in development until their acceptance
+The mapping and mockup skills remain in development until their acceptance
 runs support promotion. The standard production/testing installer skips them.
 Publishing a session-ready catalog requires that separate release step.

@@ -14,6 +14,7 @@ This repository stores reusable skills for DIA staff who use TritonAI Harness on
 | `docs/adr/` | Decisions whose tradeoffs would be hard to reconstruct |
 | `playbooks/` | Ordered skill sequences for end-to-end workflows |
 | `docs/index.html` | Repository landing page mirroring the skill and playbook catalog |
+| `docs/otbi-skill-review-guide.md` | Plain-language file map and review order for the OTBI conversion skill |
 | `scripts/` | Installer, installer tests, and repository validation |
 | `skills/` | Source skill packages |
 | `.github/workflows/` | Automated repository checks |
@@ -59,7 +60,11 @@ Only add optional directories when the skill uses them. Do not add a README or c
 
 `dia-bi-publisher-sql-optimizer` owns reviewing one selected SQL dataset in one BI Publisher data model with a required SQL Monitor export and confirmed editor smoke test with 200 selected, producing an optimization report and a behavior-preserving candidate, and comparing before/after estimated plans in delta mode. It requires the same preview and export for the candidate, keeps correctness and estimated performance findings separate, and does not request full runs, repeated benchmarks, or engine logs. It does not execute SQL, connect to a database, apply rewrites in BI Publisher, extract data-model facts, or map KPIs to datasets.
 
+`dia-otbi-to-bipublisher-sql` is archived and retained outside active catalogs and bulk installation. It owns producing one complete Oracle SQL candidate from one selected analysis in one local OTBI catalog, prioritizing evidenced physical fields, joins, row grain, filters, and calculations. Attribute SQL retains physical rows by default; distinct OTBI output is opt-in, and grouped measures keep required aggregation. Column order, readable aliases, and ordinary sorting are secondary unless a calculation or requested interface depends on them. It resolves technical choices through official workbook lineage, current Oracle documentation, and applicable supplied evidence. It reuses established decisions, asks for missing runtime inputs or business intent, and delivers complete SQL before requesting comparison exports. Its reviewed compiler supports attributes and bounded aggregate formulas; evidenced manual construction covers conversions beyond that grammar. Diagnostics address specific unresolved construction choices. Parameters/LOVs and local data-model packaging from a supplied BIP template are requested follow-ups. It repairs candidates from analyst-supplied errors/results and distinguishes generation from Oracle execution and reconciliation for the declared row policy and comparison goal. It does not execute SQL against Oracle, connect to Fusion, modify content in BI Publisher, publish, or optimize SQL.
+
 `dia-start-my-day` owns a daily chat brief from open assigned ClickUp tasks, today's and the following two days' Outlook calendar, and the last 72 hours of Outlook mail, with matching HTML on request and user-approved follow-through in those systems. It hands disconnected ClickUp access to the installed setup skill only after user approval. It does not own connection setup, other evidence sources, or unapproved external changes.
+
+`dia-harness-utilization-review` is archived and retained outside active catalogs and bulk installation. It owns a scheduled morning review of the previous day's Harness threads and conversations, with interaction improvements and new usage ideas recorded in a local review log. It does not own connection setup, other evidence sources, or unapproved external changes.
 
 `dia-setup-business-insights-folder` is archived and retained outside active catalogs and bulk installation. It owns local creation and validation of the schema-1 business-insights project folder for existing ClickUp resources. It does not create or change ClickUp content, migrate conflicting folders, process project files, analyze data, or create deliverables.
 

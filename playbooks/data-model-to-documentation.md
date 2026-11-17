@@ -2,9 +2,13 @@
 name: data-model-to-documentation
 pattern: pipeline
 description: Extract facts from one Oracle BI Publisher data model, profile its structure, then draft analyst-facing documentation in sequence.
+metadata:
+  status: development
 ---
 
 # Playbook: Data model to documentation
+
+Status: **development** - this playbook stays flagged until the data-model intake, profiler, and docs skills reach testing.
 
 Move one Oracle BI Publisher data model from raw export to a structural profile and analyst-facing documentation. Run this when your team takes ownership of an existing data model or needs to document one for reference.
 

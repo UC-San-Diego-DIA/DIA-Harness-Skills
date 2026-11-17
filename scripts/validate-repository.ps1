@@ -16,6 +16,21 @@ function Add-ValidationError {
     $errors.Add($Message)
 }
 
+function Get-FrontmatterStatus {
+    param([string]$FrontmatterText)
+    $metadataMatch = [regex]::Match($FrontmatterText, '(?ms)^metadata:\s*\r?\n(?<block>(?:^[ \t]+[^\r\n]*\r?\n?)+)')
+    if ($metadataMatch.Success) {
+        $statusMatch = [regex]::Match(
+            $metadataMatch.Groups['block'].Value,
+            "(?m)^[ \t]+status:\s*[""']?(?<value>[^""'\r\n]+)"
+        )
+        if ($statusMatch.Success) {
+            return $statusMatch.Groups['value'].Value.Trim()
+        }
+    }
+    return ''
+}
+
 function Get-RelativePath {
     param([string]$Path)
     return [System.IO.Path]::GetRelativePath($repositoryRoot, $Path)
@@ -159,11 +174,118 @@ if (Test-Path -LiteralPath $playbooksRoot -PathType Container) {
     foreach ($playbookFile in $playbookFiles) {
         $playbookName = $playbookFile.BaseName
         $playbookLink = "playbooks/$($playbookName).md"
+        $playbookText = Get-Content -Raw -LiteralPath $playbookFile.FullName
+        $playbookFrontmatter = [regex]::Match($playbookText, '(?s)\A---\r?\n(?<body>.*?)\r?\n---')
+        if (-not $playbookFrontmatter.Success) {
+            Add-ValidationError "$($playbookFile.Name): invalid YAML frontmatter"
+            continue
+        }
+
+        $playbookFrontmatterText = $playbookFrontmatter.Groups['body'].Value
+        $playbookNameMatch = [regex]::Match($playbookFrontmatterText, '(?m)^name:\s*(?<value>.+)$')
+        if (-not $playbookNameMatch.Success -or $playbookNameMatch.Groups['value'].Value.Trim() -ne $playbookName) {
+            Add-ValidationError "$($playbookFile.Name): frontmatter name must equal the file base name"
+        }
+        $playbookPatternMatch = [regex]::Match($playbookFrontmatterText, '(?m)^pattern:\s*(?<value>.+)$')
+        if (-not $playbookPatternMatch.Success -or $playbookPatternMatch.Groups['value'].Value.Trim() -notin @('pipeline', 'fan-out')) {
+            Add-ValidationError "$($playbookFile.Name): frontmatter pattern must be 'pipeline' or 'fan-out'"
+        }
+
+        $playbookStatus = Get-FrontmatterStatus $playbookFrontmatterText
+        if ($playbookStatus -notin @('development', 'testing', 'production')) {
+            Add-ValidationError "$($playbookFile.Name): frontmatter metadata.status must be 'development', 'testing', or 'production', found '$playbookStatus'"
+            continue
+        }
+
+        $playbookSkills = @(
+            [regex]::Matches($playbookText, '\$dia-[a-z0-9]+(?:-[a-z0-9]+)*') |
+                ForEach-Object { $_.Value.TrimStart('$') } |
+                Select-Object -Unique
+        )
+        $playbookSkillStatuses = @{}
+        $derivedStatus = 'production'
+        foreach ($playbookSkill in $playbookSkills) {
+            $playbookSkillEntryPath = Join-Path $skillsRoot "$playbookSkill\SKILL.md"
+            if (-not (Test-Path -LiteralPath $playbookSkillEntryPath -PathType Leaf)) {
+                Add-ValidationError "$($playbookFile.Name): referenced skill '$playbookSkill' does not exist under skills/"
+                $playbookSkillStatuses[$playbookSkill] = 'development'
+                $derivedStatus = 'development'
+                continue
+            }
+            $playbookSkillEntryText = Get-Content -Raw -LiteralPath $playbookSkillEntryPath
+            $playbookSkillFrontmatter = [regex]::Match($playbookSkillEntryText, '(?s)\A---\r?\n(?<body>.*?)\r?\n---')
+            $playbookSkillStatus = if ($playbookSkillFrontmatter.Success) { Get-FrontmatterStatus $playbookSkillFrontmatter.Groups['body'].Value } else { '' }
+            if ($playbookSkillStatus -notin @('development', 'testing', 'production', 'archived')) {
+                Add-ValidationError "$($playbookFile.Name): referenced skill '$playbookSkill' has no valid metadata.status"
+                $playbookSkillStatus = 'development'
+            }
+            $playbookSkillStatuses[$playbookSkill] = $playbookSkillStatus
+            if ($playbookSkillStatus -eq 'archived') {
+                Add-ValidationError "$($playbookFile.Name): archived skill '$playbookSkill' cannot be connected to a playbook"
+                $derivedStatus = 'development'
+            }
+            elseif ($playbookSkillStatus -eq 'development') {
+                $derivedStatus = 'development'
+            }
+            elseif ($playbookSkillStatus -eq 'testing' -and $derivedStatus -eq 'production') {
+                $derivedStatus = 'testing'
+            }
+        }
+        if ($playbookStatus -ne $derivedStatus) {
+            Add-ValidationError "$($playbookFile.Name): frontmatter status '$playbookStatus' does not match the status derived from its connected skills ('$derivedStatus')"
+        }
+
+        $playbookBody = $playbookText.Substring($playbookFrontmatter.Index + $playbookFrontmatter.Length)
+        $playbookStatusLine = [regex]::Match($playbookBody, '(?m)^Status:\s*(?<value>.+)$')
+        if (-not $playbookStatusLine.Success -or -not $playbookStatusLine.Groups['value'].Value.Contains($playbookStatus)) {
+            Add-ValidationError "$($playbookFile.Name): body must declare a 'Status:' line matching '$playbookStatus'"
+        }
+
         if ($indexPageText -and -not $indexPageText.Contains($playbookLink)) {
             Add-ValidationError "docs/index.html: playbook '$playbookName' has no card linking to $playbookLink"
         }
         if ($readmeText -and -not $readmeText.Contains($playbookLink)) {
             Add-ValidationError "README.md: playbook '$playbookName' is not listed"
+        }
+        if ($readmeText) {
+            $readmeEntryPattern = '(?m)^\s*-\s*\[[^\]]*\]\(playbooks/' + [regex]::Escape($playbookName) + '\.md\)(?<rest>[^\r\n]*)'
+            $readmeEntry = [regex]::Match($readmeText, $readmeEntryPattern)
+            if (-not $readmeEntry.Success) {
+                Add-ValidationError "README.md: playbook '$playbookName' has no list entry"
+            }
+            elseif (-not $readmeEntry.Groups['rest'].Value.Contains("*($playbookStatus)*")) {
+                Add-ValidationError "README.md: playbook '$playbookName' entry must be marked *($playbookStatus)*"
+            }
+        }
+        if ($indexPageText) {
+            $playbookCards = [regex]::Matches($indexPageText, '(?s)<article class="pb[^"]*">(?<body>.*?)</article>')
+            $playbookCard = $playbookCards | Where-Object { $_.Groups['body'].Value.Contains($playbookLink) } | Select-Object -First 1
+            if (-not $playbookCard) {
+                Add-ValidationError "docs/index.html: playbook '$playbookName' has no card article containing $playbookLink"
+            }
+            else {
+                $playbookCardBody = $playbookCard.Groups['body'].Value
+                $playbookCardStatusDot = [regex]::Match($playbookCardBody, '<span class="skill-dot (?<status>[a-z-]+)" data-pb-status="[^"]*"></span>')
+                if (-not $playbookCardStatusDot.Success -or $playbookCardStatusDot.Groups['status'].Value.Trim() -ne $playbookStatus) {
+                    Add-ValidationError "docs/index.html: playbook '$playbookName' card title dot must read '$playbookStatus'"
+                }
+                $playbookCardDots = [regex]::Matches($playbookCardBody, '<span class="skill-dot (?<status>[a-z-]+)" data-skill="(?<skill>[^"]+)"></span>')
+                if ($playbookCardDots.Count -ne $playbookSkills.Count) {
+                    Add-ValidationError "docs/index.html: playbook '$playbookName' card must show exactly one skill dot per connected skill"
+                }
+                foreach ($playbookCardDot in $playbookCardDots) {
+                    $dotSkill = $playbookCardDot.Groups['skill'].Value
+                    $dotSkillName = $dotSkill.TrimStart('$')
+                    $dotStatus = $playbookCardDot.Groups['status'].Value.Trim()
+                    if (-not $playbookSkills.Contains($dotSkillName)) {
+                        Add-ValidationError "docs/index.html: playbook '$playbookName' card shows a dot for unconnected skill '$dotSkill'"
+                        continue
+                    }
+                    if ($dotStatus -ne $playbookSkillStatuses[$dotSkillName]) {
+                        Add-ValidationError "docs/index.html: playbook '$playbookName' card dot for '$dotSkill' reads '$dotStatus' but the skill status is '$($playbookSkillStatuses[$dotSkillName])'"
+                    }
+                }
+            }
         }
     }
 }

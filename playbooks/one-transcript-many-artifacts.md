@@ -2,9 +2,13 @@
 name: one-transcript-many-artifacts
 pattern: fan-out
 description: Save one Zoom transcript once, then pull the meeting documents the project needs from it through reviewed DIA skills.
+metadata:
+  status: testing
 ---
 
 # Playbook: One transcript, many artifacts
+
+Status: **testing** - every connected skill is in testing or production.
 
 Work from one saved transcript and produce only the derived documents the meeting actually needs. Every branch runs independently, asks for its own confirmation, and writes its own files, so run the branches the meeting type calls for and skip the rest.
 
